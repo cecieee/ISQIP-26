@@ -281,45 +281,6 @@ function Antigravity({
   );
 }
 
-const EVENT_DATE = new Date('2026-11-01T09:00:00');
-function useCountdown(target) {
-  function calc(t){ const d=Math.max(0,t-Date.now()); return {days:Math.floor(d/86400000),hours:Math.floor((d%86400000)/3600000),minutes:Math.floor((d%3600000)/60000),seconds:Math.floor((d%60000)/1000)}; }
-  const [timeLeft,setTimeLeft]=useState(()=>calc(target));
-  useEffect(()=>{ const id=setInterval(()=>setTimeLeft(calc(target)),1000); return()=>clearInterval(id); },[target]);
-  return timeLeft;
-}
-
-function CountDown() {
-  const {days,hours,minutes,seconds}=useCountdown(EVENT_DATE);
-  const wrapRef = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setVisible(true); io.disconnect(); }
-    }, { threshold: 0.25 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const units=[{label:'DAYS',value:days},{label:'HOURS',value:hours},{label:'MINUTES',value:minutes},{label:'SECONDS',value:seconds}];
-  return(
-    <div ref={wrapRef} style={{display:'flex',flexDirection:'column',alignItems:'center',transition:'opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1)',opacity:visible?1:0,transform:visible?'translateY(0)':'translateY(32px)'}}>
-      <p style={{fontFamily:"'Share Tech Mono',monospace",fontSize:'0.72rem',color:'rgba(12,230,68,0.5)',letterSpacing:'0.28em',textTransform:'uppercase',marginBottom:'2rem',textAlign:'center'}}>Event Starts In</p>
-      <div style={{display:'flex',gap:'clamp(0.8rem,2vw,1.4rem)',flexWrap:'wrap',justifyContent:'center'}}>
-        {units.map(({label,value},i)=>(
-          <div key={label} style={{background:'rgba(12,230,68,0.05)',border:'1px solid rgba(12,230,68,0.18)',borderRadius:'12px',padding:'clamp(1rem,2.5vw,1.4rem) clamp(1.2rem,3vw,2rem)',display:'flex',flexDirection:'column',alignItems:'center',minWidth:'clamp(80px,12vw,110px)',backdropFilter:'blur(6px)',transition:`opacity 0.6s ease ${i*0.1}s, transform 0.6s cubic-bezier(0.22,1,0.36,1) ${i*0.1}s`,opacity:visible?1:0,transform:visible?'translateY(0)':'translateY(20px)'}}>
-            <span style={{fontFamily:"'Bruno Ace',cursive",fontSize:'clamp(2.4rem,5vw,3.8rem)',color:'#0CE644',lineHeight:1,textShadow:'0 0 18px rgba(12,230,68,0.55)',letterSpacing:'0.04em'}}>{String(value).padStart(2,'0')}</span>
-            <span style={{fontFamily:"'Share Tech Mono',monospace",fontSize:'0.62rem',color:'rgba(12,230,68,0.45)',letterSpacing:'0.2em',marginTop:'0.5rem'}}>{label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 const HERO_STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap");
   @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace&display=swap');
@@ -391,15 +352,6 @@ export default function Hero() {
               particleVariance={1.2}
             />
           </div>
-        </div>
-      </section>
-
-      {}
-      <section style={{position:'relative',minHeight:'100vh',background:'#0A0D0A',display:'flex',alignItems:'center',justifyContent:'center',overflow:'hidden'}}>
-        <div aria-hidden="true" style={{position:'absolute',inset:0,backgroundImage:'radial-gradient(circle,rgba(12,230,68,0.045) 1px,transparent 1px)',backgroundSize:'28px 28px',pointerEvents:'none'}}/>
-        <div aria-hidden="true" style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 60% 50% at 50% 50%,rgba(12,230,68,0.04) 0%,transparent 70%)',pointerEvents:'none'}}/>
-        <div style={{position:'relative',zIndex:2}}>
-          <CountDown />
         </div>
       </section>
     </>
