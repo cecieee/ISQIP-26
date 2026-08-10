@@ -19,60 +19,53 @@ const STYLES = `
     background: #000000;
     overflow: hidden;
     color: #F5F7F6;
-    perspective: 1000px;
   }
 
-  /* ── Cyber Neon Laser Beam Sweep ── */
-  #footer .ft-laser-topline {
+  /* ── Ultra-Smooth Laser Top Edge Line ── */
+  #footer .ft-topline {
     width: 100%;
     height: 2px;
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(12, 230, 68, 0.4) 20%,
+      rgba(12, 230, 68, 0.3) 15%,
       #0CE644 50%,
-      rgba(12, 230, 68, 0.4) 80%,
+      rgba(12, 230, 68, 0.3) 85%,
       transparent 100%
     );
-    box-shadow: 0 0 24px 4px rgba(12, 230, 68, 0.6);
+    box-shadow: 0 0 20px 2px rgba(12, 230, 68, 0.5);
     transform-origin: center;
     will-change: transform, opacity;
   }
 
-  /* ── Cyberpunk Corner Accents ── */
+  /* ── Cyberpunk Corner Brackets ── */
   #footer .ft-corner-tl {
     position: absolute;
-    top: 12px;
-    left: 16px;
-    width: 12px;
-    height: 12px;
+    top: 16px;
+    left: 20px;
+    width: 14px;
+    height: 14px;
     border-top: 2px solid #0CE644;
     border-left: 2px solid #0CE644;
-    opacity: 0.6;
+    box-shadow: -2px -2px 10px rgba(12, 230, 68, 0.6);
+    opacity: 0.8;
+    z-index: 10;
   }
 
   #footer .ft-corner-tr {
     position: absolute;
-    top: 12px;
-    right: 16px;
-    width: 12px;
-    height: 12px;
+    top: 16px;
+    right: 20px;
+    width: 14px;
+    height: 14px;
     border-top: 2px solid #0CE644;
     border-right: 2px solid #0CE644;
-    opacity: 0.6;
+    box-shadow: 2px -2px 10px rgba(12, 230, 68, 0.6);
+    opacity: 0.8;
+    z-index: 10;
   }
 
-  /* ── 3D Kinetic Folding Card Container ── */
-  #footer .ft-3d-card {
-    background: rgba(8, 14, 10, 0.85);
-    border: 1px solid rgba(12, 230, 68, 0.18);
-    border-radius: 20px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(12, 230, 68, 0.15);
-    transform-style: preserve-3d;
-    will-change: transform, opacity;
-  }
-
-  /* ── Mechsuit Column Headings with Kinetic Letter Spacing ── */
+  /* ── Mechsuit Column Headings with Smooth Kinetic Spacing ── */
   #footer .ft-col-head {
     font-family: var(--font-mech), sans-serif;
     font-size: 11px;
@@ -83,30 +76,30 @@ const STYLES = `
     transition: letter-spacing 0.3s ease;
   }
 
-  /* ── Accent Line Under Headings ── */
+  /* ── Glowing Accent Line Under Headings ── */
   #footer .ft-head-line {
     height: 1px;
     width: 100%;
     background: linear-gradient(
       to right,
       rgba(12, 230, 68, 0.6),
-      rgba(12, 230, 68, 0.1) 70%,
+      rgba(12, 230, 68, 0.08) 70%,
       transparent
     );
     margin-bottom: 1.25rem;
   }
 
-  /* ── Link Hover styles ── */
+  /* ── Ultra-Smooth Link Hover Transitions ── */
   #footer .ft-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     color: rgba(245, 247, 246, 0.65);
     font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
     padding: 0.25rem 0;
-    transition: color 0.22s ease, transform 0.22s ease, text-shadow 0.22s ease;
+    transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   #footer .ft-link-bar {
@@ -115,16 +108,16 @@ const STYLES = `
     height: 0.85em;
     flex-shrink: 0;
     background: #0CE644;
-    box-shadow: 0 0 6px rgba(12, 230, 68, 0.7);
+    box-shadow: 0 0 8px rgba(12, 230, 68, 0.8);
     opacity: 0;
     transform: scaleY(0);
-    transition: opacity 0.22s ease, transform 0.22s ease;
+    transition: opacity 0.25s ease, transform 0.25s ease;
   }
 
   #footer .ft-link:hover {
     color: #0CE644;
     transform: translateX(6px);
-    text-shadow: 0 0 10px rgba(12, 230, 68, 0.45);
+    text-shadow: 0 0 12px rgba(12, 230, 68, 0.5);
   }
 
   #footer .ft-link:hover .ft-link-bar {
@@ -132,22 +125,22 @@ const STYLES = `
     transform: scaleY(1);
   }
 
-  /* ── Social Links Hover ── */
+  /* ── Premium Social Links Hover ── */
   #footer .ft-social-link {
     color: rgba(245, 247, 246, 0.55);
     font-size: 1.25rem;
     display: flex;
     text-decoration: none;
-    transition: all 0.22s ease;
+    transition: color 0.25s ease, filter 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   #footer .ft-social-link:hover {
     color: #0CE644;
-    filter: drop-shadow(0 0 6px rgba(12, 230, 68, 0.6));
-    transform: translateY(-3px);
+    filter: drop-shadow(0 0 8px rgba(12, 230, 68, 0.7));
+    transform: translateY(-4px);
   }
 
-  /* ── Phone link with 180 deg Icon ── */
+  /* ── Phone Link Hover with 180 deg Rotated Icon ── */
   #footer .ft-phone-link {
     display: inline-flex;
     align-items: center;
@@ -155,36 +148,41 @@ const STYLES = `
     color: rgba(245, 247, 246, 0.65);
     font-size: 0.875rem;
     text-decoration: none;
-    transition: all 0.22s ease;
+    transition: color 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.25s ease;
   }
 
   #footer .ft-phone-icon {
     transform: rotate(180deg);
     color: #0CE644;
     font-size: 0.75rem;
-    transition: transform 0.25s ease, filter 0.25s ease;
+    transition: transform 0.3s ease, filter 0.3s ease;
   }
 
   #footer .ft-phone-link:hover {
     color: #0CE644;
-    transform: translateX(5px);
-    text-shadow: 0 0 10px rgba(12, 230, 68, 0.45);
+    transform: translateX(6px);
+    text-shadow: 0 0 12px rgba(12, 230, 68, 0.5);
   }
 
   #footer .ft-phone-link:hover .ft-phone-icon {
-    filter: drop-shadow(0 0 8px rgba(12, 230, 68, 0.9));
+    filter: drop-shadow(0 0 10px rgba(12, 230, 68, 0.95));
   }
 
-  /* ── Copyright Section ── */
+  /* ── Compact Copyright Section ── */
   #footer .ft-copyright-bar {
-    border-top: 1px solid rgba(12, 230, 68, 0.15);
-    background: linear-gradient(180deg, rgba(12, 230, 68, 0.02) 0%, rgba(0, 0, 0, 1) 100%);
-    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(12, 230, 68, 0.02);
+    backdrop-filter: blur(6px);
   }
 
-  /* ── Accessibility prefers-reduced-motion override ── */
+  /* ── Column Motion Base ── */
+  .ft-col-stagger {
+    will-change: transform, opacity;
+  }
+
+  /* ── Reduced Motion Override ── */
   @media (prefers-reduced-motion: reduce) {
-    #footer, .ft-3d-card, .ft-laser-topline {
+    #footer, .ft-col-stagger, .ft-topline {
       transform: none !important;
       opacity: 1 !important;
       transition: none !important;
@@ -219,7 +217,7 @@ export default function Footer() {
   const footerRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
-  // 3D Kinetic Scroll Physics Loop (60fps momentum)
+  // Ultra-Smooth 60fps Lerp Scroll Physics Loop
   useEffect(() => {
     let animId;
     let target = 0;
@@ -233,13 +231,14 @@ export default function Footer() {
       const windowHeight = window.innerHeight;
 
       const visible = windowHeight - rect.top;
-      const total = rect.height || 400;
+      const total = rect.height || 350;
 
       target = Math.min(Math.max(visible / (total * 0.7), 0), 1);
     };
 
     const loop = () => {
-      current += (target - current) * 0.085;
+      // Fluid exponential lerp momentum
+      current += (target - current) * 0.08;
       setScrollProgress(current);
       animId = requestAnimationFrame(loop);
     };
@@ -254,12 +253,20 @@ export default function Footer() {
     };
   }, []);
 
-  // 3D Kinetic Transformations
-  const rotateX = (1 - scrollProgress) * 14;      // 14deg ➔ 0deg 3D tilt
-  const translateY = (1 - scrollProgress) * 45;   // 45px ➔ 0px lift
-  const scale = 0.96 + scrollProgress * 0.04;     // 0.96 ➔ 1.0 scale
-  const laserWidth = 0.2 + scrollProgress * 0.8;  // Laser expands center-out
-  const letterSpacing = 0.06 + scrollProgress * 0.14; // Kinetic tracking spread
+  // Staggered motion metrics for ultra-smooth column entrance
+  const laserScaleX = Math.min(Math.max(scrollProgress * 1.05, 0), 1);
+  const letterSpacing = 0.06 + scrollProgress * 0.14; // Kinetic heading tracking
+
+  // Staggered column offsets
+  const c1Offset = (1 - scrollProgress) * 18;
+  const c2Offset = (1 - scrollProgress) * 28;
+  const c3Offset = (1 - scrollProgress) * 38;
+  const c4Offset = (1 - scrollProgress) * 48;
+
+  const c1Opacity = Math.min(Math.max(scrollProgress * 1.3, 0), 1);
+  const c2Opacity = Math.min(Math.max((scrollProgress - 0.08) * 1.3, 0), 1);
+  const c3Opacity = Math.min(Math.max((scrollProgress - 0.16) * 1.3, 0), 1);
+  const c4Opacity = Math.min(Math.max((scrollProgress - 0.24) * 1.3, 0), 1);
 
   return (
     <>
@@ -269,54 +276,63 @@ export default function Footer() {
         <footer
           id="footer"
           ref={footerRef}
-          className="relative overflow-hidden bg-black text-[#F5F7F6] py-10 px-4 sm:px-8"
+          className="relative overflow-hidden bg-black text-[#F5F7F6]"
         >
-          {/* Cyber Neon Laser Beam Sweep */}
+          {/* Ultra-Smooth Laser Top Edge Line */}
           <div
-            className="ft-laser-topline"
+            className="ft-topline"
             style={{
-              transform: `scaleX(${laserWidth.toFixed(3)})`,
-              opacity: (0.4 + scrollProgress * 0.6).toFixed(3),
+              transform: `scaleX(${laserScaleX.toFixed(3)})`,
+              opacity: (0.3 + scrollProgress * 0.7).toFixed(3),
             }}
           />
 
-          {/* Cyberpunk Corner Accents */}
+          {/* Cyberpunk Corner Brackets */}
           <div className="ft-corner-tl" />
           <div className="ft-corner-tr" />
 
-          {/* Ambient Top Glow */}
+          {/* Ambient Top Radial Glow */}
           <div
             aria-hidden="true"
             className="absolute inset-0 pointer-events-none z-0"
             style={{
-              background: `radial-gradient(ellipse 70% 50% at 50% 0%, rgba(12, 230, 68, ${(scrollProgress * 0.14).toFixed(3)}) 0%, transparent 75%)`,
+              background: `radial-gradient(ellipse 75% 55% at 50% 0%, rgba(12, 230, 68, ${(scrollProgress * 0.14).toFixed(3)}) 0%, transparent 75%)`,
             }}
           />
 
-          {/* 3D Kinetic Folding Card */}
-          <div
-            className="ft-3d-card relative z-10 mx-auto max-w-7xl px-6 py-10 sm:px-10 lg:px-12 my-4"
-            style={{
-              transform: `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) translate3d(0, ${translateY.toFixed(2)}px, 0) scale(${scale.toFixed(3)})`,
-              opacity: (0.4 + scrollProgress * 0.6).toFixed(3),
-            }}
-          >
-            {/* Live Telemetry Status Pill */}
-            <div className="flex items-center justify-between pb-6 mb-8 border-b border-white/10 text-xs font-mono">
+          {/* Main Content Layout */}
+          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-8 pb-8 sm:px-10 lg:px-12">
+            
+            {/* Live IEEE SB CEC Telemetry Status Bar */}
+            <div
+              className="flex items-center justify-between pb-4 mb-8 border-b border-white/10 text-xs font-mono transition-opacity duration-300"
+              style={{ opacity: (0.3 + scrollProgress * 0.7).toFixed(3) }}
+            >
               <div className="flex items-center gap-2 text-[#0CE644]">
-                <span className="w-2 h-2 rounded-full bg-[#0CE644] animate-ping" />
-                <span className="tracking-widest font-semibold uppercase">IEEE SB CEC CORE</span>
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0CE644] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#0CE644]" />
+                </span>
+                <span className="tracking-widest font-semibold uppercase">
+                  IEEE SB CEC CORE • SYSTEM ACTIVE
+                </span>
               </div>
               <div className="text-white/40 hidden sm:block tracking-wider uppercase">
                 COLLEGE OF ENGINEERING CHENGANNUR
               </div>
             </div>
 
-            {/* Grid Columns */}
+            {/* Staggered Grid Columns */}
             <div className="grid gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
               
               {/* Column 1: IEEE Student Branch CEC Brand */}
-              <div className="flex flex-col items-center lg:items-start">
+              <div
+                className="ft-col-stagger flex flex-col items-center lg:items-start"
+                style={{
+                  transform: `translate3d(0, ${c1Offset.toFixed(2)}px, 0)`,
+                  opacity: c1Opacity.toFixed(3),
+                }}
+              >
                 <div className="flex min-h-20 items-center">
                   <img
                     src={ieeeLogo}
@@ -324,15 +340,15 @@ export default function Footer() {
                     className="w-64 object-contain"
                     style={{
                       filter:
-                        "brightness(0) invert(1) drop-shadow(0 0 10px rgba(12,230,68,0.3))",
+                        "brightness(0) invert(1) drop-shadow(0 0 10px rgba(12,230,68,0.25))",
                     }}
                   />
                 </div>
                 <div className="mt-4 text-center lg:text-left">
-                  <p className="text-base font-semibold leading-6 text-white/90">
+                  <p className="text-lg font-semibold leading-7 text-white/90">
                     IEEE Student Branch
                   </p>
-                  <p className="text-xs leading-5 text-white/50">
+                  <p className="text-sm leading-6 text-white/50">
                     College of Engineering Chengannur
                   </p>
                 </div>
@@ -355,7 +371,13 @@ export default function Footer() {
               </div>
 
               {/* Column 2: Pages */}
-              <div className="flex flex-col gap-2">
+              <div
+                className="ft-col-stagger flex flex-col gap-4"
+                style={{
+                  transform: `translate3d(0, ${c2Offset.toFixed(2)}px, 0)`,
+                  opacity: c2Opacity.toFixed(3),
+                }}
+              >
                 <div>
                   <h3
                     className="ft-col-head"
@@ -376,7 +398,13 @@ export default function Footer() {
               </div>
 
               {/* Column 3: Sections */}
-              <div className="flex flex-col gap-2">
+              <div
+                className="ft-col-stagger flex flex-col gap-4"
+                style={{
+                  transform: `translate3d(0, ${c3Offset.toFixed(2)}px, 0)`,
+                  opacity: c3Opacity.toFixed(3),
+                }}
+              >
                 <div>
                   <h3
                     className="ft-col-head"
@@ -397,7 +425,13 @@ export default function Footer() {
               </div>
 
               {/* Column 4: Contact Us */}
-              <div className="flex flex-col items-center lg:items-start gap-2">
+              <div
+                className="ft-col-stagger flex flex-col items-center lg:items-start gap-4"
+                style={{
+                  transform: `translate3d(0, ${c4Offset.toFixed(2)}px, 0)`,
+                  opacity: c4Opacity.toFixed(3),
+                }}
+              >
                 <div className="w-full text-center lg:text-left">
                   <h3
                     className="ft-col-head"
@@ -407,7 +441,7 @@ export default function Footer() {
                   </h3>
                   <div className="ft-head-line" />
                 </div>
-                <div className="flex flex-col gap-4 text-center lg:text-left">
+                <div className="flex flex-col gap-5 text-center lg:text-left">
                   {contactInfo.map((contact, index) => (
                     <div key={index} className="flex flex-col gap-1">
                       <span className="text-sm font-semibold text-white/90">
@@ -428,19 +462,19 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Copyright Section */}
-          <div className="ft-copyright-bar relative z-10 rounded-b-2xl">
-            <div className="flex flex-col items-center justify-center gap-3 px-6 py-5 text-center sm:flex-row sm:gap-5">
-              <p className="text-sm font-medium text-white/75">
+          {/* Compact Copyright Bar */}
+          <div className="ft-copyright-bar relative z-10">
+            <div className="flex flex-col items-center justify-center gap-3 px-6 py-4 text-center sm:flex-row sm:gap-5">
+              <p className="text-sm font-medium text-white/70">
                 © {new Date().getFullYear()} IEEE Student Branch CEC. All rights reserved.
               </p>
-              <span className="hidden sm:inline text-[#0CE644]/40">|</span>
-              <p className="flex items-center gap-1.5 text-sm font-medium text-white/75">
+              <span className="hidden sm:inline text-[#0CE644]/35">|</span>
+              <p className="flex items-center gap-1 text-sm font-medium text-white/70">
                 Made with{" "}
                 <FaHeart
                   style={{
                     color: "#0CE644",
-                    filter: "drop-shadow(0 0 6px rgba(12,230,68,0.7))",
+                    filter: "drop-shadow(0 0 4px rgba(12,230,68,0.6))",
                   }}
                 />{" "}
                 by IEEE SB CEC Web Team
