@@ -1,10 +1,22 @@
 import './App.css'
+import Navbar from './Components/Navbar'
+import Hero from './Components/Hero'
+import About from './Components/About'
+import WhyParticipate from './Components/WhyParticipate'
+import LearningTracks from './Components/LearningTracks'
+import OrganizedBy from './Components/OrganizedBy'
 
 function App() {
-
   return (
     <>
-     <h1 className='text-primary font-mech'>Hi</h1>
+      <Navbar />
+      <main>
+        <Hero />
+        <About />
+        <WhyParticipate />
+        <LearningTracks />
+        <OrganizedBy />
+      </main>
     </>
   )
 }
