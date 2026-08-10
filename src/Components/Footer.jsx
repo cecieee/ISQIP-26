@@ -1,39 +1,196 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import {
   FaInstagram,
   FaLinkedin,
-  FaWhatsapp,
   FaPhoneFlip,
   FaHeart,
 } from "react-icons/fa6";
-import { IoMdMail } from "react-icons/io";
 import { BiGlobe } from "react-icons/bi";
 import ieeeLogo from "../assets/ieee-sb-cec.png";
 
-const GREEN        = "12,230,68";
-const CONNECT_DIST = 90;    
-const CURSOR_DIST  = 170;  
-const REPEL_DIST   = 120;
-const REPEL_FORCE  = 0.07;
-const BASE_SPEED   = 0.22; 
-const MAX_SPEED    = 1.2;
+const STYLES = `
+  #footer *, #footer *::before, #footer *::after {
+    box-sizing: border-box;
+  }
 
-function makeStars(W, H) {
-  const count = Math.min(Math.round((W * H) / 3000), 130);
-  return Array.from({ length: count }, () => {
-    const major = Math.random() < 0.18;   
-    return {
-      x:       Math.random() * W,
-      y:       Math.random() * H,
-      vx:      (Math.random() - 0.5) * BASE_SPEED * 2,
-      vy:      (Math.random() - 0.5) * BASE_SPEED * 2,
-      r:       major ? 2.2 + Math.random() * 1.3 : 0.6 + Math.random() * 1.0,
-      phase:   Math.random() * Math.PI * 2,
-      speed:   0.8 + Math.random() * 1.4,  
-      major,
-    };
-  });
-}
+  .ft-container {
+    position: relative;
+    width: 100%;
+    background: #000000;
+    overflow: hidden;
+    color: #F5F7F6;
+    perspective: 1000px;
+  }
+
+  /* ── Cyber Neon Laser Beam Sweep ── */
+  #footer .ft-laser-topline {
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(12, 230, 68, 0.4) 20%,
+      #0CE644 50%,
+      rgba(12, 230, 68, 0.4) 80%,
+      transparent 100%
+    );
+    box-shadow: 0 0 24px 4px rgba(12, 230, 68, 0.6);
+    transform-origin: center;
+    will-change: transform, opacity;
+  }
+
+  /* ── Cyberpunk Corner Accents ── */
+  #footer .ft-corner-tl {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid #0CE644;
+    border-left: 2px solid #0CE644;
+    opacity: 0.6;
+  }
+
+  #footer .ft-corner-tr {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid #0CE644;
+    border-right: 2px solid #0CE644;
+    opacity: 0.6;
+  }
+
+  /* ── 3D Kinetic Folding Card Container ── */
+  #footer .ft-3d-card {
+    background: rgba(8, 14, 10, 0.85);
+    border: 1px solid rgba(12, 230, 68, 0.18);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(12, 230, 68, 0.15);
+    transform-style: preserve-3d;
+    will-change: transform, opacity;
+  }
+
+  /* ── Mechsuit Column Headings with Kinetic Letter Spacing ── */
+  #footer .ft-col-head {
+    font-family: var(--font-mech), sans-serif;
+    font-size: 11px;
+    color: #0CE644;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+    opacity: 0.95;
+    transition: letter-spacing 0.3s ease;
+  }
+
+  /* ── Accent Line Under Headings ── */
+  #footer .ft-head-line {
+    height: 1px;
+    width: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(12, 230, 68, 0.6),
+      rgba(12, 230, 68, 0.1) 70%,
+      transparent
+    );
+    margin-bottom: 1.25rem;
+  }
+
+  /* ── Link Hover styles ── */
+  #footer .ft-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: rgba(245, 247, 246, 0.65);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 0.25rem 0;
+    transition: color 0.22s ease, transform 0.22s ease, text-shadow 0.22s ease;
+  }
+
+  #footer .ft-link-bar {
+    display: inline-block;
+    width: 2px;
+    height: 0.85em;
+    flex-shrink: 0;
+    background: #0CE644;
+    box-shadow: 0 0 6px rgba(12, 230, 68, 0.7);
+    opacity: 0;
+    transform: scaleY(0);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+
+  #footer .ft-link:hover {
+    color: #0CE644;
+    transform: translateX(6px);
+    text-shadow: 0 0 10px rgba(12, 230, 68, 0.45);
+  }
+
+  #footer .ft-link:hover .ft-link-bar {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  /* ── Social Links Hover ── */
+  #footer .ft-social-link {
+    color: rgba(245, 247, 246, 0.55);
+    font-size: 1.25rem;
+    display: flex;
+    text-decoration: none;
+    transition: all 0.22s ease;
+  }
+
+  #footer .ft-social-link:hover {
+    color: #0CE644;
+    filter: drop-shadow(0 0 6px rgba(12, 230, 68, 0.6));
+    transform: translateY(-3px);
+  }
+
+  /* ── Phone link with 180 deg Icon ── */
+  #footer .ft-phone-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(245, 247, 246, 0.65);
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: all 0.22s ease;
+  }
+
+  #footer .ft-phone-icon {
+    transform: rotate(180deg);
+    color: #0CE644;
+    font-size: 0.75rem;
+    transition: transform 0.25s ease, filter 0.25s ease;
+  }
+
+  #footer .ft-phone-link:hover {
+    color: #0CE644;
+    transform: translateX(5px);
+    text-shadow: 0 0 10px rgba(12, 230, 68, 0.45);
+  }
+
+  #footer .ft-phone-link:hover .ft-phone-icon {
+    filter: drop-shadow(0 0 8px rgba(12, 230, 68, 0.9));
+  }
+
+  /* ── Copyright Section ── */
+  #footer .ft-copyright-bar {
+    border-top: 1px solid rgba(12, 230, 68, 0.15);
+    background: linear-gradient(180deg, rgba(12, 230, 68, 0.02) 0%, rgba(0, 0, 0, 1) 100%);
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+  }
+
+  /* ── Accessibility prefers-reduced-motion override ── */
+  @media (prefers-reduced-motion: reduce) {
+    #footer, .ft-3d-card, .ft-laser-topline {
+      transform: none !important;
+      opacity: 1 !important;
+      transition: none !important;
+    }
+  }
+`;
 
 export default function Footer() {
   const socialLinks = [
@@ -60,266 +217,238 @@ export default function Footer() {
   ];
 
   const footerRef = useRef(null);
-  const canvasRef = useRef(null);
-  const stateRef  = useRef({ stars: [], cx: -9999, cy: -9999, time: 0, animId: null });
+  const [scrollProgress, setScrollProgress] = useState(0);
 
+  // 3D Kinetic Scroll Physics Loop (60fps momentum)
   useEffect(() => {
-    const footer = footerRef.current;
-    const canvas = canvasRef.current;
-    if (!footer || !canvas) return;
+    let animId;
+    let target = 0;
+    let current = 0;
 
-    function init() {
-      canvas.width  = footer.offsetWidth;
-      canvas.height = footer.offsetHeight;
-      stateRef.current.stars = makeStars(canvas.width, canvas.height);
-    }
-    init();
-    const ro = new ResizeObserver(init);
-    ro.observe(footer);
+    const handleScroll = () => {
+      const footer = footerRef.current;
+      if (!footer) return;
 
-    function draw() {
-      const s   = stateRef.current;
-      const ctx = canvas.getContext("2d");
-      const W   = canvas.width;
-      const H   = canvas.height;
-      const { stars, cx, cy } = s;
-      s.time += 0.012;
-      const t = s.time;
+      const rect = footer.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
 
-      ctx.clearRect(0, 0, W, H);
+      const visible = windowHeight - rect.top;
+      const total = rect.height || 400;
 
-      // ── Update star positions ───
-      for (const st of stars) {
-        const dx   = st.x - cx;
-        const dy   = st.y - cy;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < REPEL_DIST && dist > 0.5) {
-          const str = ((REPEL_DIST - dist) / REPEL_DIST) * REPEL_FORCE;
-          st.vx += (dx / dist) * str;
-          st.vy += (dy / dist) * str;
-        }
-        const spd = Math.sqrt(st.vx * st.vx + st.vy * st.vy);
-        if (spd > MAX_SPEED) { st.vx = (st.vx / spd) * MAX_SPEED; st.vy = (st.vy / spd) * MAX_SPEED; }
-        st.vx *= 0.992;
-        st.vy *= 0.992;
-        st.x += st.vx;
-        st.y += st.vy;
-        if (st.x < -10)    st.x = W + 10;
-        if (st.x > W + 10) st.x = -10;
-        if (st.y < -10)    st.y = H + 10;
-        if (st.y > H + 10) st.y = -10;
-      }
+      target = Math.min(Math.max(visible / (total * 0.7), 0), 1);
+    };
 
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i + 1; j < stars.length; j++) {
-          const a  = stars[i];
-          const b  = stars[j];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const d  = Math.sqrt(dx * dx + dy * dy);
-          if (d > CONNECT_DIST) continue;
-          const alpha = 0.2 * (1 - d / CONNECT_DIST);
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(${GREEN},${alpha.toFixed(3)})`;
-          ctx.lineWidth   = 0.45;
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
-        }
-      }
+    const loop = () => {
+      current += (target - current) * 0.085;
+      setScrollProgress(current);
+      animId = requestAnimationFrame(loop);
+    };
 
-      for (const st of stars) {
-        const dx     = st.x - cx;
-        const dy     = st.y - cy;
-        const dist   = Math.sqrt(dx * dx + dy * dy);
-        const near   = dist < REPEL_DIST * 1.3;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    animId = requestAnimationFrame(loop);
 
-        const twinkle = 0.75 + 0.25 * Math.sin(t * st.speed + st.phase);
-
-        if (st.major) {
-          const glowR = st.r * (near ? 5 : 3.5) * twinkle;
-          const grad  = ctx.createRadialGradient(st.x, st.y, 0, st.x, st.y, glowR);
-          grad.addColorStop(0,   `rgba(${GREEN},${(near ? 0.18 : 0.1).toFixed(2)})`);
-          grad.addColorStop(1,   `rgba(${GREEN},0)`);
-          ctx.beginPath();
-          ctx.arc(st.x, st.y, glowR, 0, Math.PI * 2);
-          ctx.fillStyle = grad;
-          ctx.fill();
-        }
-
-        const r      = st.r * twinkle * (near ? 1.5 : 1);
-        const alpha  = near
-          ? (st.major ? 1.0 : 0.9)
-          : (st.major ? 0.85 : 0.55) * twinkle;
-
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle   = "#0CE644";
-        ctx.beginPath();
-        ctx.arc(st.x, st.y, r, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-
-      ctx.globalAlpha = 1;
-      s.animId = requestAnimationFrame(draw);
-    }
-
-    stateRef.current.animId = requestAnimationFrame(draw);
     return () => {
-      ro.disconnect();
-      if (stateRef.current.animId) cancelAnimationFrame(stateRef.current.animId);
+      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(animId);
     };
   }, []);
 
-  function handleMouseMove(e) {
-    const footer = footerRef.current;
-    if (!footer) return;
-    const rect = footer.getBoundingClientRect();
-    stateRef.current.cx = e.clientX - rect.left;
-    stateRef.current.cy = e.clientY - rect.top;
-  }
-  function handleMouseLeave() {
-    stateRef.current.cx = -9999;
-    stateRef.current.cy = -9999;
-  }
-
-  const headingStyle = { letterSpacing: "0.18em", opacity: 0.85 };
-  const lbarStyle = {
-    display: "inline-block", width: "2px", height: "0.85em", flexShrink: 0,
-    background: "#0CE644", boxShadow: "0 0 6px rgba(12,230,68,0.7)",
-    opacity: 0, transform: "scaleY(0)", transition: "all 0.22s ease",
-  };
-  function onLinkEnter(e) {
-    e.currentTarget.style.color      = "#0CE644";
-    e.currentTarget.style.transform  = "translateX(5px)";
-    e.currentTarget.style.textShadow = "0 0 10px rgba(12,230,68,0.45)";
-    const bar = e.currentTarget.querySelector(".lbar");
-    if (bar) { bar.style.opacity = "1"; bar.style.transform = "scaleY(1)"; }
-  }
-  function onLinkLeave(e) {
-    e.currentTarget.style.color      = "";
-    e.currentTarget.style.transform  = "";
-    e.currentTarget.style.textShadow = "";
-    const bar = e.currentTarget.querySelector(".lbar");
-    if (bar) { bar.style.opacity = "0"; bar.style.transform = "scaleY(0)"; }
-  }
+  // 3D Kinetic Transformations
+  const rotateX = (1 - scrollProgress) * 14;      // 14deg ➔ 0deg 3D tilt
+  const translateY = (1 - scrollProgress) * 45;   // 45px ➔ 0px lift
+  const scale = 0.96 + scrollProgress * 0.04;     // 0.96 ➔ 1.0 scale
+  const laserWidth = 0.2 + scrollProgress * 0.8;  // Laser expands center-out
+  const letterSpacing = 0.06 + scrollProgress * 0.14; // Kinetic tracking spread
 
   return (
-    <footer
-      id="footer"
-      ref={footerRef}
-      className="relative overflow-hidden text-text"
-      style={{
-        background: "#071110",
-        borderTop: "1px solid rgba(12,230,68,0.25)",
-        boxShadow: "0 -1px 0 0 rgba(12,230,68,0.08)",
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(12,230,68,0.07) 0%, transparent 70%)" }} />
-      <canvas ref={canvasRef} aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 5 }} />
+    <>
+      <style>{STYLES}</style>
+      
+      <div className="ft-container">
+        <footer
+          id="footer"
+          ref={footerRef}
+          className="relative overflow-hidden bg-black text-[#F5F7F6] py-10 px-4 sm:px-8"
+        >
+          {/* Cyber Neon Laser Beam Sweep */}
+          <div
+            className="ft-laser-topline"
+            style={{
+              transform: `scaleX(${laserWidth.toFixed(3)})`,
+              opacity: (0.4 + scrollProgress * 0.6).toFixed(3),
+            }}
+          />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-6 py-10 sm:px-10 lg:grid-cols-4 lg:px-12">
+          {/* Cyberpunk Corner Accents */}
+          <div className="ft-corner-tl" />
+          <div className="ft-corner-tr" />
 
-        {/* IEEE SB CEC */}
-        <div className="flex flex-col items-center lg:items-start">
-          <div className="flex min-h-20 items-center">
-            <img src={ieeeLogo} alt="IEEE Student Branch CEC" className="w-64 object-contain" style={{ filter: "brightness(0) invert(1) drop-shadow(0 0 8px rgba(12,230,68,0.25))" }} />
-          </div>
-          <div className="mt-5">
-            <p className="text-lg font-semibold leading-7 text-text/90">IEEE Student Branch</p>
-            <p className="text-sm leading-6 text-text/50">College of Engineering Chengannur</p>
-          </div>
-          <div className="mt-6 flex items-center gap-3">
-            {socialLinks.map((social, index) => (
-              <a
-                key={index}
-                href={social.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.name}
-                style={{
-                  color: "rgba(245,247,246,0.55)",
-                  fontSize: "1.25rem",
-                  transition: "all 0.22s ease",
-                  display: "flex",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color     = "#0CE644";
-                  e.currentTarget.style.filter    = "drop-shadow(0 0 6px rgba(12,230,68,0.6))";
-                  e.currentTarget.style.transform = "translateY(-3px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color     = "rgba(245,247,246,0.55)";
-                  e.currentTarget.style.filter    = "none";
-                  e.currentTarget.style.transform = "translateY(0)";
-                }}
-              >
-                {social.icon}
-              </a>
-            ))}
-          </div>
-        </div>
+          {/* Ambient Top Glow */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 pointer-events-none z-0"
+            style={{
+              background: `radial-gradient(ellipse 70% 50% at 50% 0%, rgba(12, 230, 68, ${(scrollProgress * 0.14).toFixed(3)}) 0%, transparent 75%)`,
+            }}
+          />
 
-        {/* Pages */}
-        <div className="hidden flex-col gap-4 lg:flex">
-          <div className="mb-1">
-            <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>Pages</h3>
-            <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
-          </div>
-          <div className="flex flex-col gap-1">
-            {pageLinks.map((link, index) => (
-              <a key={index} href={link.link} className="flex items-center gap-2 text-sm text-text/60" style={{ transition: "all 0.22s ease", paddingTop: "3px", paddingBottom: "3px" }} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
-                <span className="lbar" style={lbarStyle} />{link.name}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Sections */}
-        <div className="hidden flex-col gap-4 lg:flex">
-          <div className="mb-1">
-            <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>Sections</h3>
-            <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
-          </div>
-          <div className="flex flex-col gap-1">
-            {sectionLinks.map((link, index) => (
-              <a key={index} href={link.link} className="flex items-center gap-2 text-sm text-text/60" style={{ transition: "all 0.22s ease", paddingTop: "3px", paddingBottom: "3px" }} onMouseEnter={onLinkEnter} onMouseLeave={onLinkLeave}>
-                <span className="lbar" style={lbarStyle} />{link.name}
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Contact */}
-        <div className="flex flex-col items-center gap-4 lg:items-start">
-          <div className="mb-1">
-            <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>Contact Us</h3>
-            <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
-          </div>
-          <div className="flex flex-col gap-5">
-            {contactInfo.map((contact, index) => (
-              <div key={index} className="flex flex-col gap-1">
-                <span className="text-sm font-semibold">{contact.name}</span>
-                <a href={`tel:${contact.phone.replace(/\s/g, "")}`} className="flex items-center gap-2 text-sm text-text/60" style={{ transition: "all 0.22s ease" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.color = "#0CE644"; e.currentTarget.style.transform = "translateX(5px)"; e.currentTarget.style.textShadow = "0 0 10px rgba(12,230,68,0.45)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.color = ""; e.currentTarget.style.transform = ""; e.currentTarget.style.textShadow = ""; }}
-                ><FaPhoneFlip className="text-xs" />{contact.phone}</a>
+          {/* 3D Kinetic Folding Card */}
+          <div
+            className="ft-3d-card relative z-10 mx-auto max-w-7xl px-6 py-10 sm:px-10 lg:px-12 my-4"
+            style={{
+              transform: `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) translate3d(0, ${translateY.toFixed(2)}px, 0) scale(${scale.toFixed(3)})`,
+              opacity: (0.4 + scrollProgress * 0.6).toFixed(3),
+            }}
+          >
+            {/* Live Telemetry Status Pill */}
+            <div className="flex items-center justify-between pb-6 mb-8 border-b border-white/10 text-xs font-mono">
+              <div className="flex items-center gap-2 text-[#0CE644]">
+                <span className="w-2 h-2 rounded-full bg-[#0CE644] animate-ping" />
+                <span className="tracking-widest font-semibold uppercase">IEEE SB CEC CORE</span>
               </div>
-            ))}
+              <div className="text-white/40 hidden sm:block tracking-wider uppercase">
+                COLLEGE OF ENGINEERING CHENGANNUR
+              </div>
+            </div>
+
+            {/* Grid Columns */}
+            <div className="grid gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+              
+              {/* Column 1: IEEE Student Branch CEC Brand */}
+              <div className="flex flex-col items-center lg:items-start">
+                <div className="flex min-h-20 items-center">
+                  <img
+                    src={ieeeLogo}
+                    alt="IEEE Student Branch CEC"
+                    className="w-64 object-contain"
+                    style={{
+                      filter:
+                        "brightness(0) invert(1) drop-shadow(0 0 10px rgba(12,230,68,0.3))",
+                    }}
+                  />
+                </div>
+                <div className="mt-4 text-center lg:text-left">
+                  <p className="text-base font-semibold leading-6 text-white/90">
+                    IEEE Student Branch
+                  </p>
+                  <p className="text-xs leading-5 text-white/50">
+                    College of Engineering Chengannur
+                  </p>
+                </div>
+                
+                {/* Original Social Links */}
+                <div className="mt-6 flex items-center gap-3">
+                  {socialLinks.map((social, index) => (
+                    <a
+                      key={index}
+                      href={social.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={social.name}
+                      className="ft-social-link"
+                    >
+                      {social.icon}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 2: Pages */}
+              <div className="flex flex-col gap-2">
+                <div>
+                  <h3
+                    className="ft-col-head"
+                    style={{ letterSpacing: `${letterSpacing.toFixed(3)}em` }}
+                  >
+                    Pages
+                  </h3>
+                  <div className="ft-head-line" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  {pageLinks.map((link, index) => (
+                    <a key={index} href={link.link} className="ft-link">
+                      <span className="ft-link-bar" />
+                      <span>{link.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 3: Sections */}
+              <div className="flex flex-col gap-2">
+                <div>
+                  <h3
+                    className="ft-col-head"
+                    style={{ letterSpacing: `${letterSpacing.toFixed(3)}em` }}
+                  >
+                    Sections
+                  </h3>
+                  <div className="ft-head-line" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  {sectionLinks.map((link, index) => (
+                    <a key={index} href={link.link} className="ft-link">
+                      <span className="ft-link-bar" />
+                      <span>{link.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              {/* Column 4: Contact Us */}
+              <div className="flex flex-col items-center lg:items-start gap-2">
+                <div className="w-full text-center lg:text-left">
+                  <h3
+                    className="ft-col-head"
+                    style={{ letterSpacing: `${letterSpacing.toFixed(3)}em` }}
+                  >
+                    Contact Us
+                  </h3>
+                  <div className="ft-head-line" />
+                </div>
+                <div className="flex flex-col gap-4 text-center lg:text-left">
+                  {contactInfo.map((contact, index) => (
+                    <div key={index} className="flex flex-col gap-1">
+                      <span className="text-sm font-semibold text-white/90">
+                        {contact.name}
+                      </span>
+                      <a
+                        href={`tel:${contact.phone.replace(/\s/g, "")}`}
+                        className="ft-phone-link justify-center lg:justify-start"
+                      >
+                        <FaPhoneFlip className="ft-phone-icon" />
+                        <span>{contact.phone}</span>
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
           </div>
-        </div>
 
+          {/* Copyright Section */}
+          <div className="ft-copyright-bar relative z-10 rounded-b-2xl">
+            <div className="flex flex-col items-center justify-center gap-3 px-6 py-5 text-center sm:flex-row sm:gap-5">
+              <p className="text-sm font-medium text-white/75">
+                © {new Date().getFullYear()} IEEE Student Branch CEC. All rights reserved.
+              </p>
+              <span className="hidden sm:inline text-[#0CE644]/40">|</span>
+              <p className="flex items-center gap-1.5 text-sm font-medium text-white/75">
+                Made with{" "}
+                <FaHeart
+                  style={{
+                    color: "#0CE644",
+                    filter: "drop-shadow(0 0 6px rgba(12,230,68,0.7))",
+                  }}
+                />{" "}
+                by IEEE SB CEC Web Team
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
-
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(12,230,68,0.03)", backdropFilter: "blur(4px)" }}>
-        <div className="flex flex-col items-center justify-center gap-3 px-6 py-5 text-center sm:flex-row sm:gap-5">
-          <p className="text-sm font-medium text-text/70">© {new Date().getFullYear()} IEEE Student Branch CEC. All rights reserved.</p>
-          <span className="hidden sm:inline" style={{ color: "rgba(12,230,68,0.35)" }}>|</span>
-          <p className="flex items-center gap-1 text-sm font-medium text-text/70">Made with <FaHeart style={{ color: "#0CE644", filter: "drop-shadow(0 0 4px rgba(12,230,68,0.6))" }} /> by IEEE SB CEC Web Team</p>
-        </div>
-      </div>
-    </footer>
+    </>
   );
 }
