@@ -2,193 +2,38 @@ import { useRef, useEffect, useState } from "react";
 import {
   FaInstagram,
   FaLinkedin,
+  FaWhatsapp,
   FaPhoneFlip,
   FaHeart,
+  FaCopy,
+  FaCheck,
 } from "react-icons/fa6";
+import { IoMdMail } from "react-icons/io";
 import { BiGlobe } from "react-icons/bi";
 import ieeeLogo from "../assets/ieee-sb-cec.png";
+import isqipLogo from "../assets/isqip26.webp";
 
-const STYLES = `
-  #footer *, #footer *::before, #footer *::after {
-    box-sizing: border-box;
-  }
+const GREEN        = "12,230,68";
+const CONNECT_DIST = 90;    
+const BASE_SPEED   = 0.22; 
+const MAX_SPEED    = 1.2;
 
-  .ft-container {
-    position: relative;
-    width: 100%;
-    background: #000000;
-    overflow: hidden;
-    color: #F5F7F6;
-  }
-
-  /* ── Ultra-Smooth Laser Top Edge Line ── */
-  #footer .ft-topline {
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(12, 230, 68, 0.3) 15%,
-      #0CE644 50%,
-      rgba(12, 230, 68, 0.3) 85%,
-      transparent 100%
-    );
-    box-shadow: 0 0 20px 2px rgba(12, 230, 68, 0.5);
-    transform-origin: center;
-    will-change: transform, opacity;
-  }
-
-  /* ── Cyberpunk Corner Brackets ── */
-  #footer .ft-corner-tl {
-    position: absolute;
-    top: 16px;
-    left: 20px;
-    width: 14px;
-    height: 14px;
-    border-top: 2px solid #0CE644;
-    border-left: 2px solid #0CE644;
-    box-shadow: -2px -2px 10px rgba(12, 230, 68, 0.6);
-    opacity: 0.8;
-    z-index: 10;
-  }
-
-  #footer .ft-corner-tr {
-    position: absolute;
-    top: 16px;
-    right: 20px;
-    width: 14px;
-    height: 14px;
-    border-top: 2px solid #0CE644;
-    border-right: 2px solid #0CE644;
-    box-shadow: 2px -2px 10px rgba(12, 230, 68, 0.6);
-    opacity: 0.8;
-    z-index: 10;
-  }
-
-  /* ── Mechsuit Column Headings with Smooth Kinetic Spacing ── */
-  #footer .ft-col-head {
-    font-family: var(--font-mech), sans-serif;
-    font-size: 11px;
-    color: #0CE644;
-    text-transform: uppercase;
-    margin-bottom: 0.4rem;
-    opacity: 0.95;
-    transition: letter-spacing 0.3s ease;
-  }
-
-  /* ── Glowing Accent Line Under Headings ── */
-  #footer .ft-head-line {
-    height: 1px;
-    width: 100%;
-    background: linear-gradient(
-      to right,
-      rgba(12, 230, 68, 0.6),
-      rgba(12, 230, 68, 0.08) 70%,
-      transparent
-    );
-    margin-bottom: 1.25rem;
-  }
-
-  /* ── Ultra-Smooth Link Hover Transitions ── */
-  #footer .ft-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(245, 247, 246, 0.65);
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-decoration: none;
-    padding: 0.25rem 0;
-    transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  #footer .ft-link-bar {
-    display: inline-block;
-    width: 2px;
-    height: 0.85em;
-    flex-shrink: 0;
-    background: #0CE644;
-    box-shadow: 0 0 8px rgba(12, 230, 68, 0.8);
-    opacity: 0;
-    transform: scaleY(0);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-
-  #footer .ft-link:hover {
-    color: #0CE644;
-    transform: translateX(6px);
-    text-shadow: 0 0 12px rgba(12, 230, 68, 0.5);
-  }
-
-  #footer .ft-link:hover .ft-link-bar {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-
-  /* ── Premium Social Links Hover ── */
-  #footer .ft-social-link {
-    color: rgba(245, 247, 246, 0.55);
-    font-size: 1.25rem;
-    display: flex;
-    text-decoration: none;
-    transition: color 0.25s ease, filter 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  #footer .ft-social-link:hover {
-    color: #0CE644;
-    filter: drop-shadow(0 0 8px rgba(12, 230, 68, 0.7));
-    transform: translateY(-4px);
-  }
-
-  /* ── Phone Link Hover with 180 deg Rotated Icon ── */
-  #footer .ft-phone-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: rgba(245, 247, 246, 0.65);
-    font-size: 0.875rem;
-    text-decoration: none;
-    transition: color 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), text-shadow 0.25s ease;
-  }
-
-  #footer .ft-phone-icon {
-    transform: rotate(180deg);
-    color: #0CE644;
-    font-size: 0.75rem;
-    transition: transform 0.3s ease, filter 0.3s ease;
-  }
-
-  #footer .ft-phone-link:hover {
-    color: #0CE644;
-    transform: translateX(6px);
-    text-shadow: 0 0 12px rgba(12, 230, 68, 0.5);
-  }
-
-  #footer .ft-phone-link:hover .ft-phone-icon {
-    filter: drop-shadow(0 0 10px rgba(12, 230, 68, 0.95));
-  }
-
-  /* ── Compact Copyright Section ── */
-  #footer .ft-copyright-bar {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: rgba(12, 230, 68, 0.02);
-    backdrop-filter: blur(6px);
-  }
-
-  /* ── Column Motion Base ── */
-  .ft-col-stagger {
-    will-change: transform, opacity;
-  }
-
-  /* ── Reduced Motion Override ── */
-  @media (prefers-reduced-motion: reduce) {
-    #footer, .ft-col-stagger, .ft-topline {
-      transform: none !important;
-      opacity: 1 !important;
-      transition: none !important;
-    }
-  }
-`;
+function makeStars(W, H) {
+  const count = Math.min(Math.round((W * H) / 3000), 130);
+  return Array.from({ length: count }, () => {
+    const major = Math.random() < 0.18;   
+    return {
+      x:       Math.random() * W,
+      y:       Math.random() * H,
+      vx:      (Math.random() - 0.5) * BASE_SPEED * 2,
+      vy:      (Math.random() - 0.5) * BASE_SPEED * 2,
+      r:       major ? 2.2 + Math.random() * 1.3 : 0.6 + Math.random() * 1.0,
+      phase:   Math.random() * Math.PI * 2,
+      speed:   0.8 + Math.random() * 1.4,  
+      major,
+    };
+  });
+}
 
 export default function Footer() {
   const socialLinks = [
@@ -197,292 +42,330 @@ export default function Footer() {
     { name: "Website",   icon: <BiGlobe />,     link: "https://cecieee.org" },
   ];
 
-  const pageLinks = [
-    { name: "Home",     link: "#home" },
-    { name: "Register", link: "#register" },
-  ];
-
-  const sectionLinks = [
-    { name: "About",         link: "#about" },
-    { name: "Highlights",    link: "#highlights" },
-    { name: "Domains",       link: "#domains" },
-    { name: "Event Details", link: "#event-details" },
+  const navDirectory = [
+    { num: "01", name: "Home", link: "#home" },
+    { num: "02", name: "About ISQIP", link: "#about" },
+    { num: "03", name: "Key Highlights", link: "#highlights" },
+    { num: "04", name: "Track & Domains", link: "#domains" },
+    { num: "05", name: "Event Details", link: "#event-details" },
+    { num: "06", name: "Register Now", link: "#register" },
   ];
 
   const contactInfo = [
-    { name: "Contact Name", phone: "+91 XXXXX XXXXX" },
-    { name: "Contact Name", phone: "+91 XXXXX XXXXX" },
+    { name: "Contact Name 1", role: "Event Lead", phone: "+91 XXXXX XXXXX" },
+    { name: "Contact Name 2", role: "Student Coordinator", phone: "+91 XXXXX XXXXX" },
   ];
 
+  const [copiedIndex, setCopiedIndex] = useState(null);
+
+  const handleCopy = (phone, index) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(phone);
+    }
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
   const footerRef = useRef(null);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const canvasRef = useRef(null);
+  const stateRef  = useRef({ stars: [], time: 0, animId: null });
 
-  // Ultra-Smooth 60fps Lerp Scroll Physics Loop
   useEffect(() => {
-    let animId;
-    let target = 0;
-    let current = 0;
+    const footer = footerRef.current;
+    const canvas = canvasRef.current;
+    if (!footer || !canvas) return;
 
-    const handleScroll = () => {
-      const footer = footerRef.current;
-      if (!footer) return;
+    function init() {
+      canvas.width  = footer.offsetWidth;
+      canvas.height = footer.offsetHeight;
+      stateRef.current.stars = makeStars(canvas.width, canvas.height);
+    }
+    init();
+    const ro = new ResizeObserver(init);
+    ro.observe(footer);
 
-      const rect = footer.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
+    function draw() {
+      const s   = stateRef.current;
+      const ctx = canvas.getContext("2d");
+      const W   = canvas.width;
+      const H   = canvas.height;
+      const { stars } = s;
+      s.time += 0.012;
+      const t = s.time;
 
-      const visible = windowHeight - rect.top;
-      const total = rect.height || 350;
+      ctx.clearRect(0, 0, W, H);
 
-      target = Math.min(Math.max(visible / (total * 0.7), 0), 1);
-    };
+      // ── Update star positions ───
+      for (const st of stars) {
+        const spd = Math.sqrt(st.vx * st.vx + st.vy * st.vy);
+        if (spd > MAX_SPEED) { st.vx = (st.vx / spd) * MAX_SPEED; st.vy = (st.vy / spd) * MAX_SPEED; }
+        st.vx *= 0.992;
+        st.vy *= 0.992;
+        st.x += st.vx;
+        st.y += st.vy;
+        if (st.x < -10)    st.x = W + 10;
+        if (st.x > W + 10) st.x = -10;
+        if (st.y < -10)    st.y = H + 10;
+        if (st.y > H + 10) st.y = -10;
+      }
 
-    const loop = () => {
-      // Fluid exponential lerp momentum
-      current += (target - current) * 0.08;
-      setScrollProgress(current);
-      animId = requestAnimationFrame(loop);
-    };
+      for (let i = 0; i < stars.length; i++) {
+        for (let j = i + 1; j < stars.length; j++) {
+          const a  = stars[i];
+          const b  = stars[j];
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const d  = Math.sqrt(dx * dx + dy * dy);
+          if (d > CONNECT_DIST) continue;
+          const alpha = 0.2 * (1 - d / CONNECT_DIST);
+          ctx.beginPath();
+          ctx.strokeStyle = `rgba(${GREEN},${alpha.toFixed(3)})`;
+          ctx.lineWidth   = 0.45;
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    animId = requestAnimationFrame(loop);
+      for (const st of stars) {
+        const twinkle = 0.75 + 0.25 * Math.sin(t * st.speed + st.phase);
 
+        if (st.major) {
+          const glowR = st.r * 3.5 * twinkle;
+          const grad  = ctx.createRadialGradient(st.x, st.y, 0, st.x, st.y, glowR);
+          grad.addColorStop(0,   `rgba(${GREEN},0.10)`);
+          grad.addColorStop(1,   `rgba(${GREEN},0)`);
+          ctx.beginPath();
+          ctx.arc(st.x, st.y, glowR, 0, Math.PI * 2);
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
+
+        const r     = st.r * twinkle;
+        const alpha = (st.major ? 0.85 : 0.55) * twinkle;
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle   = "#0CE644";
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.globalAlpha = 1;
+      s.animId = requestAnimationFrame(draw);
+    }
+
+    stateRef.current.animId = requestAnimationFrame(draw);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      cancelAnimationFrame(animId);
+      ro.disconnect();
+      if (stateRef.current.animId) cancelAnimationFrame(stateRef.current.animId);
     };
   }, []);
 
-  // Staggered motion metrics for ultra-smooth column entrance
-  const laserScaleX = Math.min(Math.max(scrollProgress * 1.05, 0), 1);
-  const letterSpacing = 0.06 + scrollProgress * 0.14; // Kinetic heading tracking
-
-  // Staggered column offsets
-  const c1Offset = (1 - scrollProgress) * 18;
-  const c2Offset = (1 - scrollProgress) * 28;
-  const c3Offset = (1 - scrollProgress) * 38;
-  const c4Offset = (1 - scrollProgress) * 48;
-
-  const c1Opacity = Math.min(Math.max(scrollProgress * 1.3, 0), 1);
-  const c2Opacity = Math.min(Math.max((scrollProgress - 0.08) * 1.3, 0), 1);
-  const c3Opacity = Math.min(Math.max((scrollProgress - 0.16) * 1.3, 0), 1);
-  const c4Opacity = Math.min(Math.max((scrollProgress - 0.24) * 1.3, 0), 1);
+  const headingStyle = { letterSpacing: "0.18em", opacity: 0.85 };
+  const lbarStyle = {
+    display: "inline-block", width: "2px", height: "0.85em", flexShrink: 0,
+    background: "#0CE644", boxShadow: "0 0 6px rgba(12,230,68,0.7)",
+    opacity: 0, transform: "scaleY(0)", transition: "all 0.22s ease",
+  };
+  function onLinkEnter(e) {
+    e.currentTarget.style.color      = "#0CE644";
+    e.currentTarget.style.transform  = "translateX(5px)";
+    e.currentTarget.style.textShadow = "0 0 10px rgba(12,230,68,0.45)";
+    const bar = e.currentTarget.querySelector(".lbar");
+    if (bar) { bar.style.opacity = "1"; bar.style.transform = "scaleY(1)"; }
+  }
+  function onLinkLeave(e) {
+    e.currentTarget.style.color      = "";
+    e.currentTarget.style.transform  = "";
+    e.currentTarget.style.textShadow = "";
+    const bar = e.currentTarget.querySelector(".lbar");
+    if (bar) { bar.style.opacity = "0"; bar.style.transform = "scaleY(0)"; }
+  }
 
   return (
-    <>
-      <style>{STYLES}</style>
-      
-      <div className="ft-container">
-        <footer
-          id="footer"
-          ref={footerRef}
-          className="relative overflow-hidden bg-black text-[#F5F7F6]"
-        >
-          {/* Ultra-Smooth Laser Top Edge Line */}
-          <div
-            className="ft-topline"
-            style={{
-              transform: `scaleX(${laserScaleX.toFixed(3)})`,
-              opacity: (0.3 + scrollProgress * 0.7).toFixed(3),
-            }}
-          />
+    <footer
+      id="footer"
+      ref={footerRef}
+      className="relative overflow-hidden text-text"
+      style={{
+        background: "#000000",
+        borderTop: "1px solid rgba(12,230,68,0.25)",
+        boxShadow: "0 -1px 0 0 rgba(12,230,68,0.08)",
+      }}
+    >
+      {/* Cyber Flicker Animation Styles matching Navbar */}
+      <style>{`
+        @keyframes ft-flicker {
+          0%, 100% { opacity: 1; }
+          20% { opacity: 0.25; }
+          35% { opacity: 1; }
+          55% { opacity: 0.35; }
+          65% { opacity: 1; }
+        }
+        .ft-hover-flicker:hover {
+          animation: ft-flicker 0.3s linear;
+        }
+      `}</style>
 
-          {/* Cyberpunk Corner Brackets */}
-          <div className="ft-corner-tl" />
-          <div className="ft-corner-tr" />
+      <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(12,230,68,0.07) 0%, transparent 70%)" }} />
+      <canvas ref={canvasRef} aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 5 }} />
 
-          {/* Ambient Top Radial Glow */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 pointer-events-none z-0"
-            style={{
-              background: `radial-gradient(ellipse 75% 55% at 50% 0%, rgba(12, 230, 68, ${(scrollProgress * 0.14).toFixed(3)}) 0%, transparent 75%)`,
-            }}
-          />
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-6 py-10 sm:px-10 lg:grid-cols-12 lg:px-12">
 
-          {/* Main Content Layout */}
-          <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pt-8 pb-8 sm:px-10 lg:px-12">
-            
-            {/* Live IEEE SB CEC Telemetry Status Bar */}
-            <div
-              className="flex items-center justify-between pb-4 mb-8 border-b border-white/10 text-xs font-mono transition-opacity duration-300"
-              style={{ opacity: (0.3 + scrollProgress * 0.7).toFixed(3) }}
+        {/* IEEE SB CEC & ISQIP Logo Lockup */}
+        <div className="flex flex-col items-center lg:col-span-4 lg:items-start">
+          <div className="flex flex-wrap items-center justify-center gap-3.5 lg:justify-start">
+            <a
+              href="https://cecieee.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="ft-hover-flicker transition-opacity duration-200 hover:opacity-80"
             >
-              <div className="flex items-center gap-2 text-[#0CE644]">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0CE644] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#0CE644]" />
-                </span>
-                <span className="tracking-widest font-semibold uppercase">
-                  IEEE SB CEC CORE • SYSTEM ACTIVE
-                </span>
-              </div>
-              <div className="text-white/40 hidden sm:block tracking-wider uppercase">
-                COLLEGE OF ENGINEERING CHENGANNUR
-              </div>
-            </div>
+              <img
+                src={ieeeLogo}
+                alt="IEEE Student Branch CEC"
+                className="h-10 w-auto object-contain"
+                style={{ filter: "brightness(0) invert(1) drop-shadow(0 0 8px rgba(12,230,68,0.25))" }}
+              />
+            </a>
 
-            {/* Staggered Grid Columns */}
-            <div className="grid gap-10 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
-              
-              {/* Column 1: IEEE Student Branch CEC Brand */}
-              <div
-                className="ft-col-stagger flex flex-col items-center lg:items-start"
+            <span className="text-xs font-medium tracking-widest text-text/50 uppercase">
+              presents
+            </span>
+
+            <a
+              href="#home"
+              className="ft-hover-flicker transition-transform duration-200 hover:scale-105"
+            >
+              <img
+                src={isqipLogo}
+                alt="ISQIP 26"
+                className="h-10 w-auto object-contain"
+              />
+            </a>
+          </div>
+          <div className="mt-5">
+            <p className="text-lg font-semibold leading-7 text-text/90">IEEE Student Branch</p>
+            <p className="text-sm leading-6 text-text/50">College of Engineering Chengannur</p>
+          </div>
+          <div className="mt-6 flex items-center gap-3">
+            {socialLinks.map((social, index) => (
+              <a
+                key={index}
+                href={social.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={social.name}
+                className="ft-hover-flicker"
                 style={{
-                  transform: `translate3d(0, ${c1Offset.toFixed(2)}px, 0)`,
-                  opacity: c1Opacity.toFixed(3),
+                  color: "rgba(245,247,246,0.55)",
+                  fontSize: "1.25rem",
+                  transition: "all 0.22s ease",
+                  display: "flex",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color     = "#0CE644";
+                  e.currentTarget.style.filter    = "drop-shadow(0 0 6px rgba(12,230,68,0.6))";
+                  e.currentTarget.style.transform = "translateY(-3px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color     = "rgba(245,247,246,0.55)";
+                  e.currentTarget.style.filter    = "none";
+                  e.currentTarget.style.transform = "translateY(0)";
                 }}
               >
-                <div className="flex min-h-20 items-center">
-                  <img
-                    src={ieeeLogo}
-                    alt="IEEE Student Branch CEC"
-                    className="w-64 object-contain"
-                    style={{
-                      filter:
-                        "brightness(0) invert(1) drop-shadow(0 0 10px rgba(12,230,68,0.25))",
-                    }}
-                  />
-                </div>
-                <div className="mt-4 text-center lg:text-left">
-                  <p className="text-lg font-semibold leading-7 text-white/90">
-                    IEEE Student Branch
-                  </p>
-                  <p className="text-sm leading-6 text-white/50">
-                    College of Engineering Chengannur
-                  </p>
-                </div>
-                
-                {/* Original Social Links */}
-                <div className="mt-6 flex items-center gap-3">
-                  {socialLinks.map((social, index) => (
-                    <a
-                      key={index}
-                      href={social.link}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={social.name}
-                      className="ft-social-link"
-                    >
-                      {social.icon}
-                    </a>
-                  ))}
-                </div>
-              </div>
+                {social.icon}
+              </a>
+            ))}
+          </div>
+        </div>
 
-              {/* Column 2: Pages */}
-              <div
-                className="ft-col-stagger flex flex-col gap-4"
-                style={{
-                  transform: `translate3d(0, ${c2Offset.toFixed(2)}px, 0)`,
-                  opacity: c2Opacity.toFixed(3),
-                }}
-              >
-                <div>
-                  <h3
-                    className="ft-col-head"
-                    style={{ letterSpacing: `${letterSpacing.toFixed(3)}em` }}
-                  >
-                    Pages
-                  </h3>
-                  <div className="ft-head-line" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  {pageLinks.map((link, index) => (
-                    <a key={index} href={link.link} className="ft-link">
-                      <span className="ft-link-bar" />
-                      <span>{link.name}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 3: Sections */}
-              <div
-                className="ft-col-stagger flex flex-col gap-4"
-                style={{
-                  transform: `translate3d(0, ${c3Offset.toFixed(2)}px, 0)`,
-                  opacity: c3Opacity.toFixed(3),
-                }}
-              >
-                <div>
-                  <h3
-                    className="ft-col-head"
-                    style={{ letterSpacing: `${letterSpacing.toFixed(3)}em` }}
-                  >
-                    Sections
-                  </h3>
-                  <div className="ft-head-line" />
-                </div>
-                <div className="flex flex-col gap-1">
-                  {sectionLinks.map((link, index) => (
-                    <a key={index} href={link.link} className="ft-link">
-                      <span className="ft-link-bar" />
-                      <span>{link.name}</span>
-                    </a>
-                  ))}
-                </div>
-              </div>
-
-              {/* Column 4: Contact Us */}
-              <div
-                className="ft-col-stagger flex flex-col items-center lg:items-start gap-4"
-                style={{
-                  transform: `translate3d(0, ${c4Offset.toFixed(2)}px, 0)`,
-                  opacity: c4Opacity.toFixed(3),
-                }}
-              >
-                <div className="w-full text-center lg:text-left">
-                  <h3
-                    className="ft-col-head"
-                    style={{ letterSpacing: `${letterSpacing.toFixed(3)}em` }}
-                  >
-                    Contact Us
-                  </h3>
-                  <div className="ft-head-line" />
-                </div>
-                <div className="flex flex-col gap-5 text-center lg:text-left">
-                  {contactInfo.map((contact, index) => (
-                    <div key={index} className="flex flex-col gap-1">
-                      <span className="text-sm font-semibold text-white/90">
-                        {contact.name}
-                      </span>
-                      <a
-                        href={`tel:${contact.phone.replace(/\s/g, "")}`}
-                        className="ft-phone-link justify-center lg:justify-start"
-                      >
-                        <FaPhoneFlip className="ft-phone-icon" />
-                        <span>{contact.phone}</span>
-                      </a>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
+        {/* Navigation Directory */}
+        <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
+          <div className="w-full mb-1">
+            <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>
+              NAVIGATION DIRECTORY
+            </h3>
+            <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
           </div>
 
-          {/* Compact Copyright Bar */}
-          <div className="ft-copyright-bar relative z-10">
-            <div className="flex flex-col items-center justify-center gap-3 px-6 py-4 text-center sm:flex-row sm:gap-5">
-              <p className="text-sm font-medium text-white/70">
-                © {new Date().getFullYear()} IEEE Student Branch CEC. All rights reserved.
-              </p>
-              <span className="hidden sm:inline text-[#0CE644]/35">|</span>
-              <p className="flex items-center gap-1 text-sm font-medium text-white/70">
-                Made with{" "}
-                <FaHeart
-                  style={{
-                    color: "#0CE644",
-                    filter: "drop-shadow(0 0 4px rgba(12,230,68,0.6))",
-                  }}
-                />{" "}
-                by IEEE SB CEC Web Team
-              </p>
-            </div>
+          <div className="grid w-full grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+            {navDirectory.map((item) => (
+              <a
+                key={item.num}
+                href={item.link}
+                className="group ft-hover-flicker flex items-center gap-2.5 py-1 transition-all duration-200 hover:translate-x-1.5"
+              >
+                <span className="font-mono text-xs font-bold text-primary transition-colors group-hover:drop-shadow-[0_0_8px_rgba(12,230,68,0.8)]">
+                  {item.num}
+                </span>
+                <span className="font-inter text-sm font-medium text-text/70 transition-colors group-hover:text-primary group-hover:drop-shadow-[0_0_10px_rgba(12,230,68,0.45)]">
+                  {item.name}
+                </span>
+              </a>
+            ))}
           </div>
-        </footer>
+        </div>
+
+        {/* GET IN TOUCH */}
+        <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
+          <div className="w-full mb-1">
+            <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>GET IN TOUCH</h3>
+            <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
+          </div>
+          <div className="flex w-full flex-col gap-4">
+            {contactInfo.map((contact, index) => (
+              <div
+                key={index}
+                className="group relative flex items-center justify-between gap-3 border-l-2 border-primary/40 pl-3.5 py-1 transition-all duration-200 hover:border-primary hover:translate-x-1"
+              >
+                <div className="flex min-w-0 flex-col gap-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-text/90 transition-colors group-hover:text-white">
+                      {contact.name}
+                    </span>
+                    <span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-wide text-primary">
+                      {contact.role}
+                    </span>
+                  </div>
+
+                  <a
+                    href={`tel:${contact.phone.replace(/\s/g, "")}`}
+                    className="ft-hover-flicker flex items-center gap-2 text-xs text-text/60 transition-colors hover:text-primary hover:drop-shadow-[0_0_8px_rgba(12,230,68,0.5)]"
+                  >
+                    <FaPhoneFlip className="rotate-90 text-[11px] text-primary" />
+                    <span>{contact.phone}</span>
+                  </a>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleCopy(contact.phone, index)}
+                  title="Copy Phone Number"
+                  aria-label={`Copy phone number for ${contact.name}`}
+                  className="ft-hover-flicker flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-text/60 transition-all duration-200 hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+                >
+                  {copiedIndex === index ? (
+                    <FaCheck className="text-xs text-primary" />
+                  ) : (
+                    <FaCopy className="text-xs" />
+                  )}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
-    </>
+
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(12,230,68,0.03)", backdropFilter: "blur(4px)" }}>
+        <div className="flex flex-col items-center justify-center gap-3 px-6 py-5 text-center sm:flex-row sm:gap-5">
+          <p className="text-sm font-medium text-text/70">© {new Date().getFullYear()} IEEE Student Branch CEC. All rights reserved.</p>
+          <span className="hidden sm:inline" style={{ color: "rgba(12,230,68,0.35)" }}>|</span>
+          <p className="flex items-center gap-1 text-sm font-medium text-text/70">Made with <FaHeart style={{ color: "#0CE644", filter: "drop-shadow(0 0 4px rgba(12,230,68,0.6))" }} /> by IEEE SB CEC Web Team</p>
+        </div>
+      </div>
+    </footer>
   );
 }
