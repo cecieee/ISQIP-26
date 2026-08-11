@@ -19,7 +19,7 @@ const BASE_SPEED   = 0.22;
 const MAX_SPEED    = 1.2;
 
 function makeStars(W, H) {
-  const count = Math.min(Math.round((W * H) / 3000), 130);
+  const count = Math.min(Math.round((W * H) / 1800), 220);
   return Array.from({ length: count }, () => {
     const major = Math.random() < 0.18;   
     return {
@@ -52,11 +52,14 @@ export default function Footer() {
   ];
 
   const contactInfo = [
-    { name: "Contact Name 1", role: "Event Lead", phone: "+91 XXXXX XXXXX" },
-    { name: "Contact Name 2", role: "Student Coordinator", phone: "+91 XXXXX XXXXX" },
+    { name: "Contact Name", phone: "+91 XXXXX XXXXX" },
+    { name: "Contact Name", phone: "+91 XXXXX XXXXX" },
   ];
 
+  const watermarkLetters = ["I", "S", "Q", "I", "P", "2", "6"];
+  const letterRefs = useRef([]);
   const [copiedIndex, setCopiedIndex] = useState(null);
+  const [letterOpacities, setLetterOpacities] = useState([0, 0, 0, 0, 0, 0, 0]);
 
   const handleCopy = (phone, index) => {
     if (navigator.clipboard) {
@@ -68,7 +71,7 @@ export default function Footer() {
 
   const footerRef = useRef(null);
   const canvasRef = useRef(null);
-  const stateRef  = useRef({ stars: [], time: 0, animId: null });
+  const stateRef  = useRef({ stars: [], cx: -9999, cy: -9999, targetCx: -9999, targetCy: -9999, time: 0, animId: null });
 
   useEffect(() => {
     const footer = footerRef.current;
@@ -93,10 +96,37 @@ export default function Footer() {
       s.time += 0.012;
       const t = s.time;
 
+      // Smooth lerp cursor position
+      s.cx += (s.targetCx - s.cx) * 0.12;
+      s.cy += (s.targetCy - s.cy) * 0.12;
+      const { cx, cy } = s;
+
       ctx.clearRect(0, 0, W, H);
 
-      // ── Update star positions ───
+      // Draw soft ambient cursor light follow halo
+      if (cx > -1000 && cy > -1000) {
+        const cursorGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
+        cursorGlow.addColorStop(0, `rgba(${GREEN}, 0.14)`);
+        cursorGlow.addColorStop(0.4, `rgba(${GREEN}, 0.04)`);
+        cursorGlow.addColorStop(1, `rgba(${GREEN}, 0)`);
+        ctx.fillStyle = cursorGlow;
+        ctx.beginPath();
+        ctx.arc(cx, cy, 180, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // ── Update star positions & cursor interaction ───
       for (const st of stars) {
+        if (cx > -1000 && cy > -1000) {
+          const dx = st.x - cx;
+          const dy = st.y - cy;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130 && dist > 1) {
+            const force = ((130 - dist) / 130) * 0.04;
+            st.vx += (dx / dist) * force;
+            st.vy += (dy / dist) * force;
+          }
+        }
         const spd = Math.sqrt(st.vx * st.vx + st.vy * st.vy);
         if (spd > MAX_SPEED) { st.vx = (st.vx / spd) * MAX_SPEED; st.vy = (st.vy / spd) * MAX_SPEED; }
         st.vx *= 0.992;
@@ -109,23 +139,7 @@ export default function Footer() {
         if (st.y > H + 10) st.y = -10;
       }
 
-      for (let i = 0; i < stars.length; i++) {
-        for (let j = i + 1; j < stars.length; j++) {
-          const a  = stars[i];
-          const b  = stars[j];
-          const dx = b.x - a.x;
-          const dy = b.y - a.y;
-          const d  = Math.sqrt(dx * dx + dy * dy);
-          if (d > CONNECT_DIST) continue;
-          const alpha = 0.2 * (1 - d / CONNECT_DIST);
-          ctx.beginPath();
-          ctx.strokeStyle = `rgba(${GREEN},${alpha.toFixed(3)})`;
-          ctx.lineWidth   = 0.45;
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.stroke();
-        }
-      }
+
 
       for (const st of stars) {
         const twinkle = 0.75 + 0.25 * Math.sin(t * st.speed + st.phase);
@@ -133,7 +147,7 @@ export default function Footer() {
         if (st.major) {
           const glowR = st.r * 3.5 * twinkle;
           const grad  = ctx.createRadialGradient(st.x, st.y, 0, st.x, st.y, glowR);
-          grad.addColorStop(0,   `rgba(${GREEN},0.10)`);
+          grad.addColorStop(0,   `rgba(${GREEN},0.12)`);
           grad.addColorStop(1,   `rgba(${GREEN},0)`);
           ctx.beginPath();
           ctx.arc(st.x, st.y, glowR, 0, Math.PI * 2);
@@ -162,7 +176,39 @@ export default function Footer() {
     };
   }, []);
 
-  const headingStyle = { letterSpacing: "0.18em", opacity: 0.85 };
+  function handleMouseMove(e) {
+    const footer = footerRef.current;
+    if (!footer) return;
+    const rect = footer.getBoundingClientRect();
+    stateRef.current.targetCx = e.clientX - rect.left;
+    stateRef.current.targetCy = e.clientY - rect.top;
+
+    const newOpacities = watermarkLetters.map((_, i) => {
+      const el = letterRefs.current[i];
+      if (!el) return 0;
+      const r = el.getBoundingClientRect();
+      const lx = r.left + r.width / 2;
+      const ly = r.top + r.height / 2;
+      const dist = Math.hypot(e.clientX - lx, e.clientY - ly);
+      const radius = 140;
+      if (dist < radius) {
+        return Math.min(1, (1 - dist / radius) * 1.2);
+      }
+      return 0;
+    });
+
+    setLetterOpacities(newOpacities);
+  }
+  function handleMouseLeave() {
+    stateRef.current.targetCx = -9999;
+    stateRef.current.targetCy = -9999;
+    setLetterOpacities([0, 0, 0, 0, 0, 0, 0]);
+  }
+
+  const headingStyle = {
+    letterSpacing: "0.18em",
+    opacity: 0.9,
+  };
   const lbarStyle = {
     display: "inline-block", width: "2px", height: "0.85em", flexShrink: 0,
     background: "#0CE644", boxShadow: "0 0 6px rgba(12,230,68,0.7)",
@@ -193,20 +239,75 @@ export default function Footer() {
         borderTop: "1px solid rgba(12,230,68,0.25)",
         boxShadow: "0 -1px 0 0 rgba(12,230,68,0.08)",
       }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
-      {/* Cyber Flicker Animation Styles matching Navbar */}
       <style>{`
-        @keyframes ft-flicker {
-          0%, 100% { opacity: 1; }
-          20% { opacity: 0.25; }
-          35% { opacity: 1; }
-          55% { opacity: 0.35; }
-          65% { opacity: 1; }
+        .ft-bracket-link {
+          position: relative;
+          display: inline-flex;
+          align-items: center;
+          transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
         }
-        .ft-hover-flicker:hover {
-          animation: ft-flicker 0.3s linear;
+        .ft-bracket-link::before,
+        .ft-bracket-link::after {
+          font-family: monospace;
+          font-weight: 700;
+          color: #0CE644;
+          opacity: 0;
+          transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+          text-shadow: 0 0 8px rgba(12, 230, 68, 0.8);
+          pointer-events: none;
+        }
+        .ft-bracket-link::before {
+          content: "[";
+          margin-right: 4px;
+          transform: translateX(6px);
+        }
+        .ft-bracket-link::after {
+          content: "]";
+          margin-left: 4px;
+          transform: translateX(-6px);
+        }
+        .ft-bracket-link:hover::before,
+        .ft-bracket-link:hover::after {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        .ft-bracket-link:hover {
+          color: #0CE644;
+          text-shadow: 0 0 10px rgba(12, 230, 68, 0.45);
         }
       `}</style>
+
+      {/* Background Watermark Text Overlay - letter by letter cursor reveal */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden select-none px-6 py-4"
+      >
+        <div className="flex items-center justify-center gap-1 sm:gap-2 font-mech text-[clamp(2.5rem,7.5vw,6.5rem)] uppercase leading-none tracking-wider whitespace-nowrap text-center">
+          {watermarkLetters.map((char, index) => {
+            const op = letterOpacities[index] || 0;
+            return (
+              <span
+                key={index}
+                ref={(el) => (letterRefs.current[index] = el)}
+                className="inline-block transition-all duration-200 ease-out"
+                style={{
+                  opacity: op * 0.9,
+                  color: "#0CE644",
+                  textShadow: op > 0.05
+                    ? `0 0 ${Math.round(25 * op)}px rgba(12,230,68,${(0.7 * op).toFixed(2)})`
+                    : "none",
+                  transform: `scale(${1 + 0.1 * op})`,
+                }}
+              >
+                {char}
+              </span>
+            );
+          })}
+        </div>
+      </div>
 
       <div aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(ellipse 60% 40% at 50% 0%, rgba(12,230,68,0.07) 0%, transparent 70%)" }} />
       <canvas ref={canvasRef} aria-hidden="true" style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 5 }} />
@@ -220,7 +321,7 @@ export default function Footer() {
               href="https://cecieee.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="ft-hover-flicker transition-opacity duration-200 hover:opacity-80"
+              className="transition-all duration-250 hover:opacity-80 hover:drop-shadow-[0_0_10px_rgba(12,230,68,0.5)]"
             >
               <img
                 src={ieeeLogo}
@@ -236,7 +337,7 @@ export default function Footer() {
 
             <a
               href="#home"
-              className="ft-hover-flicker transition-transform duration-200 hover:scale-105"
+              className="transition-all duration-250 hover:scale-105 hover:drop-shadow-[0_0_10px_rgba(12,230,68,0.5)]"
             >
               <img
                 src={isqipLogo}
@@ -257,22 +358,21 @@ export default function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label={social.name}
-                className="ft-hover-flicker"
                 style={{
                   color: "rgba(245,247,246,0.55)",
                   fontSize: "1.25rem",
-                  transition: "all 0.22s ease",
+                  transition: "all 0.25s cubic-bezier(0.22, 1, 0.36, 1)",
                   display: "flex",
                 }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color     = "#0CE644";
-                  e.currentTarget.style.filter    = "drop-shadow(0 0 6px rgba(12,230,68,0.6))";
-                  e.currentTarget.style.transform = "translateY(-3px)";
+                  e.currentTarget.style.filter    = "drop-shadow(0 0 10px rgba(12,230,68,0.7))";
+                  e.currentTarget.style.transform = "translateY(-3px) scale(1.1)";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.color     = "rgba(245,247,246,0.55)";
                   e.currentTarget.style.filter    = "none";
-                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.transform = "translateY(0) scale(1)";
                 }}
               >
                 {social.icon}
@@ -285,7 +385,7 @@ export default function Footer() {
         <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
           <div className="w-full mb-1">
             <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>
-              NAVIGATION DIRECTORY
+              EXPLORE
             </h3>
             <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
           </div>
@@ -295,12 +395,12 @@ export default function Footer() {
               <a
                 key={item.num}
                 href={item.link}
-                className="group ft-hover-flicker flex items-center gap-2.5 py-1 transition-all duration-200 hover:translate-x-1.5"
+                className="group ft-bracket-link inline-flex items-center gap-2 py-1 text-xs"
               >
-                <span className="font-mono text-xs font-bold text-primary transition-colors group-hover:drop-shadow-[0_0_8px_rgba(12,230,68,0.8)]">
+                <span className="font-mono text-xs font-bold text-primary transition-transform duration-250 group-hover:scale-105">
                   {item.num}
                 </span>
-                <span className="font-inter text-sm font-medium text-text/70 transition-colors group-hover:text-primary group-hover:drop-shadow-[0_0_10px_rgba(12,230,68,0.45)]">
+                <span className="font-inter text-sm font-medium text-text/70 transition-colors group-hover:text-primary">
                   {item.name}
                 </span>
               </a>
@@ -318,21 +418,16 @@ export default function Footer() {
             {contactInfo.map((contact, index) => (
               <div
                 key={index}
-                className="group relative flex items-center justify-between gap-3 border-l-2 border-primary/40 pl-3.5 py-1 transition-all duration-200 hover:border-primary hover:translate-x-1"
+                className="flex items-center justify-between gap-3"
               >
                 <div className="flex min-w-0 flex-col gap-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-text/90 transition-colors group-hover:text-white">
-                      {contact.name}
-                    </span>
-                    <span className="rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-wide text-primary">
-                      {contact.role}
-                    </span>
-                  </div>
+                  <span className="text-sm font-semibold text-text/90">
+                    {contact.name}
+                  </span>
 
                   <a
                     href={`tel:${contact.phone.replace(/\s/g, "")}`}
-                    className="ft-hover-flicker flex items-center gap-2 text-xs text-text/60 transition-colors hover:text-primary hover:drop-shadow-[0_0_8px_rgba(12,230,68,0.5)]"
+                    className="ft-bracket-link inline-flex items-center gap-2 text-xs text-text/60 hover:text-primary"
                   >
                     <FaPhoneFlip className="rotate-90 text-[11px] text-primary" />
                     <span>{contact.phone}</span>
@@ -344,7 +439,7 @@ export default function Footer() {
                   onClick={() => handleCopy(contact.phone, index)}
                   title="Copy Phone Number"
                   aria-label={`Copy phone number for ${contact.name}`}
-                  className="ft-hover-flicker flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-text/60 transition-all duration-200 hover:border-primary/50 hover:bg-primary/10 hover:text-primary active:scale-95"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-text/60 transition-all duration-250 hover:border-primary/50 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_rgba(12,230,68,0.35)] active:scale-95"
                 >
                   {copiedIndex === index ? (
                     <FaCheck className="text-xs text-primary" />
@@ -359,7 +454,14 @@ export default function Footer() {
 
       </div>
 
-      <div style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(12,230,68,0.03)", backdropFilter: "blur(4px)" }}>
+      <div
+        onMouseEnter={handleMouseLeave}
+        onMouseMove={(e) => {
+          e.stopPropagation();
+          handleMouseLeave();
+        }}
+        style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(12,230,68,0.03)", backdropFilter: "blur(4px)" }}
+      >
         <div className="flex flex-col items-center justify-center gap-3 px-6 py-5 text-center sm:flex-row sm:gap-5">
           <p className="text-sm font-medium text-text/70">© {new Date().getFullYear()} IEEE Student Branch CEC. All rights reserved.</p>
           <span className="hidden sm:inline" style={{ color: "rgba(12,230,68,0.35)" }}>|</span>
