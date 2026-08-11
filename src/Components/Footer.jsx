@@ -258,15 +258,16 @@ export default function Footer() {
           transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
           text-shadow: 0 0 8px rgba(12, 230, 68, 0.8);
           pointer-events: none;
+          position: absolute;
         }
         .ft-bracket-link::before {
           content: "[";
-          margin-right: 4px;
+          left: -12px;
           transform: translateX(6px);
         }
         .ft-bracket-link::after {
           content: "]";
-          margin-left: 4px;
+          right: -12px;
           transform: translateX(-6px);
         }
         .ft-bracket-link:hover::before,
@@ -294,12 +295,12 @@ export default function Footer() {
                 ref={(el) => (letterRefs.current[index] = el)}
                 className="inline-block transition-all duration-200 ease-out"
                 style={{
-                  opacity: op * 0.9,
+                  opacity: op * 0.88,
                   color: "#0CE644",
                   textShadow: op > 0.05
-                    ? `0 0 ${Math.round(25 * op)}px rgba(12,230,68,${(0.7 * op).toFixed(2)})`
+                    ? `0 0 ${Math.round(24 * op)}px rgba(12,230,68,${(0.7 * op).toFixed(2)})`
                     : "none",
-                  transform: `scale(${1 + 0.1 * op})`,
+                  transform: `scale(${1 + 0.08 * op})`,
                 }}
               >
                 {char}
@@ -381,16 +382,16 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Navigation Directory */}
+        {/* EXPLORE */}
         <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
           <div className="w-full mb-1">
             <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>
-              EXPLORE
+              ROOT LINKS
             </h3>
             <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
           </div>
 
-          <div className="grid w-full grid-cols-1 gap-x-8 gap-y-3.5 sm:grid-cols-2">
+          <div className="grid w-full grid-cols-2 gap-x-4 gap-y-3.5 sm:gap-x-8">
             {navDirectory.map((item) => (
               <a
                 key={item.num}
@@ -433,20 +434,6 @@ export default function Footer() {
                     <span>{contact.phone}</span>
                   </a>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleCopy(contact.phone, index)}
-                  title="Copy Phone Number"
-                  aria-label={`Copy phone number for ${contact.name}`}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-text/60 transition-all duration-250 hover:border-primary/50 hover:bg-primary/10 hover:text-primary hover:shadow-[0_0_12px_rgba(12,230,68,0.35)] active:scale-95"
-                >
-                  {copiedIndex === index ? (
-                    <FaCheck className="text-xs text-primary" />
-                  ) : (
-                    <FaCopy className="text-xs" />
-                  )}
-                </button>
               </div>
             ))}
           </div>
