@@ -5,6 +5,7 @@ import About from './Components/About'
 import WhyParticipate from './Components/WhyParticipate'
 import LearningTracks from './Components/LearningTracks'
 import OrganizedBy from './Components/OrganizedBy'
+import FAQ from './Components/FAQ'
 import Footer from './Components/Footer'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <WhyParticipate />
         <LearningTracks />
         <OrganizedBy />
+        <FAQ />
       </main>
       <Footer />
     </>

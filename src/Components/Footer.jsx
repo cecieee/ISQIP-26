@@ -96,14 +96,12 @@ export default function Footer() {
       s.time += 0.012;
       const t = s.time;
 
-      // Smooth lerp cursor position
       s.cx += (s.targetCx - s.cx) * 0.12;
       s.cy += (s.targetCy - s.cy) * 0.12;
       const { cx, cy } = s;
 
       ctx.clearRect(0, 0, W, H);
 
-      // Draw soft ambient cursor light follow halo
       if (cx > -1000 && cy > -1000) {
         const cursorGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
         cursorGlow.addColorStop(0, `rgba(${GREEN}, 0.14)`);
@@ -114,8 +112,6 @@ export default function Footer() {
         ctx.arc(cx, cy, 180, 0, Math.PI * 2);
         ctx.fill();
       }
-
-      // ── Update star positions & cursor interaction ───
       for (const st of stars) {
         if (cx > -1000 && cy > -1000) {
           const dx = st.x - cx;
@@ -138,8 +134,6 @@ export default function Footer() {
         if (st.y < -10)    st.y = H + 10;
         if (st.y > H + 10) st.y = -10;
       }
-
-
 
       for (const st of stars) {
         const twinkle = 0.75 + 0.25 * Math.sin(t * st.speed + st.phase);
@@ -280,8 +274,7 @@ export default function Footer() {
           text-shadow: 0 0 10px rgba(12, 230, 68, 0.45);
         }
       `}</style>
-
-      {/* Background Watermark Text Overlay - letter by letter cursor reveal */}
+      
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden select-none px-6 py-4"
