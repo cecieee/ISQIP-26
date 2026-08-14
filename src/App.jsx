@@ -1,12 +1,17 @@
 import './App.css'
+import CountDown from "./Components/CountDown.jsx";
+
 
 function App() {
 
   return (
     <>
-     <h1 className='text-primary font-mech'>Hi</h1>
+      <div className="min-h-screen bg-black">
+        <CountDown />
+      </div>
+     
     </>
-  )
+  );
 }
 
 export default App
