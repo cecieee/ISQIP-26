@@ -1,47 +1,39 @@
+import { useEffect } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+
 const STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap");
 
   .ab-section {
     position: relative;
     background: var(--color-background);
-    padding: clamp(4.5rem, 12vh, 8rem) clamp(1.5rem, 6vw, 5rem);
     overflow: hidden;
   }
 
-  .ab-watermark {
-    position: absolute;
-    top: clamp(1rem, 4vh, 2rem);
-    left: clamp(1.5rem, 6vw, 5rem);
-    font-family: var(--font-mech);
-    font-size: clamp(1.8rem, 16vw, 11rem);
-    color: rgba(245,247,246,0.03);
-    line-height: 1;
-    text-transform: uppercase;
-    white-space: nowrap;
-    pointer-events: none;
-    user-select: none;
-  }
-
-  .ab-grid {
+  .ab-outer {
     position: relative;
-    max-width: 1200px;
-    margin: 0 auto;
+    z-index: 1;
     display: grid;
-    grid-template-columns: 1fr 0.85fr;
-    gap: clamp(2.5rem, 6vw, 5rem);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
     align-items: center;
+    min-height: clamp(480px, 70vh, 720px);
   }
-  @media (max-width: 800px) {
-    .ab-grid { grid-template-columns: 1fr; }
+  @media (max-width: 900px) {
+    .ab-outer {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
   }
 
-  .ab-eyebrow {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--color-primary);
-    letter-spacing: 0.05em;
-    margin: 0 0 0.6rem;
+  .ab-textcol {
+    padding: clamp(4rem, 10vh, 6rem) clamp(1.5rem, 6vw, 4rem);
+    padding-right: clamp(1.5rem, 4vw, 3rem);
   }
+  @media (max-width: 900px) {
+    .ab-textcol { padding: clamp(3.5rem, 10vh, 5rem) clamp(1.5rem, 6vw, 3rem) 2.5rem; }
+  }
+
   .ab-heading {
     font-family: var(--font-mech);
     font-size: clamp(2.4rem, 6vw, 3.6rem);
@@ -61,112 +53,92 @@ const STYLES = `
     margin: 0 0 1.4rem;
   }
 
-  .ab-pullout {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.95rem;
+  .ab-highlight {
+    background: rgba(12,230,68,0.15);
     color: var(--color-primary);
-    border-left: 2px solid var(--color-primary);
-    padding-left: 1rem;
-    margin-top: 1.75rem;
-    max-width: 40ch;
+    padding: 0.05em 0.35em;
+    font-weight: 500;
   }
 
-  .ab-frame {
+  .ab-imgcol {
     position: relative;
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
+    height: clamp(340px, 46vw, 620px);
+    clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
   }
-  .ab-frame::before,
-  .ab-frame::after {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--color-primary);
-    z-index: 2;
-    pointer-events: none;
+  @media (max-width: 900px) {
+    .ab-imgcol {
+      height: clamp(240px, 60vw, 380px);
+      clip-path: none;
+      margin: 0 clamp(1.5rem, 6vw, 3rem);
+    }
   }
-  .ab-frame::before { top: -8px; left: -8px; border-right: none; border-bottom: none; }
-  .ab-frame::after { bottom: -8px; right: -8px; border-left: none; border-top: none; }
 
   .ab-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 30%;
+    object-position: 85% 26%;
     display: block;
     filter: saturate(0.92) contrast(1.03);
   }
 
-  /* --- telemetry markers: snap into place once, then hold still --- */
-  .ab-tag {
+  /* small floating badge over the bottom-left of the photo,
+     same circuit-status language as the rest of the page */
+  .ab-badge {
     position: absolute;
+    left: clamp(0.5rem, 2vw, 1rem);
+    bottom: clamp(0.2rem, 1vw, 0.4rem);
     z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: rgba(6, 14, 9, 0.82);
+    border: 1px solid rgba(12,230,68,0.4);
+    border-radius: 8px;
+    backdrop-filter: blur(3px);
+    padding: 0.55rem 0.95rem;
+  }
+  .ab-badge-top {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    opacity: 0;
-    animation: ab-lock 0.5s ease forwards;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    letter-spacing: 0.03em;
   }
-  .ab-tag--a { top: 16%; left: 12%; animation-delay: 0.5s; }
-  .ab-tag--b { bottom: 20%; right: 10%; animation-delay: 0.85s; flex-direction: row-reverse; }
-
-  @keyframes ab-lock {
-    0% { opacity: 0; transform: scale(1.6); }
-    60% { opacity: 1; }
-    100% { opacity: 1; transform: scale(1); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ab-tag { animation: none; opacity: 1; transform: scale(1); }
-  }
-
-  .ab-reticle {
-    width: 14px;
-    height: 14px;
-    border: 1px solid var(--color-primary);
+  .ab-badge-dot {
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    position: relative;
-    flex-shrink: 0;
-  }
-  .ab-reticle::before,
-  .ab-reticle::after {
-    content: "";
-    position: absolute;
     background: var(--color-primary);
+    box-shadow: 0 0 5px 1px rgba(12,230,68,0.7);
+    animation: ab-blink 1.6s ease-in-out infinite;
   }
-  .ab-reticle::before { top: 50%; left: -5px; width: 4px; height: 1px; transform: translateY(-50%); }
-  .ab-reticle::after { top: -5px; left: 50%; width: 1px; height: 4px; transform: translateX(-50%); }
-
-  .ab-tag-label {
+  @keyframes ab-blink { 50% { opacity: 0.25; } }
+  .ab-badge-sub {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.68rem;
-    color: var(--color-primary);
-    background: rgba(7,17,16,0.75);
-    backdrop-filter: blur(4px);
-    padding: 0.2rem 0.5rem;
-    white-space: nowrap;
+    color: rgba(245,247,246,0.55);
+    letter-spacing: 0.02em;
   }
-
-  .ab-caption {
-    margin-top: 0.8rem;
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--color-primary);
+  @media (prefers-reduced-motion: reduce) {
+    .ab-badge-dot { animation: none; }
   }
-  .ab-caption span { color: rgba(245,247,246,0.4); }
 `;
 
 export default function About() {
+  useEffect(() => {
+    AOS.init({ duration: 1200, once: true, offset: 60, easing: "ease-out" });
+  }, []);
+
   return (
     <section id="about" className="ab-section">
       <style>{STYLES}</style>
-      <p className="ab-watermark">About</p>
 
-      <div className="ab-grid">
-        <div>
-          <p className="ab-eyebrow">// about_isqip</p>
+      <div className="ab-outer">
+        <div className="ab-textcol" data-aos="fade-down">
           <h2 className="ab-heading">
             About <span>ISQIP</span>
           </h2>
@@ -182,31 +154,25 @@ export default function About() {
             training, resume building, and LinkedIn optimisation.
           </p>
 
-          <p className="ab-pullout">
-            Since 1996, IEEE SB CEC has run the sessions that get
-            people internship-ready.
+          <p className="ab-copy">
+            <span className="ab-highlight">
+              Since 1996, IEEE SB CEC has run the sessions that get
+              people internship-ready.
+            </span>
           </p>
         </div>
 
-        <div>
-          <div className="ab-frame">
-            <img
-              src="/isqip-photo.jpg"
-              alt="ISQIP participants"
-              className="ab-image"
-            />
-            <div className="ab-tag ab-tag--a">
-              <span className="ab-reticle" />
-              <span className="ab-tag-label">ISQIP_25</span>
-            </div>
-            <div className="ab-tag ab-tag--b">
-              <span className="ab-reticle" />
-              <span className="ab-tag-label">STATUS: ACTIVE</span>
-            </div>
-          </div>
-          <div className="ab-caption">
-            // archive_2025
-            <span>last year's cohort</span>
+        <div className="ab-imgcol" data-aos="fade-up" data-aos-delay="160">
+          <img
+            src="/isqip-photo.jpg"
+            alt="ISQIP participants"
+            className="ab-image"
+          />
+          <div className="ab-badge">
+            <p className="ab-badge-top">
+              <span className="ab-badge-dot" /> ISQIP '25
+            </p>
+            <p className="ab-badge-sub">last year's cohort</p>
           </div>
         </div>
       </div>
