@@ -6,11 +6,11 @@ const STYLES = `
     padding: clamp(3.5rem, 8vh, 5.5rem) clamp(1.5rem, 5vw, 4rem);
     text-align: center;
   }
-  .ob-title {
+.ob-title {
     font-family: var(--font-mech);
     font-size: clamp(1.5rem, 3vw, 1.9rem);
     color: var(--color-text);
-    margin: 0 0 1rem;   /* was 2rem */
+    margin: 0 0 2.5rem;   /* was 1rem */
   }
   .ob-accent { color: var(--color-primary); }
 
@@ -50,7 +50,7 @@ const STYLES = `
 `;
 
 const ORGANIZERS = [
-  { name: "IEEE SB CEC", logo: "/logos/ieee.png", invert: true },
+  { name: "IEEE SB CEC", logo: "/logos/ieeesb.png", invert: true },
   { name: "IEEE Computer Society", logo: "/logos/cs.png", invert: true },
   { name: "SSCS", logo: "/logos/sscs.png", invert: false },
   { name: "IEEE PES", logo: "/logos/pes.png", invert: true },
