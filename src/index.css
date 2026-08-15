@@ -19,12 +19,6 @@
 }
 
 
-html,
-body {
-  overflow-x: hidden;
-  max-width: 100%;
-}
-
 /* =========================================================
    FLIP ANIMATION
    ========================================================= */
@@ -563,4 +557,56 @@ body {
     inset 0 0 80px rgba(0, 0, 0, 0.70),
     inset 0 0 25px rgba(12, 230, 68, 0.03),
     0 0 40px rgba(12, 230, 68, 0.03);
+}
+
+
+.highlights-carousel {
+  width: 100%;
+  overflow: hidden;
+}
+
+.highlights-track {
+  display: flex;
+  width: max-content;
+  gap: 1rem;
+
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.highlights-track-forward {
+  animation: highlights-forward 45s linear infinite;
+}
+
+.highlights-track-reverse {
+  animation: highlights-reverse 45s linear infinite;
+}
+
+@keyframes highlights-forward {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes highlights-reverse {
+  from {
+    transform: translate3d(-50%, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .highlights-track-forward,
+  .highlights-track-reverse {
+    animation: none;
+  }
 }
