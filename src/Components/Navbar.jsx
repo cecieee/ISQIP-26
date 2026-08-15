@@ -23,7 +23,7 @@ const STYLES = `
     top: 16px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 9999;
     height: 52px;
     display: flex;
     align-items: center;
@@ -32,13 +32,13 @@ const STYLES = `
     -webkit-backdrop-filter: blur(18px);
     border: 1px solid rgba(12,230,68,0.18);
     border-radius: 8px;
-    overflow: hidden;
+    overflow: clip;
     white-space: nowrap;
     transition:
-      width   0.55s cubic-bezier(0.22,1,0.36,1),
-      opacity 0.4s  ease,
-      transform 0.55s cubic-bezier(0.22,1,0.36,1),
-      box-shadow 0.3s;
+      width   0.8s cubic-bezier(0.34,1.56,0.64,1),
+      opacity 0.6s  cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      transform 0.8s cubic-bezier(0.34,1.56,0.64,1),
+      box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
   .nb.nb-off {
     opacity: 0;
@@ -177,7 +177,7 @@ const STYLES = `
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    z-index: 999;
+    z-index: 9998;
     backdrop-filter: blur(18px);
   }
 
@@ -191,16 +191,32 @@ const STYLES = `
 export default function Navbar() {
   const [scrollY,  setScrollY]  = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
   useEffect(() => {
-    const fn = () => { setScrollY(window.scrollY); if (window.scrollY <= 50) setMenuOpen(false); };
+    // Track viewport height for consistent behavior
+    const updateHeight = () => setViewportHeight(window.innerHeight);
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    
+    const fn = () => { 
+      setScrollY(window.scrollY); 
+      if (window.scrollY <= 0) setMenuOpen(false); 
+    };
     window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
+    
+    return () => {
+      window.removeEventListener("scroll", fn);
+      window.removeEventListener('resize', updateHeight);
+    };
   }, []);
 
-  const progress       = Math.min(1, Math.max(0, (scrollY - 50) / 250));
-  const visible        = scrollY > 50;
-  const contentOpacity = Math.max(0, (progress - 0.45) / 0.55);
+  // Use viewport height based calculation for consistent behavior
+  const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
+  
+  const progress       = Math.min(1, Math.max(0, scrollY / 300));
+  const visible        = scrollVH > 2.2; // Show navbar after 2.2 viewport heights
+  const contentOpacity = Math.max(0, (progress - 0.3) / 0.7);
   const width          = visible
     ? `min(${Math.round(38 + progress * 54)}vw, ${Math.round(380 + progress * 720)}px)`
     : '48px';

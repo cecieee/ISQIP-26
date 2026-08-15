@@ -1,4 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
+import departureMono from '../assets/Font/DepartureMono-Regular.woff2';
+import black1 from '../assets/black1.webp';
+import tvLeft from '../assets/tv-left.webp';
+import tvRight from '../assets/tv-right.webp';
+import singleTV from '../assets/singletv.webp';
 
 class Grad {
   constructor(x,y,z){ this.x=x; this.y=y; this.z=z; }
@@ -96,197 +101,12 @@ function Waves({ lineColor='rgba(12,230,68,0.18)', backgroundColor='transparent'
   );
 }
 
-function Antigravity({
-  count=300, magnetRadius=6, ringRadius=7, waveSpeed=0.4,
-  waveAmplitude=1, particleSize=1.5, lerpSpeed=0.05,
-  color='#0CE644', autoAnimate=true, particleVariance=1,
-}) {
-  const canvasRef = useRef(null);
-  const stateRef  = useRef(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    
-    const hex2rgb = hex => {
-      const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return r ? [parseInt(r[1],16), parseInt(r[2],16), parseInt(r[3],16)] : [12,230,68];
-    };
-    const [cr,cg,cb] = hex2rgb(color);
-
-    
-    const verts4 = [];
-    for (let i=0;i<16;i++) {
-      verts4.push([
-        (i&1)?1:-1, (i&2)?1:-1, (i&4)?1:-1, (i&8)?1:-1
-      ]);
-    }
-    
-    const edges = [];
-    for (let a=0;a<16;a++) for (let b=a+1;b<16;b++) {
-      let diff=0; for(let k=0;k<4;k++) if(verts4[a][k]!==verts4[b][k]) diff++;
-      if(diff===1) edges.push([a,b]);
-    }
-
-    
-    const particles = [];
-    for (let i=0;i<count;i++) {
-      const ei = Math.floor(Math.random()*edges.length);
-      const t  = Math.random();
-      const phase = Math.random()*Math.PI*2;
-      const variance = (Math.random()-0.5)*particleVariance*0.4;
-      particles.push({ ei, t, phase, variance,
-        x:0, y:0, tx:0, ty:0, vx:0, vy:0 });
-    }
-
-    let rot1=0, rot2=0, rot3=0, rot4=0;
-    let mx=-9999, my=-9999;
-    let W=0, H=0, cx2=0, cy2=0;
-    let raf=0;
-
-    const resize = () => {
-
-      const r = canvas.parentElement.getBoundingClientRect();
-      W = canvas.width  = Math.round(r.width);
-      H = canvas.height = Math.round(r.height);
-      cx2 = W * 0.55; cy2 = H / 2;
-    };
-    const ro = new ResizeObserver(resize);
-    ro.observe(canvas.parentElement);
-    resize();
-
-    const onMove = e => {
-      const r = canvas.getBoundingClientRect();
-      mx = e.clientX - r.left;
-      my = e.clientY - r.top;
-    };
-    const onLeave = () => { mx=-9999; my=-9999; };
-    canvas.addEventListener('mousemove', onMove, {passive:true});
-    canvas.addEventListener('mouseleave', onLeave);
-
-    
-    const rot4D = (v, a, b, angle) => {
-      const c = Math.cos(angle), s = Math.sin(angle);
-      const nv = [...v];
-      nv[a] = v[a]*c - v[b]*s;
-      nv[b] = v[a]*s + v[b]*c;
-      return nv;
-    };
-    const project4to2 = (v4, scale) => {
-      let v = [...v4];
-      v = rot4D(v,0,1,rot1); v = rot4D(v,0,2,rot2);
-      v = rot4D(v,1,2,rot3); v = rot4D(v,2,3,rot4);
-
-      const w3 = 2/(3-v[3]);
-      const x3 = v[0]*w3, y3 = v[1]*w3, z3 = v[2]*w3;
-
-      const w2 = 2/(4-z3);
-      return [cx2 + x3*w2*scale, cy2 + y3*w2*scale];
-    };
-
-    const t0 = performance.now();
-    const loop = now => {
-      const t = (now - t0)*0.001;
-      if (autoAnimate) {
-        rot1 = t * waveSpeed * 0.31;
-        rot2 = t * waveSpeed * 0.19;
-        rot3 = t * waveSpeed * 0.23;
-        rot4 = t * waveSpeed * 0.17;
-      }
-
-      ctx.clearRect(0,0,W,H);
-
-      const scale = Math.min(W,H) * 0.28 * ringRadius * 0.17;
-
-      
-      for (const [a,b] of edges) {
-        const [ax,ay] = project4to2(verts4[a], scale);
-        const [bx,by] = project4to2(verts4[b], scale);
-
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.12)`;
-        ctx.lineWidth   = 5;
-        ctx.moveTo(ax,ay); ctx.lineTo(bx,by);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(${cr},${cg},${cb},0.65)`;
-        ctx.lineWidth   = 1;
-        ctx.moveTo(ax,ay); ctx.lineTo(bx,by);
-        ctx.stroke();
-      }
-
-      
-      for (const v of verts4) {
-        const [vx2, vy2] = project4to2(v, scale);
-        ctx.beginPath();
-        ctx.arc(vx2, vy2, 3.5, 0, Math.PI*2);
-        ctx.fillStyle = `rgba(${cr},${cg},${cb},0.9)`;
-        ctx.fill();
-      }
-
-      
-      const repelDist = Math.min(W,H) * magnetRadius * 0.015;
-
-      for (const p of particles) {
-        const [va, vb] = edges[p.ei];
-        const pa = verts4[va], pb = verts4[vb];
-        const lerp = (a,b,t) => a+(b-a)*t;
-        const v4 = pa.map((a,i) => lerp(a, pb[i], p.t));
-
-        v4[0] += Math.sin(p.phase + t*waveSpeed*2)*waveAmplitude*0.08*p.variance;
-        v4[1] += Math.cos(p.phase + t*waveSpeed*1.7)*waveAmplitude*0.08*p.variance;
-
-        const [px2, py2] = project4to2(v4, scale);
-
-        const dx = px2 - mx, dy = py2 - my;
-        const dist = Math.hypot(dx, dy);
-        let tx = px2, ty = py2;
-        if (dist < repelDist && dist > 0.1) {
-          const force = (1 - dist/repelDist) * repelDist * 0.6;
-          tx += (dx/dist)*force;
-          ty += (dy/dist)*force;
-        }
-
-        p.x += (tx - p.x) * lerpSpeed;
-        p.y += (ty - p.y) * lerpSpeed;
-
-        const alpha = 0.55 + Math.random()*0.45;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, particleSize, 0, Math.PI*2);
-        ctx.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
-        ctx.fill();
-      }
-
-      raf = requestAnimationFrame(loop);
-    };
-    raf = requestAnimationFrame(loop);
-
-    stateRef.current = { raf };
-    return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      canvas.removeEventListener('mousemove', onMove);
-      canvas.removeEventListener('mouseleave', onLeave);
-    };
-  }, [count, magnetRadius, ringRadius, waveSpeed, waveAmplitude,
-      particleSize, lerpSpeed, color, autoAnimate, particleVariance]);
-
-  return (
-    <div style={{position:'absolute',inset:'-20% -35% -20% -15%',pointerEvents:'auto'}}>
-      <canvas ref={canvasRef} style={{display:'block',width:'100%',height:'100%'}}/>
-    </div>
-  );
-}
-
 const HERO_STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap");
   @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace&display=swap');
   .hero-section{background-image:radial-gradient(circle,rgba(12,230,68,0.055) 1px,transparent 1px);background-size:28px 28px;}
   .hero-section::before{content:"";pointer-events:none;position:absolute;inset:0;z-index:3;background:repeating-linear-gradient(to bottom,transparent 0px,transparent 3px,rgba(0,0,0,0.12) 3px,rgba(0,0,0,0.12) 4px);mix-blend-mode:multiply;}
-  .hero-headline{font-family:'Mechsuit',sans-serif;color:rgba(12,230,68,0.72);text-shadow:0 0 8px rgba(12,230,68,0.4),0 0 28px rgba(12,230,68,.28),0 0 60px rgba(12,230,68,.12);line-height:0.9;letter-spacing:-0.01em;margin:0 0 0.2rem;}
+  .hero-headline{font-family:'Mechsuit',sans-serif;color:rgba(12,230,68,0.72);text-shadow:0 0 8px rgba(12,230,68,0.4),0 0 28px rgba(12,230,68,.28),0 0 60px rgba(12,230,68,.12);line-height:0.9;letter-spacing:-0.01em;margin:0;}
   @keyframes h-glitch{0%{clip-path:inset(0 0 96% 0);transform:translate(-2px,0)}20%{clip-path:inset(35% 0 45% 0);transform:translate(2px,0)}45%{clip-path:inset(65% 0 15% 0);transform:translate(-1px,0)}65%{clip-path:inset(0 0 0 0);transform:translate(0,0)}100%{clip-path:inset(0 0 0 0);transform:translate(0,0)}}
   @keyframes h-glitch-2{0%{clip-path:inset(75% 0 8% 0);transform:translate(3px,0);opacity:.55}30%{clip-path:inset(15% 0 65% 0);transform:translate(-2px,0);opacity:.35}55%{opacity:0}100%{opacity:0}}
   .hero-hl-wrap{position:relative;display:inline-block;}
@@ -298,59 +118,269 @@ const HERO_STYLES = `
   .hero-btn-primary:hover{animation:btn-flicker .3s ease forwards;box-shadow:0 0 20px rgba(12,230,68,.65),0 0 44px rgba(12,230,68,.28);transform:translateY(-2px);}
   .hero-btn-outline{display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:13px 30px;border-radius:4px;font-size:.88rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;font-family:'Inter',sans-serif;color:#0CE644;background:transparent;border:1px solid rgba(12,230,68,.55);cursor:pointer;transition:background .2s,box-shadow .2s,border-color .2s,transform .1s;white-space:nowrap;}
   .hero-btn-outline:hover{background:rgba(12,230,68,.08);border-color:#0CE644;box-shadow:0 0 14px rgba(12,230,68,.3);transform:translateY(-2px);}
-  @keyframes scroll-line{0%{transform:scaleY(0);transform-origin:top;opacity:1}50%{transform:scaleY(1);transform-origin:top;opacity:1}100%{transform:scaleY(1);transform-origin:bottom;opacity:0}}
-  .hero-scroll-line{width:1px;height:36px;background:linear-gradient(to bottom,#0CE644,transparent);animation:scroll-line 1.8s ease-in-out infinite;}
+  @keyframes scrollBarGrow{0%{height:0%;transform:translateY(0)}100%{height:100%;transform:translateY(0)}}
   @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-  @keyframes hero-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-  .hero-inner{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:2rem;width:100%;max-width:1280px;margin:0 auto;padding:clamp(4rem,10vh,7rem) clamp(1.5rem,5vw,4rem);}
-  @media(max-width:768px){.hero-inner{grid-template-columns:1fr;}.hero-ag-wrap{height:320px!important;}}
+  @font-face {
+    font-family: 'Departure Mono';
+    src: url('${departureMono}') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  .arcade-ticker {
+    font-family: 'Departure Mono', monospace;
+    font-size: clamp(1.4rem, 3.5vw, 2.8rem);
+    font-weight: 400;
+    color: #000000;
+    text-shadow: none;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+  }
+  @keyframes tvNoise {
+    0% { opacity: 0.1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 0.1; }
+  }
+  .parallax {
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+  }
+  .scroller {
+    display: flex;
+    white-space: nowrap;
+    text-align: center;
+    font-family: 'Departure Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
+    color: #000000;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+  .scroller span {
+    flex-shrink: 0;
+  }
+  @media (min-width: 768px) {
+    .scroller {
+      font-size: 2rem;
+      line-height: 2rem;
+    }
+  }
 `;
 
 export default function Hero() {
+  const [scrollY, setScrollY] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
+  
+  useEffect(() => {
+    // Track viewport height
+    const updateHeight = () => setViewportHeight(window.innerHeight);
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    
+    const fn = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', fn, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', fn);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, []);
+
+  const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
+  
+  const tvDropProgress = Math.min(scrollVH / 0.8, 1); 
+  const singleTVTop = -80 + (tvDropProgress * 100); 
+  
+  const transitionProgress = Math.max(0, Math.min(1, (scrollVH - 0.8) / 0.3));
+  const tvOpacity = Math.max(0, 1 - transitionProgress);
+  const isqipOpacity = transitionProgress;
+  
+  const ctaOpacity = Math.max(0, 1 - Math.max(0, (scrollVH - 2.0) / 0.3)); // Fade out from 2.0vh to 2.3vh
+  
+  const tvScale = 1 - (transitionProgress * 0.2);
+  const tvBlur = transitionProgress * 20;
+  const isqipScale = 0.9 + (transitionProgress * 0.1);
+  
   return (
     <>
       <style>{HERO_STYLES}</style>
 
-      {}
-      <section id="home" className="hero-section" style={{position:'relative',height:'100vh',overflow:'hidden',background:'#0A0D0A',display:'flex',alignItems:'center'}}>
-        <Waves lineColor="rgba(12,230,68,0.18)" backgroundColor="transparent" waveSpeedX={0.018} waveSpeedY={0.008} waveAmpX={44} waveAmpY={22} xGap={14} yGap={40} friction={0.93} tension={0.006} maxCursorMove={120}/>
-        <div aria-hidden="true" style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 70% 60% at 30% 50%,rgba(12,230,68,0.04) 0%,transparent 70%)',pointerEvents:'none',zIndex:1}}/>
-        <div aria-hidden="true" style={{position:'absolute',bottom:0,left:0,right:0,height:'38%',background:'linear-gradient(to top,rgba(10,13,10,0.96) 15%,transparent)',pointerEvents:'none',zIndex:2}}/>
-        <div aria-hidden="true" style={{position:'absolute',top:0,left:0,right:0,height:'18%',background:'linear-gradient(to bottom,rgba(10,13,10,0.7),transparent)',pointerEvents:'none',zIndex:2}}/>
-        <div className="hero-inner" style={{position:'relative',zIndex:4}}>
+      <section id="home" style={{position:'relative',minHeight:'250vh',background:'#0A0D0A'}}>
+        
+        <div style={{
+          position:'sticky',
+          top:0,
+          height:'100vh',
+          overflow:'hidden',
+          backgroundImage: `url(${black1})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}>
+          
+          <div style={{
+            position: 'absolute',
+            bottom: '-10%',
+            left: '-5%',
+            width: '30vw',
+            height: '50vh',
+            background: 'radial-gradient(ellipse, rgba(12,230,68,0.25) 0%, rgba(12,230,68,0.15) 30%, transparent 70%)',
+            filter: 'blur(60px)',
+            opacity: tvOpacity * 0.8,
+            transition: 'opacity 0.3s ease-out',
+            zIndex: 3,
+            pointerEvents: 'none'
+          }} />
+          
+          <div style={{
+            position: 'absolute',
+            bottom: '-10%',
+            right: '-5%',
+            width: '30vw',
+            height: '50vh',
+            background: 'radial-gradient(ellipse, rgba(12,230,68,0.25) 0%, rgba(12,230,68,0.15) 30%, transparent 70%)',
+            filter: 'blur(60px)',
+            opacity: tvOpacity * 0.8,
+            transition: 'opacity 0.3s ease-out',
+            zIndex: 3,
+            pointerEvents: 'none'
+          }} />
+          
+          <div style={{
+            position: 'absolute',
+            top: `${singleTVTop + 5}vh`,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '25vw',
+            height: '40vh',
+            background: 'radial-gradient(ellipse, rgba(12,230,68,0.3) 0%, rgba(12,230,68,0.18) 30%, transparent 70%)',
+            filter: 'blur(50px)',
+            opacity: tvOpacity * 0.9,
+            transition: 'opacity 0.3s ease-out',
+            zIndex: 8,
+            pointerEvents: 'none'
+          }} />
 
-          {}
-          <div style={{display:'flex',flexDirection:'column',alignItems:'flex-start'}}>
-            <h1 className="hero-headline" style={{fontSize:'clamp(4.5rem,10vw,8.5rem)'}}>ISQIP</h1>
-            <p style={{fontFamily:"'Bruno Ace',cursive",fontSize:'clamp(0.9rem,1.8vw,1.1rem)',color:'#8FAE95',lineHeight:1.75,maxWidth:'420px',marginBottom:'2.4rem',marginTop:'3rem',letterSpacing:'0.02em'}}>
-              IEEE Student Quality Improvement Programme
-            </p>
-            <div style={{display:'flex',gap:'1rem',flexWrap:'wrap',alignItems:'center'}}>
-              <a href="#register" className="hero-btn-primary">
-                Register Now
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </a>
-              <a href="#tracks" className="hero-btn-outline">
-                Learn More
-                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><polygon points="3,2 9,6 3,10" fill="currentColor"/></svg>
-              </a>
+          <img 
+            src={tvLeft}
+            alt="TV Left"
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              height: '45vh',
+              width: 'auto',
+              objectFit: 'contain',
+              objectPosition: 'bottom left',
+              opacity: tvOpacity,
+              transform: `scale(${tvScale})`,
+              transformOrigin: 'bottom left',
+              filter: `blur(${tvBlur}px)`,
+              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
+              zIndex: 5
+            }}
+          />
+          
+          <img 
+            src={tvRight}
+            alt="TV Right"
+            style={{
+              position: 'absolute',
+              bottom: -28,
+              right: 0,
+              height: '50vh',
+              width: 'auto',
+              objectFit: 'contain',
+              objectPosition: 'bottom right',
+              opacity: tvOpacity,
+              transform: `scale(${tvScale})`,
+              transformOrigin: 'bottom right',
+              filter: `blur(${tvBlur}px)`,
+              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
+              zIndex: 5
+            }}
+          />
+          
+          <img 
+            src={singleTV}
+            alt="Single TV"
+            style={{
+              position: 'absolute',
+              top: `${singleTVTop}vh`,
+              left: '50%',
+              transform: `translateX(-50%) scale(${tvScale})`,
+              height: '35vh',
+              width: 'auto',
+              objectFit: 'contain',
+              opacity: tvOpacity,
+              filter: `blur(${tvBlur}px)`,
+              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
+              zIndex: 10
+            }}
+          />
+          
+          <div style={{
+            position:'absolute',
+            inset:0,
+            display: 'flex', 
+            alignItems:'center',
+            justifyContent:'center',
+            zIndex:20,
+            opacity: isqipOpacity,
+            transform: `scale(${isqipScale})`,
+            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+            pointerEvents: isqipOpacity > 0.7 ? 'auto' : 'none',
+            backgroundImage: `url(${black1})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}>
+            <div style={{
+              position:'absolute',
+              inset:0,
+              zIndex:1,
+              pointerEvents:'none'
+            }}>
+              <Waves lineColor="rgba(12,230,68,0.18)" backgroundColor="transparent" waveSpeedX={0.018} waveSpeedY={0.008} waveAmpX={44} waveAmpY={22} xGap={14} yGap={40} friction={0.93} tension={0.006} maxCursorMove={120}/>
             </div>
-          </div>
-
-          {}
-          <div className="hero-ag-wrap" style={{position:'relative',height:'600px',width:'100%',overflow:'visible'}}>
-            <Antigravity
-              count={500}
-              magnetRadius={8}
-              ringRadius={8}
-              waveSpeed={0.4}
-              waveAmplitude={1.2}
-              particleSize={2}
-              lerpSpeed={0.06}
-              color="#0CE644"
-              autoAnimate={true}
-              particleVariance={1.2}
-            />
+            
+            <div aria-hidden="true" style={{position:'absolute',inset:0,background:'radial-gradient(ellipse 80% 60% at 50% 50%,rgba(12,230,68,0.04) 0%,transparent 70%)',pointerEvents:'none',zIndex:2}}/>
+            
+            <div style={{
+              position:'relative',
+              zIndex:3,
+              display:'flex',
+              flexDirection:'column',
+              alignItems:'center',
+              justifyContent:'center',
+              textAlign:'center',
+              width:'100%',
+              maxWidth:'1280px',
+              padding:'2rem clamp(1.5rem,5vw,4rem)',
+              minHeight:'100vh'
+            }}>
+              
+              <h1 className="hero-headline" style={{fontSize:'clamp(3.5rem,9vw,7rem)',marginBottom:'1rem',marginTop:0,lineHeight:1.1}}>ISQIP</h1>
+              
+              <p style={{fontFamily:"'Bruno Ace',cursive",fontSize:'clamp(0.85rem,1.6vw,1rem)',color:'#8FAE95',lineHeight:1.75,maxWidth:'560px',marginBottom:'2rem',marginTop:'1rem',letterSpacing:'0.02em'}}>
+                IEEE Student Quality Improvement Programme
+              </p>
+              
+              <div style={{display:'flex',gap:'1rem',flexWrap:'wrap',justifyContent:'center',opacity:ctaOpacity,transition:'opacity 0.4s ease-out'}}>
+                <a href="#register" className="hero-btn-primary">
+                  Register Now
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </a>
+                <a href="#tracks" className="hero-btn-outline">
+                  Learn More
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><polygon points="3,2 9,6 3,10" fill="currentColor"/></svg>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>
