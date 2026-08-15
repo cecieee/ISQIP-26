@@ -129,14 +129,14 @@ const GlitchUnit = ({ value, label, isGlitching }) => {
       <div
         className="
           font-mechsuit
-          text-3xl
+          text-5xl
           leading-none
           tracking-wider
           text-[#0CE644]
           [text-shadow:0_0_4px_rgba(12,230,68,0.65),0_0_12px_rgba(12,230,68,0.25)]
-          sm:text-4xl
-          md:text-6xl
-          lg:text-7xl
+          sm:text-6xl
+          md:text-8xl
+          lg:text-9xl
         "
       >
         {displayValue.split("").map((digit, index) => {
@@ -165,12 +165,12 @@ const GlitchUnit = ({ value, label, isGlitching }) => {
         className="
           whitespace-nowrap
           font-mechsuit
-          text-[7px]
+          text-[10px]
           tracking-[0.25em]
           text-[#0CE644]/50
-          sm:text-[8px]
-          md:text-[10px]
-          lg:text-xs
+          sm:text-[11px]
+          md:text-[13px]
+          lg:text-xl
         "
       >
         <ScanText small>{label}</ScanText>
@@ -363,8 +363,9 @@ const CountDown = () => {
             className="
               mb-8
               font-mechsuit
-              text-2xl
-              tracking-[0.4em]
+              text-[20px]
+              tracking-[0.2em]
+              md:tracking-[0.2em]
               text-[#0CE644]/70
               [text-shadow:0_0_8px_rgba(12,230,68,0.35)]
               md:mb-12
@@ -383,11 +384,14 @@ const CountDown = () => {
           {eventStarted ? (
             <h2
               className="
-                my-8
+                mb-8
                 font-mechsuit
-                text-2xl
-                text-[#0CE644]
-                [text-shadow:0_0_12px_rgba(12,230,68,0.55)]
+                text-[20px]
+                tracking-[0.2em]
+                md:tracking-[0.2em]
+                text-[#0CE644]/70
+                [text-shadow:0_0_8px_rgba(12,230,68,0.35)]
+                md:mb-12
                 md:text-3xl
               "
             >
@@ -514,11 +518,6 @@ const CountDown = () => {
               md:text-xl
             "
           >
-            <span>
-              <ScanText small>
-                &gt; THE FUTURE IS LOADING......
-              </ScanText>
-            </span>
           </div>
         </div>
       </div>
