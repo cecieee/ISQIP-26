@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { label: "Home",         href: "#home" },
   { label: "About",        href: "#about" },
   { label: "Benefits",     href: "#benefits" },
+  { label: "Tracks",       href: "#tracks" },
   { label: "Highlights",   href: "#highlights" },
   { label: "Certificates", href: "#certificates" },
   { label: "Schedule",     href: "#schedule" },
@@ -107,7 +108,7 @@ const STYLES = `
     font-weight: 500;
     font-size: 0.84rem;
     letter-spacing: 0.04em;
-    padding: 0 clamp(0.7rem, 1.4vw, 1.1rem);
+    padding: 0 clamp(0.6rem, 1.2vw, 1rem);
     height: 52px;
     transition: color 0.18s, background 0.18s;
     white-space: nowrap;
@@ -179,9 +180,11 @@ const STYLES = `
     gap: 1rem;
     z-index: 9998;
     backdrop-filter: blur(18px);
+    max-height: min(75vh, 560px);
+    overflow-y: auto;
   }
 
-  @media (max-width: 700px) {
+  @media (max-width: 860px) {
     .nb-links    { display: none !important; }
     .nb-cta-wrap { display: none !important; }
     .nb-ham      { display: flex !important; }
@@ -211,7 +214,6 @@ export default function Navbar() {
     };
   }, []);
 
-  // Use viewport height based calculation for consistent behavior
   const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
   
   const progress       = Math.min(1, Math.max(0, scrollY / 300));
