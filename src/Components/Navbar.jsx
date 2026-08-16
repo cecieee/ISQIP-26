@@ -197,7 +197,6 @@ export default function Navbar() {
   const [viewportHeight, setViewportHeight] = useState(0);
 
   useEffect(() => {
-    // Track viewport height for consistent behavior
     const updateHeight = () => setViewportHeight(window.innerHeight);
     updateHeight();
     window.addEventListener('resize', updateHeight);

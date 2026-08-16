@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import mechsuitFont from '../assets/Font/mechsuit/Mechsuit.otf';
 
-/* ------------------------------------------------------------------ */
-/*  Content — swap copy freely, structure stays the same               */
-/* ------------------------------------------------------------------ */
 const TRACKS = [
   {
     id: 1,
@@ -98,9 +95,6 @@ const TRACKS = [
   },
 ];
 
-/* ------------------------------------------------------------------ */
-/*  Styles — same visual language as Navbar / Hero                     */
-/* ------------------------------------------------------------------ */
 const STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Share+Tech+Mono&family=Orbitron:wght@500;600;700&display=swap");
 

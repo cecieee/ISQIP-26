@@ -6,9 +6,6 @@ import tvLeft from '../assets/tv_left.webp';
 import tvRight from '../assets/tv-right.webp';
 import singleTV from '../assets/singletv.webp';
 
-/* ------------------------------------------------------------------ */
-/*  Perlin noise (unchanged logic, same output as before)              */
-/* ------------------------------------------------------------------ */
 class Grad {
   constructor(x, y, z) { this.x = x; this.y = y; this.z = z; }
   dot2(x, y) { return this.x * x + this.y * y; }
@@ -40,9 +37,6 @@ class Noise {
   }
 }
 
-/* ------------------------------------------------------------------ */
-/*  Waves canvas background — now DPR-aware and reduced-motion safe   */
-/* ------------------------------------------------------------------ */
 function Waves({
   lineColor = 'rgba(12,230,68,0.18)', backgroundColor = 'transparent',
   waveSpeedX = 0.0125, waveSpeedY = 0.005, waveAmpX = 32, waveAmpY = 16,
@@ -76,7 +70,6 @@ function Waves({
       const { width, height } = boundingRef.current;
       linesRef.current = [];
       const { xGap, yGap } = cfgRef.current;
-      // fewer sample points on small / narrow viewports keeps this smooth on phones
       const density = width < 640 ? 1.6 : 1;
       const oW = width + 200, oH = height + 30;
       const tL = Math.ceil(oW / (xGap * density)), tP = Math.ceil(oH / (yGap * density));
@@ -131,7 +124,6 @@ function Waves({
     setSize(); setLines();
 
     if (reduceMotion) {
-      // draw a single static frame instead of animating forever
       movePoints(0); drawLines();
     } else {
       frameRef.current = requestAnimationFrame(tick);
@@ -157,9 +149,6 @@ function Waves({
   );
 }
 
-/* ------------------------------------------------------------------ */
-/*  Styles                                                             */
-/* ------------------------------------------------------------------ */
 const HERO_STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap");
   @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace&display=swap');
@@ -304,9 +293,6 @@ export default function Hero() {
     const updateHeight = () => setViewportHeight(window.innerHeight);
     updateHeight();
     window.addEventListener('resize', updateHeight);
-
-    // rAF-throttled scroll handler avoids stacking state updates on
-    // low-power / mobile devices
     const onScroll = () => {
       if (rafRef.current) return;
       rafRef.current = requestAnimationFrame(() => {
