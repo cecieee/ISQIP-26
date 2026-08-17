@@ -69,6 +69,7 @@ const STYLES = `
     background: transparent;
     border: none;
     cursor: pointer;
+    list-style: none;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -81,6 +82,10 @@ const STYLES = `
     outline: none;
     appearance: none;
     -webkit-appearance: none;
+  }
+  .faq-trigger::-webkit-details-marker,
+  .faq-trigger::marker {
+    display: none;
   }
   .faq-trigger:active,
   .faq-trigger:focus,
@@ -173,9 +178,9 @@ const STYLES = `
     line-height: 1.78;
     color: rgba(245,247,246,0.6);
     padding-bottom: clamp(1rem, 2.2vh, 1.35rem);
-    padding-left: 2.6rem;
+    padding-left: 3.45rem;
     border-left: 1px solid rgba(12,230,68,0.18);
-    margin-left: 0.1rem;
+    margin-left: 0;
   }
 
   .faq-contact {
