@@ -1,230 +1,189 @@
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 const domains = [
   {
     id: 0,
-    title: "GENERAL ISQIP",
-    description:
-      "Tailored for career readiness, this track focuses on essential soft skills, professional communication, leadership, teamwork, interview preparation, and placement preparedness. Participants will develop practical skills that help them approach professional environments with greater confidence while strengthening their ability to collaborate, communicate ideas effectively, and adapt to different workplace situations.",
-  },
-  {
-    id: 1,
+    number: "01",
     title: "CS ISQIP",
+    level: "CYBERSECURITY & DEFENSE",
     description:
       "Dive into hands-on sessions that explore the latest tools, technologies, threats, and defenses in cybersecurity. This track introduces participants to important concepts in network security, ethical hacking, secure systems, digital forensics, and modern cyber defense practices.",
   },
   {
-    id: 2,
+    id: 1,
+    number: "02",
     title: "EC ISQIP",
+    level: "VLSI & SEMICONDUCTORS",
     description:
       "Gain a deeper understanding of VLSI design principles by exploring circuit architectures, digital and analog design methodologies, semiconductor technologies, and modern approaches to hardware development. Participants will get an opportunity to understand how complex electronic systems are designed and implemented.",
   },
   {
-    id: 3,
+    id: 2,
+    number: "03",
     title: "EE ISQIP",
+    level: "RENEWABLE ENERGY & PV",
     description:
       "Learn to model, simulate, and analyze solar PV systems using PVsyst while developing an understanding of system design, performance evaluation, energy generation, and real-world yield assessment. The track provides participants with practical exposure to renewable energy technologies and helps them understand how engineering principles can be applied.",
   },
 ];
 
-const DomainCard = ({ domain, index, cardRef }) => {
+const DomainCard = ({ domain, index, isLoaded }) => {
   return (
     <div
-      ref={cardRef}
-      data-active="false"
-      style={{ transitionDelay: `${(index % 2) * 120}ms` }}
-      className="
+      className={`
         group
         relative
         w-full
-        -translate-y-4
-        rounded-[6px]
-        border
-        border-[#0CE644]/20
-        bg-black
+        h-full
+        flex
+        flex-col
+        justify-between
+        rounded-[4px]
         p-6
-        opacity-0
-        transition-[opacity,transform,border-color,box-shadow]
-        duration-700
-        ease-out
-
         sm:p-7
-
-        data-[active=true]:translate-y-0
-        data-[active=true]:opacity-100
-        data-[active=true]:border-[#0CE644]
-        data-[active=true]:shadow-[0_0_30px_rgba(12,230,68,0.10)]
-      "
+        crt-hud-panel
+        crt-card-hover
+        transition-all
+        duration-500
+        ${isLoaded ? "crt-card-booting opacity-100" : "opacity-0 translate-y-8"}
+      `}
     >
-      {/* TOP-LEFT CORNER */}
-      <span
-        className="
-          pointer-events-none
-          absolute
-          left-0
-          top-0
-          h-4
-          w-4
-          border-l-2
-          border-t-2
-          border-[#0CE644]/30
-          transition-[width,height,border-color]
-          duration-500
+      {/* SCANLINE SWEEP BAR ON LOAD */}
+      {isLoaded && <div className="crt-scan-bar" />}
 
-          group-data-[active=true]:h-8
-          group-data-[active=true]:w-8
-          group-data-[active=true]:border-[#0CE644]
-        "
-      />
+      {/* OUTER CRT HUD L-BRACKETS */}
+      <span className="crt-outer-l-bracket -top-2 -left-2 border-t-2 border-l-2" />
+      <span className="crt-outer-l-bracket -top-2 -right-2 border-t-2 border-r-2" />
+      <span className="crt-outer-l-bracket -bottom-2 -left-2 border-b-2 border-l-2" />
+      <span className="crt-outer-l-bracket -bottom-2 -right-2 border-b-2 border-r-2" />
 
-      {/* BOTTOM-RIGHT CORNER */}
-      <span
-        className="
-          pointer-events-none
-          absolute
-          bottom-0
-          right-0
-          h-4
-          w-4
-          border-b-2
-          border-r-2
-          border-[#0CE644]/30
-          transition-[width,height,border-color]
-          duration-500
+      {/* DOMAIN TITLE & NUMBER HEADER */}
+      <div className="flex items-start justify-between gap-3 border-b border-[#0CE644]/25 pb-4">
+        <div>
+          <h3 className="font-mechsuit text-xl sm:text-2xl tracking-wide text-[#0CE644] crt-chromatic-text crt-phosphor-glow group-hover:crt-phosphor-bright group-hover:text-white transition-all duration-300">
+            {domain.title}
+          </h3>
+          <p className="mt-1 font-mono text-[11px] tracking-widest text-[#0CE644]/70">
+            TRACK // {domain.level}
+          </p>
+        </div>
 
-          group-data-[active=true]:h-8
-          group-data-[active=true]:w-8
-          group-data-[active=true]:border-[#0CE644]
-        "
-      />
-
-      {/* NUMBER */}
-      <div
-        className="
-          font-mechsuit
-          text-xs
-          tracking-[0.3em]
-          text-[#0CE644]/30
-          transition-colors
-          duration-500
-
-          group-data-[active=true]:text-[#0CE644]
-        "
-      >
-        0{index + 1}
+        <div className="font-mechsuit text-3xl sm:text-4xl text-[#0CE644]/30 group-hover:text-[#0CE644] group-hover:crt-phosphor-glow transition-all duration-300 select-none">
+          {domain.number}
+        </div>
       </div>
 
-      {/* TITLE */}
-      <h3
-        className="
-          mt-4
-          font-mechsuit
-          text-lg
-          tracking-wide
-          text-[#0CE644]/50
-          transition-colors
-          duration-500
-
-          sm:text-xl
-
-          group-data-[active=true]:text-[#0CE644]
-        "
-      >
-        {domain.title}
-      </h3>
-
-      {/* DESCRIPTION */}
-      <p
-        className="
-          mt-4
-          text-sm
-          leading-7
-          text-white/30
-          transition-colors
-          duration-500
-
-          group-data-[active=true]:text-white/70
-        "
-      >
-        {domain.description}
-      </p>
+      {/* MINIMAL CRT DESCRIPTION BOX (Equal height on desktop) */}
+      <div className="crt-inner-box p-4 mt-5 flex-1 flex flex-col justify-start">
+        <p className="text-xs sm:text-sm leading-relaxed text-white/75 group-hover:text-white/95 transition-colors duration-300">
+          {domain.description}
+        </p>
+      </div>
     </div>
   );
 };
 
 const Domains = () => {
-  const cardRefs = useRef([]);
+  const sectionRef = useRef(null);
+  const [inView, setInView] = useState(false);
+  const [loadedCards, setLoadedCards] = useState([false, false, false]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.dataset.active = "true";
-            observer.unobserve(entry.target);
-          }
-        });
+        if (entries[0].isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
       },
       {
-        threshold: 0.2,
-        rootMargin: "0px 0px -10% 0px",
+        threshold: 0.1,
+        rootMargin: "0px 0px -40px 0px",
       }
     );
 
-    cardRefs.current.forEach((card) => {
-      if (card) observer.observe(card);
-    });
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
 
     return () => observer.disconnect();
   }, []);
 
+  // Procedural Staggered Loading Sequence (01 -> 02 -> 03)
+  useEffect(() => {
+    if (inView) {
+      domains.forEach((_, idx) => {
+        setTimeout(() => {
+          setLoadedCards((prev) => {
+            const next = [...prev];
+            next[idx] = true;
+            return next;
+          });
+        }, idx * 240);
+      });
+    }
+  }, [inView]);
+
   return (
     <section
+      ref={sectionRef}
       className="
         relative
         w-full
         overflow-hidden
-        bg-black
-        px-5
-        py-24
-
+        crt-old-screen-bg
+        crt-vignette
+        crt-monitor-container
+        crt-screen-flicker
+        my-8
+        px-4
+        py-16
         sm:px-8
-        sm:py-28
-
+        sm:py-24
         lg:px-12
-        lg:py-32
+        lg:py-28
       "
     >
-      {/* HEADING */}
-      <div className="relative z-20 mb-16 text-center sm:mb-20">
-        <h2
-          className="
-            font-mechsuit
-            text-3xl
-            tracking-[0.12em]
-            text-[#0CE644]
+      {/* HEAVY RETRO CRT SCREEN OVERLAY LAYERS */}
+      {/* 1. Heavy Static Noise Layer */}
+      <div className="pointer-events-none absolute inset-0 crt-heavy-static" />
 
-            sm:text-4xl
-          "
-        >
-          Domains
+      {/* 2. Glass Glare Reflection */}
+      <div className="crt-glass-glare" />
+
+      {/* 3. Rolling CRT Scanline Refresh Bar */}
+      <div className="crt-rolling-bar" />
+
+      {/* 4. RGB Subpixel Aperture Grille Mask */}
+      <div className="pointer-events-none absolute inset-0 crt-aperture-mask opacity-80" />
+
+      {/* HEADER SECTION */}
+      <div className="relative z-20 mb-12 text-center sm:mb-16">
+        {/* Minimal Oscillating DOMAINS Title */}
+        <h2 className="font-mechsuit text-4xl sm:text-5xl lg:text-6xl tracking-[0.14em] text-[#0CE644] crt-chromatic-text crt-heading-anim">
+          DOMAINS
         </h2>
 
-        <div className="mx-auto mt-4 h-[2px] w-14 bg-[#0CE644]" />
+        {/* Retro Double Line Underline */}
+        <div className="mx-auto mt-4 max-w-xs font-mono text-xs tracking-widest text-[#0CE644] crt-chromatic-text">
+          ====================================
+        </div>
       </div>
 
-      {/* GRID */}
+      {/* RESPONSIVE GRID LAYOUT FOR 3 DOMAINS (Equal height containers on desktop) */}
       <div
         className="
+          relative
+          z-20
           mx-auto
           grid
           w-full
-          max-w-[1050px]
+          max-w-[1150px]
           grid-cols-1
-          gap-6
-
-          sm:grid-cols-2
-          sm:gap-8
+          gap-8
+          md:grid-cols-3
+          md:items-stretch
+          lg:gap-8
         "
       >
         {domains.map((domain, index) => (
@@ -232,9 +191,7 @@ const Domains = () => {
             key={domain.id}
             domain={domain}
             index={index}
-            cardRef={(el) => {
-              cardRefs.current[index] = el;
-            }}
+            isLoaded={loadedCards[index]}
           />
         ))}
       </div>
@@ -243,3 +200,8 @@ const Domains = () => {
 };
 
 export default Domains;
+
+
+
+
+

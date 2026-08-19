@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const highlightsRow1 = [
   "/Highlights/DSC03708.webp",
@@ -18,7 +18,7 @@ const highlightsRow2 = [
   "/Highlights/DSC04105.webp",
 ];
 
-const HighlightCard = ({ image, index }) => {
+const HighlightCard = React.memo(({ image, index }) => {
   return (
     <div
       className="
@@ -41,11 +41,13 @@ const HighlightCard = ({ image, index }) => {
         sm:w-[320px]
         md:h-[350px]
         md:w-[370px]
+        transform-gpu
       "
     >
       <img
         src={image}
         alt={`Event highlight ${index + 1}`}
+        decoding="async"
         className="
           h-full
           w-full
@@ -54,6 +56,7 @@ const HighlightCard = ({ image, index }) => {
           duration-500
           ease-out
           group-hover:scale-[1.03]
+          transform-gpu
         "
       />
 
@@ -100,9 +103,23 @@ const HighlightCard = ({ image, index }) => {
       />
     </div>
   );
-};
+});
+
+HighlightCard.displayName = "HighlightCard";
 
 const Highlights = () => {
+  // Pre-decode images quietly in background thread to eliminate scroll stalls
+  useEffect(() => {
+    const allImages = [...highlightsRow1, ...highlightsRow2];
+    allImages.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      if (img.decode) {
+        img.decode().catch(() => {});
+      }
+    });
+  }, []);
+
   return (
     <section className="w-full overflow-hidden bg-black py-16 sm:py-20">
 
@@ -167,3 +184,5 @@ const Highlights = () => {
 };
 
 export default Highlights;
+
+
