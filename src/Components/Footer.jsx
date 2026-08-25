@@ -2,11 +2,8 @@ import { useRef, useEffect, useState } from "react";
 import {
   FaInstagram,
   FaLinkedin,
-  FaWhatsapp,
   FaPhoneFlip,
   FaHeart,
-  FaCopy,
-  FaCheck,
 } from "react-icons/fa6";
 import { IoMdMail } from "react-icons/io";
 import { BiGlobe } from "react-icons/bi";
@@ -391,10 +388,10 @@ export default function Footer() {
                 href={item.link}
                 className="group ft-bracket-link inline-flex items-center gap-2 py-1 text-xs"
               >
-                <span className="font-mono text-xs font-bold text-primary transition-transform duration-250 group-hover:scale-105">
+                <span className="font-mono text-xs font-bold text-primary transition-transform duration-250 group-hover:scale-105" style={{ textShadow: "0 0 6px #000, 0 0 3px #000" }}>
                   {item.num}
                 </span>
-                <span className="font-inter text-sm font-medium text-text/70 transition-colors group-hover:text-primary">
+                <span className="font-inter text-sm font-medium text-text/70 transition-colors group-hover:text-primary" style={{ textShadow: "0 0 8px #000, 0 0 4px #000" }}>
                   {item.name}
                 </span>
               </a>
