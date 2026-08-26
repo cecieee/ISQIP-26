@@ -4,6 +4,7 @@ import Hero from './Components/Hero'
 import CountDown from "./Components/CountDown.jsx";
 import About from './Components/About'
 import WhyParticipate from './Components/WhyParticipate'
+import EventDetails from './Components/EventDetails'
 import LearningTracks from './Components/LearningTracks'
 import OrganizedBy from './Components/OrganizedBy'
 import FAQ from './Components/FAQ'
@@ -22,6 +23,7 @@ function App() {
         </div>
         <About />
         <WhyParticipate />
+        <EventDetails />
         <LearningTracks />
         <OrganizedBy />
         <FAQ />
