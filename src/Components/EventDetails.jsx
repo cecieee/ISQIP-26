@@ -200,19 +200,20 @@ const STYLES = `
     inset: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    background: rgba(6,14,12,0.96);
-    border: 1px solid rgba(12,230,68,0.28);
+    background: rgba(6, 14, 12, 0.96);
+    border: 1px solid rgba(12, 230, 68, 0.28);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
     padding: 2rem 1.5rem;
     text-align: center;
     overflow: hidden;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
 
-  /* 4-corner bracket marks — the thing that actually makes cards look designed */
+  /* 4-corner bracket marks */
   .ed-card-front::before,
   .ed-card-front::after,
   .ed-card-back::before,
@@ -222,74 +223,67 @@ const STYLES = `
     width: 14px;
     height: 14px;
     pointer-events: none;
-    transition: width 0.3s, height 0.3s, opacity 0.3s;
+    transition: width 0.3s, height 0.3s, border-color 0.3s;
+    z-index: 2;
   }
 
   /* top-left */
   .ed-card-front::before,
   .ed-card-back::before {
     top: -1px; left: -1px;
-    border-top: 2px solid rgba(12,230,68,0.7);
-    border-left: 2px solid rgba(12,230,68,0.7);
+    border-top: 2px solid rgba(12, 230, 68, 0.7);
+    border-left: 2px solid rgba(12, 230, 68, 0.7);
   }
 
   /* bottom-right */
   .ed-card-front::after,
   .ed-card-back::after {
     bottom: -1px; right: -1px;
-    border-bottom: 2px solid rgba(12,230,68,0.7);
-    border-right: 2px solid rgba(12,230,68,0.7);
+    border-bottom: 2px solid rgba(12, 230, 68, 0.7);
+    border-right: 2px solid rgba(12, 230, 68, 0.7);
   }
 
-  /* scan-sweep line on hover (only enabled on desktop hover) */
-  .ed-card-front .ed-card-sweep {
-    position: absolute;
-    top: -100%;
-    left: 0; right: 0;
-    height: 60%;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(12,230,68,0.04) 50%,
-      transparent 100%
-    );
-    pointer-events: none;
-    transition: top 0s;
+  @media (hover: hover) {
+    .ed-card-wrap:hover .ed-card-front,
+    .ed-card-wrap:hover .ed-card-back {
+      border-color: rgba(12, 230, 68, 0.55);
+      box-shadow: 0 0 25px rgba(12, 230, 68, 0.15);
+    }
+
+    .ed-card-wrap:hover .ed-card-front::before,
+    .ed-card-wrap:hover .ed-card-front::after,
+    .ed-card-wrap:hover .ed-card-back::before,
+    .ed-card-wrap:hover .ed-card-back::after {
+      width: 22px;
+      height: 22px;
+      border-color: var(--color-primary);
+    }
   }
 
   /* ── FRONT ─────────────────────────────────────────── */
-
-  /* radial glow behind icon */
   .ed-card-icon-glow {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
+    width: 54px;
+    height: 54px;
     flex-shrink: 0;
-  }
-
-  .ed-card-icon-glow::before {
-    content: "";
-    position: absolute;
-    inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(12,230,68,0.14) 0%, transparent 72%);
-    border: 1px solid rgba(12,230,68,0.2);
+    background: radial-gradient(circle, rgba(12, 230, 68, 0.15) 0%, rgba(12, 230, 68, 0.03) 70%, transparent 100%);
+    border: 1px solid rgba(12, 230, 68, 0.25);
+    box-shadow: 0 0 15px rgba(12, 230, 68, 0.1);
   }
 
   .ed-card-icon {
     color: var(--color-primary);
-    filter: drop-shadow(0 0 6px rgba(12,230,68,0.65));
-    position: relative;
-    z-index: 1;
+    filter: drop-shadow(0 0 6px rgba(12, 230, 68, 0.65));
   }
 
   .ed-card-label {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    color: rgba(12,230,68,0.5);
+    font-size: 0.7rem;
+    color: rgba(12, 230, 68, 0.7);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     margin: 0;
@@ -298,49 +292,31 @@ const STYLES = `
   .ed-card-value {
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: clamp(0.88rem, 1.6vw, 1rem);
+    font-size: clamp(0.95rem, 1.8vw, 1.1rem);
     color: var(--color-text);
     line-height: 1.4;
     margin: 0;
   }
 
-  .ed-card-hint {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.55rem;
-    color: rgba(12,230,68,0.3);
-    letter-spacing: 0.1em;
-    position: absolute;
-    bottom: 0.65rem;
-    right: 0.8rem;
-    /* hidden on desktop — hover is self-evident */
-    display: none;
-  }
-
-  @media (hover: none) {
-    .ed-card-hint { display: block; }
-  }
-
   /* ── BACK ──────────────────────────────────────────── */
   .ed-card-back {
     transform: rotateY(180deg);
-    border-color: rgba(12,230,68,0.5);
-    background: rgba(6,14,12,0.96);
-    gap: 0.6rem;
+    border-color: rgba(12, 230, 68, 0.5);
+    gap: 0.7rem;
     padding: 1.75rem 1.5rem;
   }
 
-  /* green radial bloom on back */
-  .ed-card-back .ed-card-bloom {
+  .ed-card-back-bloom {
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at 50% 30%, rgba(12,230,68,0.08) 0%, transparent 65%);
+    background: radial-gradient(ellipse at 50% 30%, rgba(12, 230, 68, 0.08) 0%, transparent 65%);
     pointer-events: none;
   }
 
   .ed-card-back-label {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.58rem;
-    color: rgba(12,230,68,0.45);
+    font-size: 0.62rem;
+    color: rgba(12, 230, 68, 0.6);
     letter-spacing: 0.14em;
     text-transform: uppercase;
     margin: 0;
@@ -350,49 +326,34 @@ const STYLES = `
 
   .ed-card-back-title {
     font-family: var(--font-mech);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     color: var(--color-primary);
     letter-spacing: 0.03em;
     margin: 0;
     line-height: 1.25;
-    text-shadow: 0 0 14px rgba(12,230,68,0.35);
+    text-shadow: 0 0 14px rgba(12, 230, 68, 0.35);
     position: relative;
     z-index: 1;
     text-transform: uppercase;
   }
 
   .ed-card-back-divider {
-    width: 32px;
+    width: 36px;
     height: 1px;
-    background: rgba(12,230,68,0.35);
+    background: rgba(12, 230, 68, 0.35);
     position: relative;
     z-index: 1;
   }
 
   .ed-card-back-body {
     font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    color: rgba(245,247,246,0.68);
+    font-size: 0.85rem;
+    color: rgba(245, 247, 246, 0.72);
     line-height: 1.65;
     margin: 0;
     max-width: 24ch;
     position: relative;
     z-index: 1;
-  }
-
-  .ed-card-back-hint {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.55rem;
-    color: rgba(12,230,68,0.3);
-    letter-spacing: 0.1em;
-    position: absolute;
-    bottom: 0.65rem;
-    right: 0.8rem;
-    display: none;
-  }
-
-  @media (hover: none) {
-    .ed-card-back-hint { display: block; }
   }
 
 
@@ -700,6 +661,64 @@ const STYLES = `
 
   @keyframes ed-status-pulse {
     50% { box-shadow: 0 0 8px rgba(12,230,68,0.5); }
+  }
+
+  /* Mobile timeline optimizations */
+  @media (max-width: 640px) {
+    .ed-timeline {
+      padding-left: 1.75rem;
+    }
+
+    .ed-timeline::before {
+      left: 5px;
+    }
+
+    .ed-timeline-pulse {
+      left: 2px;
+      width: 7px;
+      height: 7px;
+    }
+
+    .ed-timeline-node {
+      left: calc(-1.75rem + 1px);
+      width: 10px;
+      height: 10px;
+      top: 6px;
+    }
+
+    .ed-timeline-item::before {
+      left: calc(-1.75rem + 11px);
+      width: 0.5rem;
+      top: 10px;
+    }
+
+    .ed-timeline-item {
+      padding-bottom: 1.35rem;
+    }
+
+    .ed-timeline-card {
+      padding: 0.85rem 0.95rem;
+    }
+
+    .ed-tl-phase {
+      padding-right: 4.2rem;
+    }
+
+    .ed-tl-title {
+      font-size: 0.92rem;
+      padding-right: 2.5rem;
+    }
+
+    .ed-tl-desc {
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .ed-tl-status {
+      top: 0.75rem;
+      right: 0.75rem;
+      font-size: 0.52rem;
+    }
   }
 
   /* Two-column layout */
@@ -1074,23 +1093,20 @@ function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
 
           {/* FRONT */}
           <div className="ed-card-front">
-            <span className="ed-card-sweep" aria-hidden="true" />
             <div className="ed-card-icon-glow">
-              <Icon className="ed-card-icon" size={22} strokeWidth={1.5} />
+              <Icon className="ed-card-icon" size={24} strokeWidth={1.5} />
             </div>
             <p className="ed-card-label">{label}</p>
             <p className="ed-card-value">{value}</p>
-            <span className="ed-card-hint">tap to reveal</span>
           </div>
 
           {/* BACK */}
           <div className="ed-card-back">
-            <span className="ed-card-bloom" aria-hidden="true" />
+            <span className="ed-card-back-bloom" aria-hidden="true" />
             <p className="ed-card-back-label">{label}</p>
             <p className="ed-card-back-title">{backTitle}</p>
             <div className="ed-card-back-divider" />
             <p className="ed-card-back-body">{backBody}</p>
-            <span className="ed-card-back-hint">tap to flip back</span>
           </div>
 
         </div>
