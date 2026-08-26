@@ -777,83 +777,42 @@ const STYLES = `
 
   .ed-map-frame {
     position: relative;
-    height: clamp(140px, 18vw, 200px);
-    border: 1px solid rgba(12,230,68,0.2);
-    background:
-      linear-gradient(rgba(12,230,68,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(12,230,68,0.04) 1px, transparent 1px),
-      #071110;
-    background-size: 24px 24px, 24px 24px;
+    height: clamp(170px, 22vw, 230px);
+    border: 1px solid rgba(12,230,68,0.3);
+    border-radius: 2px;
     overflow: hidden;
-    display: flex;
+    background: #071110;
+    margin-bottom: 0.75rem;
+  }
+
+  .ed-map-frame iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    filter: invert(92%) hue-rotate(180deg) contrast(1.15) brightness(0.85);
+    transition: filter 0.3s ease;
+  }
+
+  .ed-map-frame:hover iframe {
+    filter: invert(92%) hue-rotate(180deg) contrast(1.25) brightness(0.95);
+  }
+
+  .ed-map-link-btn {
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
-  .ed-map-frame::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 50% 50%, rgba(12,230,68,0.09) 0%, transparent 65%);
-    pointer-events: none;
-  }
-
-  .ed-crosshair {
-    position: relative;
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-  }
-
-  .ed-crosshair::before,
-  .ed-crosshair::after {
-    content: "";
-    position: absolute;
-    background: rgba(12,230,68,0.6);
-  }
-
-  .ed-crosshair::before {
-    top: 50%; left: 0;
-    transform: translateY(-50%);
-    width: 100%; height: 1px;
-  }
-
-  .ed-crosshair::after {
-    left: 50%; top: 0;
-    transform: translateX(-50%);
-    width: 1px; height: 100%;
-  }
-
-  .ed-crosshair-dot {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%,-50%);
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    box-shadow: 0 0 10px 3px rgba(12,230,68,0.6);
-    animation: ed-ping 2s ease-out infinite;
-  }
-
-  @keyframes ed-ping {
-    0%  { box-shadow: 0 0 0 0 rgba(12,230,68,0.6); }
-    70% { box-shadow: 0 0 0 16px rgba(12,230,68,0); }
-    100%{ box-shadow: 0 0 0 0 rgba(12,230,68,0); }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ed-crosshair-dot { animation: none; }
-  }
-
-  .ed-map-label {
-    position: absolute;
-    bottom: 0.6rem;
-    right: 0.75rem;
+    gap: 0.35rem;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    color: rgba(12,230,68,0.5);
+    font-size: 0.65rem;
+    color: var(--color-primary);
     letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .ed-map-link-btn:hover {
+    color: #14ff5a;
+    transform: translateX(3px);
   }
 
   /* CTA panel */
@@ -1225,22 +1184,22 @@ export default function EventDetails() {
                   Chengannur — 689121<br />
                   Alappuzha District, Kerala, India
                 </p>
-                <div
-                  className="ed-map-frame"
-                  title="View on Google Maps"
-                  onClick={() =>
-                    window.open(
-                      "https://maps.google.com/?q=College+of+Engineering+Chengannur",
-                      "_blank",
-                      "noopener"
-                    )
-                  }
-                >
-                  <div className="ed-crosshair">
-                    <span className="ed-crosshair-dot" />
-                  </div>
-                  <span className="ed-map-label">click to open maps</span>
+                <div className="ed-map-frame">
+                  <iframe
+                    src="https://maps.google.com/maps?q=College%20of%20Engineering%20Chengannur&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                    title="College of Engineering Chengannur Google Map"
+                    loading="lazy"
+                    allowFullScreen
+                  />
                 </div>
+                <a
+                  href="https://maps.google.com/?q=College+of+Engineering+Chengannur"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ed-map-link-btn"
+                >
+                  Open in Google Maps &rarr;
+                </a>
               </div>
 
               {/* Registration fee */}
