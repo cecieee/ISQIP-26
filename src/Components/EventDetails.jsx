@@ -498,6 +498,8 @@ const STYLES = `
     gap: 0.75rem;
   }
 
+  .ed-timeline-title span { color: var(--color-primary); }
+
   .ed-timeline-title::after {
     content: "";
     flex: 1;
@@ -1190,7 +1192,7 @@ export default function EventDetails() {
 
             {/* Left: Timeline */}
             <div data-aos="fade-right" data-aos-delay="80">
-              <h3 className="ed-timeline-title">Programme Timeline</h3>
+              <h3 className="ed-timeline-title">Programme <span>Timeline</span></h3>
               <div className="ed-timeline">
                 <span className="ed-timeline-pulse" />
                 {TIMELINE.map((item, i) => (
@@ -1223,7 +1225,7 @@ export default function EventDetails() {
 
               {/* Venue panel */}
               <div className="ed-venue-panel">
-                <p className="ed-venue-name">College of Engineering Chengannur</p>
+                <p className="ed-venue-name">College of Engineering <span>Chengannur</span></p>
                 <p className="ed-venue-address">
                   Chengannur — 689121<br />
                   Alappuzha District, Kerala, India
