@@ -148,13 +148,15 @@ const STYLES = `
   }
 
   .ed-card-wrap {
-    perspective: 900px;
+    perspective: 1000px;
     cursor: pointer;
     width: 100%;
     height: 100%;
     min-height: 220px;
+    position: relative;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    pointer-events: auto;
   }
 
   .ed-card-inner {
@@ -163,7 +165,9 @@ const STYLES = `
     height: 100%;
     min-height: 220px;
     transform-style: preserve-3d;
+    transform-origin: center center;
     transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    pointer-events: none;
   }
 
   /* Desktop: pure CSS hover flip & animations — no JS involved */
