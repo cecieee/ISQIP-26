@@ -126,9 +126,20 @@ const STYLES = `
   /* 3-D Flip Cards grid */
   .ed-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: clamp(1rem, 2.5vw, 1.4rem);
     margin-bottom: clamp(3.5rem, 7vw, 5.5rem);
+  }
+
+  /* Desktop: 4 on top, 2 centered on bottom */
+  @media (min-width: 900px) {
+    .ed-cards-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    /* 5th card → column 2, 6th card → column 3  →  centered in 4-col grid */
+    .ed-card-wrap:nth-child(5) { grid-column: 2 / 3; }
+    .ed-card-wrap:nth-child(6) { grid-column: 3 / 4; }
   }
 
   .ed-card-wrap {
@@ -146,10 +157,21 @@ const STYLES = `
     transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
-  .ed-card-wrap:hover .ed-card-inner,
-  .ed-card-wrap.flipped .ed-card-inner {
-    transform: rotateY(180deg);
+
+  /* Desktop: pure CSS hover flip — no JS involved */
+  @media (hover: hover) {
+    .ed-card-wrap:hover .ed-card-inner {
+      transform: rotateY(180deg);
+    }
   }
+
+  /* Mobile: tap-toggle via .flipped class set by onClick */
+  @media (hover: none) {
+    .ed-card-wrap.flipped .ed-card-inner {
+      transform: rotateY(180deg);
+    }
+  }
+
 
   /* ── shared face base ──────────────────────────────── */
   .ed-card-front,
@@ -280,6 +302,12 @@ const STYLES = `
     position: absolute;
     bottom: 0.65rem;
     right: 0.8rem;
+    /* hidden on desktop — hover is self-evident */
+    display: none;
+  }
+
+  @media (hover: none) {
+    .ed-card-hint { display: block; }
   }
 
   /* ── BACK ──────────────────────────────────────────── */
@@ -311,16 +339,16 @@ const STYLES = `
   }
 
   .ed-card-back-title {
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
+    font-family: var(--font-mech);
     font-size: 1.05rem;
     color: var(--color-primary);
-    letter-spacing: 0.01em;
+    letter-spacing: 0.03em;
     margin: 0;
     line-height: 1.25;
     text-shadow: 0 0 14px rgba(12,230,68,0.35);
     position: relative;
     z-index: 1;
+    text-transform: uppercase;
   }
 
   .ed-card-back-divider {
@@ -350,6 +378,11 @@ const STYLES = `
     position: absolute;
     bottom: 0.65rem;
     right: 0.8rem;
+    display: none;
+  }
+
+  @media (hover: none) {
+    .ed-card-back-hint { display: block; }
   }
 
 
@@ -1030,10 +1063,17 @@ function StatItem({ value, suffix, label, trigger }) {
 function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
   const [flipped, setFlipped] = useState(false);
 
+  const handleClick = () => {
+    // Only toggle on touch devices — desktop uses pure CSS hover
+    if (window.matchMedia("(hover: none)").matches) {
+      setFlipped((f) => !f);
+    }
+  };
+
   return (
     <div
       className={`ed-card-wrap${flipped ? " flipped" : ""}`}
-      onClick={() => setFlipped((f) => !f)}
+      onClick={handleClick}
       data-aos="fade-up"
       data-aos-delay={delay}
     >
@@ -1047,7 +1087,7 @@ function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
           </div>
           <p className="ed-card-label">{label}</p>
           <p className="ed-card-value">{value}</p>
-          <span className="ed-card-hint">hover to flip</span>
+          <span className="ed-card-hint">tap to reveal</span>
         </div>
 
         {/* BACK */}
@@ -1057,7 +1097,7 @@ function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
           <p className="ed-card-back-title">{backTitle}</p>
           <div className="ed-card-back-divider" />
           <p className="ed-card-back-body">{backBody}</p>
-          <span className="ed-card-back-hint">hover off to flip back</span>
+          <span className="ed-card-back-hint">tap to flip back</span>
         </div>
 
       </div>
