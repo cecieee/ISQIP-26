@@ -138,14 +138,23 @@ const STYLES = `
     }
 
     /* 5th card → column 2, 6th card → column 3  →  centered in 4-col grid */
-    .ed-card-wrap:nth-child(5) { grid-column: 2 / 3; }
-    .ed-card-wrap:nth-child(6) { grid-column: 3 / 4; }
+    .ed-card-item:nth-child(5) { grid-column: 2 / 3; }
+    .ed-card-item:nth-child(6) { grid-column: 3 / 4; }
+  }
+
+  .ed-card-item {
+    height: 100%;
+    min-height: 220px;
   }
 
   .ed-card-wrap {
     perspective: 900px;
     cursor: pointer;
+    width: 100%;
+    height: 100%;
     min-height: 220px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
   .ed-card-inner {
@@ -157,21 +166,28 @@ const STYLES = `
     transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
-
-  /* Desktop: pure CSS hover flip — no JS involved */
+  /* Desktop: pure CSS hover flip & animations — no JS involved */
   @media (hover: hover) {
     .ed-card-wrap:hover .ed-card-inner {
       transform: rotateY(180deg);
     }
-  }
 
-  /* Mobile: tap-toggle via .flipped class set by onClick */
-  @media (hover: none) {
-    .ed-card-wrap.flipped .ed-card-inner {
-      transform: rotateY(180deg);
+    .ed-card-wrap:hover .ed-card-front::before,
+    .ed-card-wrap:hover .ed-card-front::after {
+      width: 22px;
+      height: 22px;
+    }
+
+    .ed-card-wrap:hover .ed-card-front .ed-card-sweep {
+      top: 120%;
+      transition: top 0.6s ease-in;
     }
   }
 
+  /* Tap / flipped state */
+  .ed-card-wrap.flipped .ed-card-inner {
+    transform: rotateY(180deg);
+  }
 
   /* ── shared face base ──────────────────────────────── */
   .ed-card-front,
@@ -221,12 +237,7 @@ const STYLES = `
     border-right: 2px solid rgba(12,230,68,0.7);
   }
 
-  .ed-card-wrap:hover .ed-card-front::before,
-  .ed-card-wrap:hover .ed-card-front::after {
-    width: 22px; height: 22px;
-  }
-
-  /* scan-sweep line on hover */
+  /* scan-sweep line on hover (only enabled on desktop hover) */
   .ed-card-front .ed-card-sweep {
     position: absolute;
     top: -100%;
@@ -240,11 +251,6 @@ const STYLES = `
     );
     pointer-events: none;
     transition: top 0s;
-  }
-
-  .ed-card-wrap:hover .ed-card-front .ed-card-sweep {
-    top: 120%;
-    transition: top 0.6s ease-in;
   }
 
   /* ── FRONT ─────────────────────────────────────────── */
@@ -728,10 +734,14 @@ const STYLES = `
   .ed-venue-name {
     font-family: var(--font-mech);
     font-size: clamp(1.15rem, 2.5vw, 1.5rem);
-    color: var(--color-primary);
+    color: var(--color-text);
     text-transform: uppercase;
     margin: 1.5rem 0 0.35rem;
-    text-shadow: 0 0 12px rgba(12,230,68,0.5);
+    text-shadow: 0 0 12px rgba(12,230,68,0.25);
+  }
+
+  .ed-venue-name span {
+    color: var(--color-primary);
   }
 
   .ed-venue-address {
@@ -913,28 +923,6 @@ const STYLES = `
   }
 
   .ed-register-btn:active { transform: translateY(0); }
-
-  /* Terminal footer bar */
-  .ed-terminal-bar {
-    margin-top: clamp(3rem, 5vw, 4rem);
-    border-top: 1px solid rgba(12,230,68,0.15);
-    padding-top: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    color: rgba(12,230,68,0.35);
-    letter-spacing: 0.08em;
-  }
-
-  .ed-terminal-bar-blink {
-    display: inline-block;
-    width: 7px; height: 12px;
-    background: rgba(12,230,68,0.4);
-    animation: cursorBlink 1s steps(1) infinite;
-    flex-shrink: 0;
-  }
 `;
 
 /* =========================================================
@@ -947,7 +935,6 @@ const CARDS = [
     value: "Sep 15 – Oct 10, 2026",
     backTitle: "Duration",
     backBody: "4-week intensive programme with weekend & weekday sessions.",
-    bar: "78%",
   },
   {
     Icon: MapPin,
@@ -955,7 +942,6 @@ const CARDS = [
     value: "CEC Main Campus, Chengannur",
     backTitle: "Campus",
     backBody: "College of Engineering Chengannur — fully on-campus, hands-on experience.",
-    bar: "62%",
   },
   {
     Icon: Wifi,
@@ -963,7 +949,6 @@ const CARDS = [
     value: "In-Person",
     backTitle: "Hybrid Option",
     backBody: "Select sessions available online for outstation participants.",
-    bar: "45%",
   },
   {
     Icon: Clock,
@@ -971,7 +956,6 @@ const CARDS = [
     value: "3–4 Hrs / Session",
     backTitle: "Schedule",
     backBody: "Weekday evenings + Saturday mornings. No clash with academics.",
-    bar: "55%",
   },
   {
     Icon: Users,
@@ -979,7 +963,6 @@ const CARDS = [
     value: "S1 – S8, Any Branch",
     backTitle: "Who Can Join",
     backBody: "Open to all UG students of CEC. Final year students get priority.",
-    bar: "90%",
   },
   {
     Icon: IndianRupee,
@@ -987,7 +970,6 @@ const CARDS = [
     value: "Rs. 300 / Person",
     backTitle: "What's Included",
     backBody: "Full programme access, resource kits, certificates & placement support.",
-    bar: "70%",
   },
 ];
 
@@ -1078,43 +1060,36 @@ function StatItem({ value, suffix, label, trigger }) {
 function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
   const [flipped, setFlipped] = useState(false);
 
-  const handleClick = () => {
-    // Only toggle on touch devices — desktop uses pure CSS hover
-    if (window.matchMedia("(hover: none)").matches) {
-      setFlipped((f) => !f);
-    }
-  };
-
   return (
-    <div
-      className={`ed-card-wrap${flipped ? " flipped" : ""}`}
-      onClick={handleClick}
-      data-aos="fade-up"
-      data-aos-delay={delay}
-    >
-      <div className="ed-card-inner">
+    <div className="ed-card-item" data-aos="fade-up" data-aos-delay={delay}>
+      <div
+        className={`ed-card-wrap${flipped ? " flipped" : ""}`}
+        onClick={() => setFlipped((f) => !f)}
+      >
+        <div className="ed-card-inner">
 
-        {/* FRONT */}
-        <div className="ed-card-front">
-          <span className="ed-card-sweep" aria-hidden="true" />
-          <div className="ed-card-icon-glow">
-            <Icon className="ed-card-icon" size={22} strokeWidth={1.5} />
+          {/* FRONT */}
+          <div className="ed-card-front">
+            <span className="ed-card-sweep" aria-hidden="true" />
+            <div className="ed-card-icon-glow">
+              <Icon className="ed-card-icon" size={22} strokeWidth={1.5} />
+            </div>
+            <p className="ed-card-label">{label}</p>
+            <p className="ed-card-value">{value}</p>
+            <span className="ed-card-hint">tap to reveal</span>
           </div>
-          <p className="ed-card-label">{label}</p>
-          <p className="ed-card-value">{value}</p>
-          <span className="ed-card-hint">tap to reveal</span>
-        </div>
 
-        {/* BACK */}
-        <div className="ed-card-back">
-          <span className="ed-card-bloom" aria-hidden="true" />
-          <p className="ed-card-back-label">{label}</p>
-          <p className="ed-card-back-title">{backTitle}</p>
-          <div className="ed-card-back-divider" />
-          <p className="ed-card-back-body">{backBody}</p>
-          <span className="ed-card-back-hint">tap to flip back</span>
-        </div>
+          {/* BACK */}
+          <div className="ed-card-back">
+            <span className="ed-card-bloom" aria-hidden="true" />
+            <p className="ed-card-back-label">{label}</p>
+            <p className="ed-card-back-title">{backTitle}</p>
+            <div className="ed-card-back-divider" />
+            <p className="ed-card-back-body">{backBody}</p>
+            <span className="ed-card-back-hint">tap to flip back</span>
+          </div>
 
+        </div>
       </div>
     </div>
   );
@@ -1278,12 +1253,6 @@ export default function EventDetails() {
                 <ChevronRight size={18} strokeWidth={2} />
               </button>
             </div>
-          </div>
-
-          {/* Terminal footer bar */}
-          <div className="ed-terminal-bar" data-aos="fade-up" data-aos-delay="200">
-            <span className="ed-terminal-bar-blink" />
-            ISQIP_26 :: SESSION_DETAILS_LOADED :: IEEE_SB_CEC :: ALL_SYSTEMS_NOMINAL
           </div>
 
         </div>
