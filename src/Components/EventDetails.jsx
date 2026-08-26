@@ -15,7 +15,7 @@ import {
    STYLES
    ========================================================= */
 const STYLES = `
-  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600&family=Bruno+Ace&display=swap");
 
   /* section wrapper */
   .ed-section {
@@ -290,12 +290,12 @@ const STYLES = `
   }
 
   .ed-card-value {
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(0.85rem, 1.4vw, 0.98rem);
     color: var(--color-text);
-    line-height: 1.4;
+    line-height: 1.45;
     margin: 0;
+    letter-spacing: 0.02em;
   }
 
   /* ── BACK ──────────────────────────────────────────── */
@@ -463,19 +463,29 @@ const STYLES = `
     color: var(--color-text);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    margin: 0 0 clamp(2rem, 4vw, 3rem);
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+    margin: 0 0 0.6rem;
+    line-height: 1.15;
+    text-align: center;
   }
 
   .ed-timeline-title span { color: var(--color-primary); }
 
-  .ed-timeline-title::after {
-    content: "";
-    flex: 1;
+  .ed-timeline-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0 auto clamp(1.8rem, 3.5vw, 2.6rem);
+  }
+
+  .ed-timeline-divider .ed-divider-line {
     height: 1px;
-    background: linear-gradient(90deg, rgba(12,230,68,0.4), transparent);
+    width: clamp(30px, 5vw, 60px);
+    background: linear-gradient(90deg, transparent, rgba(12,230,68,0.6));
+  }
+
+  .ed-timeline-divider .ed-divider-line:last-child {
+    background: linear-gradient(270deg, transparent, rgba(12,230,68,0.6));
   }
 
   .ed-timeline {
@@ -755,12 +765,14 @@ const STYLES = `
   }
 
   .ed-venue-name {
-    font-family: var(--font-mech);
-    font-size: clamp(1.15rem, 2.5vw, 1.5rem);
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
     color: var(--color-text);
     text-transform: uppercase;
     margin: 1.5rem 0 0.35rem;
     text-shadow: 0 0 12px rgba(12,230,68,0.25);
+    letter-spacing: 0.02em;
+    line-height: 1.35;
   }
 
   .ed-venue-name span {
@@ -1147,6 +1159,11 @@ export default function EventDetails() {
             {/* Left: Timeline */}
             <div data-aos="fade-right" data-aos-delay="80">
               <h3 className="ed-timeline-title">Programme <span>Timeline</span></h3>
+              <div className="ed-timeline-divider">
+                <span className="ed-divider-line" />
+                <span className="ed-divider-diamond" />
+                <span className="ed-divider-line" />
+              </div>
               <div className="ed-timeline">
                 <span className="ed-timeline-pulse" />
                 {TIMELINE.map((item, i) => (
