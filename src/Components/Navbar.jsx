@@ -216,7 +216,7 @@ export default function Navbar() {
   const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
   
   const progress       = Math.min(1, Math.max(0, scrollY / 300));
-  const visible        = scrollVH > 2.2; // Show navbar after 2.2 viewport heights
+  const visible        = scrollVH > 3.1; // Show navbar at 3.1vh
   const contentOpacity = Math.max(0, (progress - 0.3) / 0.7);
   const width          = visible
     ? `min(${Math.round(38 + progress * 54)}vw, ${Math.round(380 + progress * 720)}px)`

@@ -188,12 +188,12 @@ const HERO_STYLES = `
   .hero-sticky{ height: 100vh; }
   @supports (height: 100svh) { .hero-sticky{ height: 100svh; } }
 
-  .hero-scene{ min-height: 250vh; }
-  @supports (height: 100svh) { .hero-scene{ min-height: 250svh; } }
+  .hero-scene{ min-height: 350vh; }
+  @supports (height: 100svh) { .hero-scene{ min-height: 350svh; } }
   @media (max-width: 640px){
     /* shorter scroll runway on phones so the reveal doesn't feel like an endless scroll */
-    .hero-scene{ min-height: 190vh; }
-    @supports (height: 100svh) { .hero-scene{ min-height: 190svh; } }
+    .hero-scene{ min-height: 300vh; }
+    @supports (height: 100svh) { .hero-scene{ min-height: 300svh; } }
   }
 
   /* headline: Share Tech Mono is loaded and reads as an arcade/terminal
@@ -314,15 +314,35 @@ export default function Hero() {
   const tvDropProgress = Math.min(scrollVH / 0.8, 1);
   const singleTVTop = -80 + tvDropProgress * 100;
 
-  const transitionProgress = Math.max(0, Math.min(1, (scrollVH - 0.8) / 0.3));
-  const tvOpacity = Math.max(0, 1 - transitionProgress);
-  const isqipOpacity = transitionProgress;
+  // The TV drop finishes at scrollVH 0.8. Hold it static there for a bit
+  // (0.8 -> 1.1) before the zoom-into-the-screen transition kicks in.
+  const HOLD_END = 1.1;
+  const ZOOM_END = 1.6;
+  const ISQIP_END = 1.9;
+  
+  // Zoom phase: Camera zooms INTO the single TV screen (1.1 -> 1.6)
+  const zoomProgress = Math.max(0, Math.min(1, (scrollVH - HOLD_END) / (ZOOM_END - HOLD_END)));
+  
+  // ISQIP appears AFTER we're inside the TV (1.6 -> 1.9)
+  const isqipProgress = Math.max(0, Math.min(1, (scrollVH - ZOOM_END) / (ISQIP_END - ZOOM_END)));
+  const isqipOpacity = isqipProgress;
 
-  const ctaOpacity = Math.max(0, 1 - Math.max(0, (scrollVH - 2.0) / 0.3));
+  // CTA buttons stay visible for a very long time (3.2 -> 3.5)
+  const ctaOpacity = Math.max(0, 1 - Math.max(0, (scrollVH - 3.2) / 0.3));
 
-  const tvScale = 1 - transitionProgress * 0.2;
-  const tvBlur = transitionProgress * 20;
-  const isqipScale = 0.9 + transitionProgress * 0.1;
+  // Single TV zooms up massively as camera dives into it
+  const singleTVScale = 1 + zoomProgress * 8; // Scales from 1x to 9x - screen fills viewport
+  
+  // Side TVs scale slightly and fade as we focus on center
+  const sideTVScale = 1 + zoomProgress * 0.3;
+  const sideTVOpacity = Math.max(0, 1 - zoomProgress * 1.5);
+  
+  // Single TV fades out at the very end as we pass through the screen
+  const singleTVOpacity = Math.max(0, 1 - Math.max(0, (zoomProgress - 0.85) / 0.15));
+  const tvBlur = zoomProgress * 40; // Heavy blur as we zoom through
+  
+  // ISQIP emerges from within the TV screen
+  const isqipScale = 1.2 - isqipProgress * 0.2;
 
   return (
     <>
@@ -345,28 +365,28 @@ export default function Hero() {
           <div style={{
             position: 'absolute', bottom: '-10%', left: '-5%', width: '30vw', height: '50vh',
             background: 'radial-gradient(ellipse, rgba(12,230,68,0.25) 0%, rgba(12,230,68,0.15) 30%, transparent 70%)',
-            filter: 'blur(60px)', opacity: tvOpacity * 0.8, transition: 'opacity 0.3s ease-out', zIndex: 3, pointerEvents: 'none',
+            filter: 'blur(60px)', opacity: sideTVOpacity * 0.8, transition: 'opacity 0.3s ease-out', zIndex: 3, pointerEvents: 'none',
           }} />
 
           <div style={{
             position: 'absolute', bottom: '-10%', right: '-5%', width: '30vw', height: '50vh',
             background: 'radial-gradient(ellipse, rgba(12,230,68,0.25) 0%, rgba(12,230,68,0.15) 30%, transparent 70%)',
-            filter: 'blur(60px)', opacity: tvOpacity * 0.8, transition: 'opacity 0.3s ease-out', zIndex: 3, pointerEvents: 'none',
+            filter: 'blur(60px)', opacity: sideTVOpacity * 0.8, transition: 'opacity 0.3s ease-out', zIndex: 3, pointerEvents: 'none',
           }} />
 
           <div style={{
             position: 'absolute', top: `${singleTVTop + 5}vh`, left: '50%', transform: 'translateX(-50%)',
             width: 'min(25vw, 340px)', height: '40vh',
             background: 'radial-gradient(ellipse, rgba(12,230,68,0.3) 0%, rgba(12,230,68,0.18) 30%, transparent 70%)',
-            filter: 'blur(50px)', opacity: tvOpacity * 0.9, transition: 'opacity 0.3s ease-out', zIndex: 8, pointerEvents: 'none',
+            filter: 'blur(50px)', opacity: singleTVOpacity * 0.9, transition: 'opacity 0.3s ease-out', zIndex: 8, pointerEvents: 'none',
           }} />
 
           <img
             src={tvLeft} alt="" aria-hidden="true" className="hero-tv-side"
             style={{
-              left: 0, bottom: -12, objectPosition: 'bottom left', opacity: tvOpacity,
-              transform: `scale(${tvScale})`, transformOrigin: 'bottom left',
-              filter: `blur(${tvBlur}px)`,
+              left: 0, bottom: -12, objectPosition: 'bottom left', opacity: sideTVOpacity,
+              transform: `scale(${sideTVScale})`, transformOrigin: 'bottom left',
+              filter: `blur(${tvBlur * 0.5}px)`,
               transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
               zIndex: 5,
             }}
@@ -375,9 +395,9 @@ export default function Hero() {
           <img
             src={tvRight} alt="" aria-hidden="true" className="hero-tv-side"
             style={{
-              right: 0, bottom: -12, objectPosition: 'bottom right', opacity: tvOpacity,
-              transform: `scale(${tvScale})`, transformOrigin: 'bottom right',
-              filter: `blur(${tvBlur}px)`,
+              right: 0, bottom: -12, objectPosition: 'bottom right', opacity: sideTVOpacity,
+              transform: `scale(${sideTVScale})`, transformOrigin: 'bottom right',
+              filter: `blur(${tvBlur * 0.5}px)`,
               transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
               zIndex: 5,
             }}
@@ -386,8 +406,8 @@ export default function Hero() {
           <img
             src={singleTV} alt="" aria-hidden="true" className="hero-tv-single"
             style={{
-              top: `${singleTVTop}vh`, transform: `translateX(-50%) scale(${tvScale})`,
-              opacity: tvOpacity, filter: `blur(${tvBlur}px)`,
+              top: `${singleTVTop}vh`, transform: `translateX(-50%) scale(${singleTVScale})`,
+              opacity: singleTVOpacity, filter: `blur(${tvBlur}px)`,
               transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
               zIndex: 10,
             }}

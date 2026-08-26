@@ -150,7 +150,7 @@ const STYLES = `
     font-size: clamp(2.1rem, 6vw, 3.4rem);
     line-height: 1.02;
     letter-spacing: .02em;
-    margin: 0 0 .9rem;
+    margin: 0 0 2.5rem;
   }
   .lt-sub{
     font-family:'Inter', sans-serif;
