@@ -5,17 +5,11 @@ import {
   MapPin,
   Calendar,
   Clock,
-  Users,
-  Wifi,
   Radio,
   CreditCard,
-  ChevronRight,
-  Navigation,
-  ExternalLink,
-  Terminal,
-  Train,
-  ShieldAlert,
   Sparkles,
+  ExternalLink,
+  Train,
 } from "lucide-react";
 
 /* =========================================================
@@ -348,31 +342,31 @@ const STYLES = `
   }
 
   /* =========================================================
-     LOWER SECTION: SCHEDULE & VENUE
+     LOWER SECTION: SCHEDULE & VENUE (MINIMAL CYBER HUD)
      ========================================================= */
   .ed-lower-grid {
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
-    gap: clamp(2.5rem, 5vw, 4.5rem);
+    gap: clamp(2rem, 4vw, 3.5rem);
     align-items: start;
   }
 
   @media (max-width: 1024px) {
     .ed-lower-grid {
       grid-template-columns: 1fr;
-      gap: 3.5rem;
+      gap: 2.75rem;
     }
   }
 
-  /* Subheading */
+  /* Subheadings */
   .ed-subheading-wrap {
-    margin-bottom: clamp(1.5rem, 3vw, 2.2rem);
+    margin-bottom: clamp(1.2rem, 2.5vw, 1.8rem);
   }
 
   .ed-subheading-tag {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.65rem;
-    color: rgba(12, 230, 68, 0.65);
+    color: rgba(12, 230, 68, 0.7);
     letter-spacing: 0.16em;
     text-transform: uppercase;
     display: block;
@@ -381,7 +375,7 @@ const STYLES = `
 
   .ed-subheading {
     font-family: var(--font-mech);
-    font-size: clamp(1.4rem, 3.2vw, 1.9rem);
+    font-size: clamp(1.4rem, 3vw, 1.85rem);
     color: var(--color-text);
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -391,210 +385,136 @@ const STYLES = `
 
   .ed-subheading span { color: var(--color-primary); }
 
-  /* ── SCHEDULE TIMELINE MATRIX ────────────────────────── */
-  .ed-schedule-container {
-    position: relative;
-    padding-left: clamp(1.5rem, 3vw, 2.2rem);
+  /* ── SLEEK TIMELINE MATRIX ────────────────────────── */
+  .ed-schedule-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
   }
 
-  .ed-schedule-container::before {
-    content: "";
-    position: absolute;
-    top: 14px;
-    bottom: 20px;
-    left: 7px;
-    width: 2px;
-    background: linear-gradient(
-      180deg,
-      rgba(12, 230, 68, 0.7) 0%,
-      rgba(12, 230, 68, 0.3) 50%,
-      rgba(12, 230, 68, 0.7) 100%
-    );
-    box-shadow: 0 0 8px rgba(12, 230, 68, 0.3);
-  }
-
-  .ed-schedule-pulse {
-    position: absolute;
-    left: 4px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    box-shadow: 0 0 10px 3px rgba(12, 230, 68, 0.75);
-    animation: ed-rail-pulse 8s ease-in-out infinite;
-    pointer-events: none;
-    z-index: 3;
-  }
-
-  @keyframes ed-rail-pulse {
-    0%   { top: 2%; opacity: 0; }
-    8%   { opacity: 1; }
-    92%  { opacity: 1; }
-    100% { top: 96%; opacity: 0; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .ed-schedule-pulse { animation: none; opacity: 0; }
-  }
-
-  .ed-phase-node {
-    position: relative;
-    margin-bottom: clamp(1.4rem, 2.5vw, 1.8rem);
-  }
-
-  .ed-phase-node:last-child {
-    margin-bottom: 0;
-  }
-
-  .ed-phase-pin {
-    position: absolute;
-    left: calc(-1 * clamp(1.5rem, 3vw, 2.2rem) + 2px);
-    top: 18px;
-    width: 12px;
-    height: 12px;
-    background: var(--color-background);
-    border: 2px solid var(--color-primary);
-    transform: rotate(45deg);
-    box-shadow: 0 0 8px 2px rgba(12, 230, 68, 0.45);
-    transition: all 0.3s ease;
-    z-index: 2;
-  }
-
-  .ed-phase-node:hover .ed-phase-pin {
-    background: var(--color-primary);
-    box-shadow: 0 0 16px 4px rgba(12, 230, 68, 0.8);
-    transform: rotate(45deg) scale(1.15);
-  }
-
-  .ed-phase-card {
-    background: rgba(6, 14, 12, 0.9);
-    border: 1px solid rgba(12, 230, 68, 0.24);
-    padding: clamp(1.1rem, 2.2vw, 1.5rem);
+  .ed-sched-card {
+    background: rgba(6, 14, 12, 0.85);
+    border: 1px solid rgba(12, 230, 68, 0.2);
+    border-radius: 4px;
+    padding: clamp(1rem, 2vw, 1.35rem);
     position: relative;
     overflow: hidden;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
   }
 
-  .ed-phase-card:hover {
-    border-color: rgba(12, 230, 68, 0.6);
-    background: rgba(12, 230, 68, 0.04);
-    transform: translateX(4px);
-    box-shadow: 0 4px 20px rgba(12, 230, 68, 0.08);
-  }
-
-  .ed-phase-card::before {
+  .ed-sched-card::before {
     content: "";
     position: absolute;
-    bottom: -1px; right: -1px;
-    width: 16px; height: 16px;
-    border-bottom: 2px solid rgba(12, 230, 68, 0.5);
-    border-right: 2px solid rgba(12, 230, 68, 0.5);
-    pointer-events: none;
-    transition: width 0.3s, height 0.3s, border-color 0.3s;
+    top: 0; left: 0; bottom: 0;
+    width: 3px;
+    background: var(--color-primary);
+    opacity: 0.35;
+    transition: opacity 0.3s ease, width 0.3s ease, box-shadow 0.3s ease;
   }
 
-  .ed-phase-card:hover::before {
-    width: 24px; height: 24px;
-    border-color: var(--color-primary);
+  .ed-sched-card:hover {
+    border-color: rgba(12, 230, 68, 0.5);
+    background: rgba(12, 230, 68, 0.03);
+    transform: translateX(4px);
+    box-shadow: 0 4px 24px rgba(12, 230, 68, 0.09);
   }
 
-  .ed-phase-meta {
+  .ed-sched-card:hover::before {
+    opacity: 1;
+    width: 4px;
+    box-shadow: 0 0 10px var(--color-primary);
+  }
+
+  /* Date / Index Column */
+  .ed-sched-lead {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.7rem;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 80px;
+    flex-shrink: 0;
+    border-right: 1px dashed rgba(12, 230, 68, 0.18);
+    padding-right: 1rem;
   }
 
-  .ed-phase-badge {
+  .ed-sched-daynum {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--color-primary);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+
+  .ed-sched-date {
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+    color: var(--color-text);
+    line-height: 1.2;
+    margin: 0;
+    letter-spacing: 0.02em;
+  }
+
+  .ed-sched-weekday {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(245, 247, 246, 0.55);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 0.2rem;
+  }
+
+  /* Content Column */
+  .ed-sched-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .ed-sched-title {
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(0.88rem, 1.3vw, 0.98rem);
+    color: var(--color-text);
+    margin: 0;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+  }
+
+  .ed-sched-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .ed-sched-tag {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.76rem;
+    color: rgba(245, 247, 246, 0.78);
+    background: rgba(12, 230, 68, 0.05);
+    border: 1px solid rgba(12, 230, 68, 0.18);
+    border-radius: 3px;
+    padding: 0.15rem 0.55rem;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--color-primary);
-    background: rgba(12, 230, 68, 0.08);
-    border: 1px solid rgba(12, 230, 68, 0.3);
-    padding: 0.2rem 0.55rem;
-    border-radius: 2px;
   }
 
-  .ed-phase-date {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    color: rgba(245, 247, 246, 0.75);
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+  .ed-sched-tag-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-primary);
   }
 
-  .ed-phase-title {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
-    color: var(--color-text);
-    letter-spacing: 0.02em;
-    margin: 0 0 0.5rem;
-    text-transform: uppercase;
-  }
-
-  .ed-phase-desc {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    color: rgba(245, 247, 246, 0.65);
-    line-height: 1.55;
-    margin: 0 0 0.85rem;
-  }
-
-  .ed-phase-sessions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.45rem;
-    border-top: 1px dashed rgba(12, 230, 68, 0.18);
-    padding-top: 0.75rem;
-  }
-
-  .ed-session-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.65rem;
-    font-size: 0.78rem;
-    line-height: 1.45;
-  }
-
-  .ed-session-time {
-    font-family: 'Share Tech Mono', monospace;
-    color: var(--color-primary);
-    font-size: 0.68rem;
-    white-space: nowrap;
-    background: rgba(12, 230, 68, 0.05);
-    border: 1px solid rgba(12, 230, 68, 0.2);
-    padding: 0.1rem 0.4rem;
-    border-radius: 2px;
-    min-width: 90px;
-    text-align: center;
-    flex-shrink: 0;
-  }
-
-  .ed-session-text {
-    font-family: 'Inter', sans-serif;
-    color: rgba(245, 247, 246, 0.8);
-    margin: 0;
-    flex: 1;
-  }
-
-  /* ── REDESIGNED: VENUE CONSOLE ─────────────────────────── */
-  .ed-venue-console {
-    display: flex;
-    flex-direction: column;
-  }
-
+  /* ── VENUE PANEL ──────────────────────────────────── */
   .ed-venue-panel {
     background: rgba(6, 14, 12, 0.85);
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    padding: clamp(1.4rem, 2.5vw, 1.85rem);
+    border: 1px solid rgba(12, 230, 68, 0.22);
+    border-radius: 4px;
+    padding: clamp(1.25rem, 2.5vw, 1.6rem);
     position: relative;
     overflow: hidden;
   }
@@ -603,7 +523,7 @@ const STYLES = `
     content: "";
     position: absolute;
     top: -1px; left: -1px;
-    width: 18px; height: 18px;
+    width: 14px; height: 14px;
     border-top: 2px solid var(--color-primary);
     border-left: 2px solid var(--color-primary);
     pointer-events: none;
@@ -613,66 +533,45 @@ const STYLES = `
     content: "";
     position: absolute;
     bottom: -1px; right: -1px;
-    width: 18px; height: 18px;
+    width: 14px; height: 14px;
     border-bottom: 2px solid var(--color-primary);
     border-right: 2px solid var(--color-primary);
     pointer-events: none;
   }
 
-  .ed-venue-meta-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 0.6rem;
+  .ed-venue-header {
+    margin-bottom: 1.15rem;
   }
 
-  .ed-venue-status-chip {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--color-primary);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .ed-venue-coords {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    color: rgba(245, 247, 246, 0.45);
-    letter-spacing: 0.08em;
-  }
-
-  .ed-venue-name {
+  .ed-venue-title {
     font-family: 'Bruno Ace', cursive;
-    font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
     color: var(--color-text);
     text-transform: uppercase;
     margin: 0 0 0.3rem;
-    line-height: 1.25;
+    line-height: 1.3;
     letter-spacing: 0.02em;
   }
 
-  .ed-venue-name span {
-    color: var(--color-primary);
-  }
+  .ed-venue-title span { color: var(--color-primary); }
 
-  .ed-venue-host {
+  .ed-venue-sub {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.72rem;
     color: rgba(12, 230, 68, 0.85);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin: 0 0 1.2rem;
+    margin: 0;
   }
 
-  /* Custom Cyberpunk Dark Map Frame */
   .ed-map-frame {
     position: relative;
-    height: clamp(180px, 20vw, 210px);
-    border: 1px solid rgba(12, 230, 68, 0.3);
-    border-radius: 2px;
+    height: clamp(160px, 18vw, 190px);
+    border: 1px solid rgba(12, 230, 68, 0.25);
+    border-radius: 3px;
     overflow: hidden;
     background: #071110;
-    margin-bottom: 1.35rem;
+    margin-bottom: 1.2rem;
   }
 
   .ed-map-frame iframe {
@@ -687,33 +586,32 @@ const STYLES = `
     filter: invert(92%) hue-rotate(180deg) contrast(1.3) brightness(0.95);
   }
 
-  /* Location Info Rows */
-  .ed-location-details {
+  .ed-venue-details {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
-    margin-bottom: 1.35rem;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
     border-top: 1px solid rgba(12, 230, 68, 0.12);
     padding-top: 1rem;
   }
 
-  .ed-loc-row {
+  .ed-venue-row {
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
   }
 
-  .ed-loc-icon {
+  .ed-venue-icon {
     color: var(--color-primary);
     margin-top: 2px;
     flex-shrink: 0;
   }
 
-  .ed-loc-content {
+  .ed-venue-info {
     flex: 1;
   }
 
-  .ed-loc-title {
+  .ed-venue-label {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.64rem;
     color: rgba(12, 230, 68, 0.7);
@@ -722,7 +620,7 @@ const STYLES = `
     margin: 0 0 0.15rem;
   }
 
-  .ed-loc-text {
+  .ed-venue-value {
     font-family: 'Inter', sans-serif;
     font-size: 0.82rem;
     color: rgba(245, 247, 246, 0.82);
@@ -730,43 +628,15 @@ const STYLES = `
     margin: 0;
   }
 
-  /* Terminal Attendance Note */
-  .ed-venue-notice {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: rgba(12, 230, 68, 0.9);
-    background: rgba(12, 230, 68, 0.05);
-    border-left: 2px solid var(--color-primary);
-    padding: 0.6rem 0.85rem;
-    margin-bottom: 1.35rem;
-    line-height: 1.45;
-    letter-spacing: 0.03em;
-  }
-
-  .ed-venue-notice-icon {
-    flex-shrink: 0;
-    color: var(--color-primary);
-  }
-
-  /* Action Buttons Group */
-  .ed-venue-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
   .ed-map-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 0.45rem;
+    gap: 0.5rem;
     width: 100%;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
+    font-size: 0.78rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--color-primary);
     background: rgba(12, 230, 68, 0.06);
@@ -774,59 +644,13 @@ const STYLES = `
     padding: 0.75rem 1.2rem;
     text-decoration: none;
     transition: all 0.25s ease;
+    border-radius: 3px;
   }
 
   .ed-map-btn:hover {
-    background: rgba(12, 230, 68, 0.15);
-    border-color: var(--color-primary);
-    color: #14ff5a;
-  }
-
-  /* Cyber CTA Register Button */
-  .ed-register-btn {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.65rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.95rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    font-weight: 600;
-    color: var(--color-background);
     background: var(--color-primary);
-    border: none;
-    padding: 1rem 2rem;
-    cursor: pointer;
-    overflow: hidden;
-    width: 100%;
-    transition: all 0.25s ease;
-    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    color: var(--color-background);
     box-shadow: 0 0 20px rgba(12, 230, 68, 0.4);
-  }
-
-  .ed-register-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
-    transform: translateX(-100%);
-    transition: transform 0.6s ease;
-  }
-
-  .ed-register-btn:hover::before {
-    transform: translateX(100%);
-  }
-
-  .ed-register-btn:hover {
-    background: #14ff5a;
-    box-shadow: 0 0 32px rgba(12, 230, 68, 0.75), 0 0 70px rgba(12, 230, 68, 0.3);
-    transform: translateY(-2px);
-  }
-
-  .ed-register-btn:active {
-    transform: translateY(0);
   }
 `;
 
@@ -880,54 +704,50 @@ const CARDS = [
   },
 ];
 
-// 4-Phase Curriculum & Timeline (Authentic ISQIP Architecture)
-const SCHEDULE_PHASES = [
+// ISQIP '26 Curriculum & Training Milestones (4-Day Architecture)
+const SCHEDULE = [
   {
-    phase: "Phase 01 // Domain Immersion",
-    day: "Day 01 — Saturday",
-    date: "Sep 19, 2026",
-    title: "Inauguration & Core Domain Foundations",
-    desc: "Grand opening address followed by stream-wise domain segregation and deep architectural fundamentals.",
+    dayNum: "Day 01",
+    date: "Sep 19",
+    weekday: "Saturday",
+    title: "Domain Training — Phase I",
     sessions: [
-      { time: "09:00 AM", text: "Inauguration & Keynote Address by Industry Experts" },
-      { time: "10:00 AM – 01:00 PM", text: "Domain Track 1: CS (Systems & Web), EC (VLSI/Embedded), EEE (Power & IoT)" },
-      { time: "02:00 PM – 05:00 PM", text: "Hands-on Workshop: Environment Setup & Toolchain Deployment" },
+      "Inauguration Ceremony",
+      "Domain Tracks (CS / EC / EEE)",
+      "Core Foundation Workshops",
     ],
   },
   {
-    phase: "Phase 02 // Hands-on Build",
-    day: "Day 02 — Sunday",
-    date: "Sep 20, 2026",
-    title: "Practical Engineering & Real-World Build Sprint",
-    desc: "Intensive practical laboratories focusing on enterprise problem statements and hardware-software integration.",
+    dayNum: "Day 02",
+    date: "Sep 20",
+    weekday: "Sunday",
+    title: "Domain Training — Phase II",
     sessions: [
-      { time: "09:30 AM – 01:00 PM", text: "Advanced Track Projects: Real-time Data Pipelines, Embedded Firmware & Circuit Design" },
-      { time: "02:00 PM – 04:30 PM", text: "Mentored Hack Sprint & Live Code / Schematic Reviews" },
-      { time: "04:30 PM – 05:00 PM", text: "Milestone Assessment & Debugging Circle" },
+      "Hands-on Project Development",
+      "Mentored Lab Build Sprint",
+      "Hardware / Software Testing",
     ],
   },
   {
-    phase: "Phase 03 // Career Acceleration",
-    day: "Day 03 — Saturday",
-    date: "Sep 26, 2026",
-    title: "Professional Skills & Placement Readiness",
-    desc: "Empowering engineering students with high-yield career preparation, ATS resume engineering, and aptitude skills.",
+    dayNum: "Day 03",
+    date: "Sep 26",
+    weekday: "Saturday",
+    title: "General Training — Career & Aptitude",
     sessions: [
-      { time: "09:00 AM – 11:00 AM", text: "Resume Engineering & Professional LinkedIn Profile Optimization" },
-      { time: "11:15 AM – 01:00 PM", text: "Aptitude Training & Logical Reasoning Masterclass" },
-      { time: "02:00 PM – 05:00 PM", text: "Group Discussion (GD) Simulations & Corporate Communication Tactics" },
+      "Resume Engineering & Review",
+      "Aptitude & Logical Reasoning",
+      "Group Discussion Simulations",
     ],
   },
   {
-    phase: "Phase 04 // Evaluation & Finale",
-    day: "Day 04 — Sunday",
-    date: "Sep 27, 2026",
-    title: "Mock Interview Drives & Valedictory Ceremony",
-    desc: "Personalized technical & HR interview panels, capstone project evaluation, awards, and certificate distribution.",
+    dayNum: "Day 04",
+    date: "Sep 27",
+    weekday: "Sunday",
+    title: "Mock Interviews & Valedictory",
     sessions: [
-      { time: "09:30 AM – 01:00 PM", text: "1-on-1 Technical & HR Mock Panel Interviews with Corporate Leaders" },
-      { time: "02:00 PM – 03:45 PM", text: "Capstone Project Demonstrations & Peer Reviews" },
-      { time: "04:00 PM – 05:00 PM", text: "Valedictory Ceremony, Award Announcements & Certificate Distribution" },
+      "1-on-1 Mock Interviews (HR & Tech)",
+      "Capstone Project Demonstrations",
+      "Valedictory & Certificate Distribution",
     ],
   },
 ];
@@ -1008,50 +828,42 @@ export default function EventDetails() {
             ))}
           </div>
 
-          {/* Lower Section: Programme Schedule & Venue Console */}
+          {/* Lower Section: Event Schedule & Event Venue */}
           <div className="ed-lower-grid">
 
-            {/* Left Column: Programme Schedule Matrix */}
+            {/* Left Column: Event Schedule */}
             <div data-aos="fade-right" data-aos-delay="80">
               <div className="ed-subheading-wrap">
-                <span className="ed-subheading-tag">// CURRICULUM_MATRIX</span>
+                <span className="ed-subheading-tag">// MILESTONE_TIMELINE</span>
                 <h3 className="ed-subheading">
                   Programme <span>Schedule</span>
                 </h3>
               </div>
 
-              <div className="ed-schedule-container">
-                <span className="ed-schedule-pulse" />
-
-                {SCHEDULE_PHASES.map((phaseItem, index) => (
+              <div className="ed-schedule-stack">
+                {SCHEDULE.map((item, index) => (
                   <div
-                    className="ed-phase-node"
-                    key={phaseItem.phase}
-                    data-aos="fade-right"
-                    data-aos-delay={100 + index * 80}
+                    className="ed-sched-card"
+                    key={item.dayNum}
+                    data-aos="fade-up"
+                    data-aos-delay={100 + index * 60}
                   >
-                    <span className="ed-phase-pin" />
-                    <div className="ed-phase-card">
-                      <div className="ed-phase-meta">
-                        <span className="ed-phase-badge">
-                          <Terminal size={12} />
-                          {phaseItem.phase}
-                        </span>
-                        <span className="ed-phase-date">
-                          <Clock size={13} color="var(--color-primary)" />
-                          {phaseItem.day}
-                        </span>
-                      </div>
+                    {/* Date / Day Lead */}
+                    <div className="ed-sched-lead">
+                      <span className="ed-sched-daynum">{item.dayNum}</span>
+                      <p className="ed-sched-date">{item.date}</p>
+                      <span className="ed-sched-weekday">{item.weekday}</span>
+                    </div>
 
-                      <h4 className="ed-phase-title">{phaseItem.title}</h4>
-                      <p className="ed-phase-desc">{phaseItem.desc}</p>
-
-                      <div className="ed-phase-sessions">
-                        {phaseItem.sessions.map((session, sIdx) => (
-                          <div className="ed-session-row" key={sIdx}>
-                            <span className="ed-session-time">{session.time}</span>
-                            <p className="ed-session-text">{session.text}</p>
-                          </div>
+                    {/* Content & Modules */}
+                    <div className="ed-sched-main">
+                      <h4 className="ed-sched-title">{item.title}</h4>
+                      <div className="ed-sched-tags">
+                        {item.sessions.map((session, sIdx) => (
+                          <span className="ed-sched-tag" key={sIdx}>
+                            <span className="ed-sched-tag-dot" />
+                            {session}
+                          </span>
                         ))}
                       </div>
                     </div>
@@ -1060,26 +872,22 @@ export default function EventDetails() {
               </div>
             </div>
 
-            {/* Right Column: Venue */}
-            <div className="ed-venue-console" data-aos="fade-left" data-aos-delay="140">
+            {/* Right Column: Event Venue */}
+            <div data-aos="fade-left" data-aos-delay="140">
               <div className="ed-subheading-wrap">
                 <span className="ed-subheading-tag">// BASE_LOCATION</span>
-                <h3 className="ed-subheading">Venue</h3>
+                <h3 className="ed-subheading">
+                  Event <span>Venue</span>
+                </h3>
               </div>
 
-              {/* Redesigned Venue Console Panel */}
               <div className="ed-venue-panel">
-                <div className="ed-venue-meta-top">
-                  <span className="ed-venue-status-chip">// HOST_CAMPUS</span>
-                  <span className="ed-venue-coords">09°19&apos;N 76°37&apos;E</span>
+                <div className="ed-venue-header">
+                  <h4 className="ed-venue-title">
+                    College of Engineering <span>Chengannur</span>
+                  </h4>
+                  <p className="ed-venue-sub">IEEE Student Branch CEC // Alappuzha, Kerala</p>
                 </div>
-
-                <h4 className="ed-venue-name">
-                  College of Engineering <span>Chengannur</span>
-                </h4>
-                <p className="ed-venue-host">
-                  IEEE Student Branch CEC // Alappuzha, Kerala
-                </p>
 
                 {/* Cyberpunk Map Frame */}
                 <div className="ed-map-frame">
@@ -1091,72 +899,51 @@ export default function EventDetails() {
                   />
                 </div>
 
-                {/* Clean Location & Access Breakdown */}
-                <div className="ed-location-details">
-                  <div className="ed-loc-row">
-                    <MapPin className="ed-loc-icon" size={16} />
-                    <div className="ed-loc-content">
-                      <p className="ed-loc-title">Campus Address</p>
-                      <p className="ed-loc-text">
+                {/* Venue Details Breakdown */}
+                <div className="ed-venue-details">
+                  <div className="ed-venue-row">
+                    <MapPin className="ed-venue-icon" size={16} />
+                    <div className="ed-venue-info">
+                      <p className="ed-venue-label">Campus Address</p>
+                      <p className="ed-venue-value">
                         College of Engineering Chengannur, SH1, Chengannur, Kerala 689121
                       </p>
                     </div>
                   </div>
 
-                  <div className="ed-loc-row">
-                    <Train className="ed-loc-icon" size={16} />
-                    <div className="ed-loc-content">
-                      <p className="ed-loc-title">Transit Connectivity</p>
-                      <p className="ed-loc-text">
+                  <div className="ed-venue-row">
+                    <Train className="ed-venue-icon" size={16} />
+                    <div className="ed-venue-info">
+                      <p className="ed-venue-label">Transit Connectivity</p>
+                      <p className="ed-venue-value">
                         1.5 km from Chengannur Railway Station (CNGR) &amp; KSRTC Bus Station
                       </p>
                     </div>
                   </div>
 
-                  <div className="ed-loc-row">
-                    <Clock className="ed-loc-icon" size={16} />
-                    <div className="ed-loc-content">
-                      <p className="ed-loc-title">Mode &amp; Timings</p>
-                      <p className="ed-loc-text">
-                        100% Offline (On Campus) &bull; 09:00 AM – 05:00 PM IST
+                  <div className="ed-venue-row">
+                    <Clock className="ed-venue-icon" size={16} />
+                    <div className="ed-venue-info">
+                      <p className="ed-venue-label">Mode &amp; Timings</p>
+                      <p className="ed-venue-value">
+                        100% Offline (On-Campus) &bull; 09:00 AM – 05:00 PM IST
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Mandatory Attendance Directive Notice */}
-                <div className="ed-venue-notice">
-                  <ShieldAlert className="ed-venue-notice-icon" size={15} />
-                  <span>
-                    Mandatory 100% attendance on all 4 training days is required for IEEE SB CEC certificate validation.
-                  </span>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="ed-venue-actions">
-                  <a
-                    href="https://maps.google.com/?q=College+of+Engineering+Chengannur"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="ed-map-btn"
-                  >
-                    <Navigation size={14} />
-                    Open in Google Maps
-                    <ExternalLink size={13} />
-                  </a>
-
-                  <button
-                    className="ed-register-btn"
-                    onClick={() =>
-                      window.open("https://forms.gle/placeholder", "_blank", "noopener")
-                    }
-                  >
-                    Register for ISQIP &apos;26
-                    <ChevronRight size={19} strokeWidth={2.2} />
-                  </button>
-                </div>
+                {/* View on Maps Link Button */}
+                <a
+                  href="https://maps.google.com/?q=College+of+Engineering+Chengannur"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ed-map-btn"
+                >
+                  <MapPin size={14} />
+                  Open in Google Maps
+                  <ExternalLink size={13} />
+                </a>
               </div>
-
             </div>
 
           </div>
