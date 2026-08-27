@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import { motion } from "motion/react";
 import {
   MapPin,
   Calendar,
@@ -9,12 +10,8 @@ import {
   CreditCard,
   Sparkles,
   ExternalLink,
-  Train,
 } from "lucide-react";
 
-/* =========================================================
-   STYLES
-   ========================================================= */
 const STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Bruno+Ace&display=swap");
 
@@ -124,9 +121,6 @@ const STYLES = `
     box-shadow: 0 0 8px 2px rgba(12,230,68,0.5);
   }
 
-  /* =========================================================
-     3-D FLIP CARDS GRID (FIXED / PRESERVED)
-     ========================================================= */
   .ed-cards-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -341,12 +335,9 @@ const STYLES = `
     z-index: 1;
   }
 
-  /* =========================================================
-     LOWER SECTION: SCHEDULE & VENUE (MINIMAL CYBER HUD)
-     ========================================================= */
   .ed-lower-grid {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
+    grid-template-columns: 1.05fr 0.95fr;
     gap: clamp(2rem, 4vw, 3.5rem);
     align-items: start;
   }
@@ -385,131 +376,162 @@ const STYLES = `
 
   .ed-subheading span { color: var(--color-primary); }
 
-  /* ── SLEEK TIMELINE MATRIX ────────────────────────── */
-  .ed-schedule-stack {
+  /* ── SCHEDULE LIST (EDITORIAL TIMETABLE // MOTION LIST) ── */
+  .ed-schedule-list {
     display: flex;
     flex-direction: column;
-    gap: 0.9rem;
-  }
-
-  .ed-sched-card {
-    background: rgba(6, 14, 12, 0.85);
-    border: 1px solid rgba(12, 230, 68, 0.2);
-    border-radius: 4px;
-    padding: clamp(1rem, 2vw, 1.35rem);
+    border-top: 1px solid rgba(12, 230, 68, 0.18);
+    border-bottom: 1px solid rgba(12, 230, 68, 0.18);
     position: relative;
-    overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    display: flex;
-    gap: 1.25rem;
-    align-items: flex-start;
   }
 
-  .ed-sched-card::before {
+  .ed-schedule-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 1rem;
+    padding: clamp(1.15rem, 2.2vw, 1.45rem) clamp(0.75rem, 1.5vw, 1.25rem);
+    border-bottom: 1px solid rgba(245, 247, 246, 0.08);
+    background: transparent;
+    transition: background 0.25s ease, border-color 0.25s ease;
+    align-items: center;
+  }
+
+  .ed-schedule-row:last-child {
+    border-bottom: none;
+  }
+
+  .ed-schedule-row:hover {
+    background: rgba(12, 230, 68, 0.035);
+  }
+
+  /* Single distinctive ISQIP accent: sleek left signal bar */
+  .ed-schedule-row::before {
     content: "";
     position: absolute;
-    top: 0; left: 0; bottom: 0;
-    width: 3px;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
     background: var(--color-primary);
-    opacity: 0.35;
-    transition: opacity 0.3s ease, width 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    transform: scaleY(0.4);
+    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .ed-sched-card:hover {
-    border-color: rgba(12, 230, 68, 0.5);
-    background: rgba(12, 230, 68, 0.03);
-    transform: translateX(4px);
-    box-shadow: 0 4px 24px rgba(12, 230, 68, 0.09);
-  }
-
-  .ed-sched-card:hover::before {
+  .ed-schedule-row:hover::before {
     opacity: 1;
-    width: 4px;
-    box-shadow: 0 0 10px var(--color-primary);
+    transform: scaleY(1);
   }
 
-  /* Date / Index Column */
-  .ed-sched-lead {
+  /* Index marker */
+  .ed-row-index {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: rgba(12, 230, 68, 0.55);
+    letter-spacing: 0.1em;
+    user-select: none;
+    transition: color 0.25s ease;
+    align-self: center;
+  }
+
+  .ed-schedule-row:hover .ed-row-index {
+    color: var(--color-primary);
+  }
+
+  /* Main content layout */
+  .ed-row-content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    min-width: 80px;
+    gap: 0.65rem;
+  }
+
+  @media (min-width: 640px) {
+    .ed-row-content {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+  }
+
+  /* Date & Day block */
+  .ed-row-date-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 165px;
     flex-shrink: 0;
-    border-right: 1px dashed rgba(12, 230, 68, 0.18);
-    padding-right: 1rem;
   }
 
-  .ed-sched-daynum {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--color-primary);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 0.2rem;
-  }
-
-  .ed-sched-date {
+  .ed-row-date {
     font-family: 'Bruno Ace', cursive;
     font-size: clamp(0.95rem, 1.4vw, 1.05rem);
     color: var(--color-text);
-    line-height: 1.2;
     margin: 0;
     letter-spacing: 0.02em;
+    line-height: 1.25;
   }
 
-  .ed-sched-weekday {
+  .ed-row-day {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    color: rgba(245, 247, 246, 0.55);
-    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--color-primary);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-top: 0.2rem;
+    margin: 0;
   }
 
-  /* Content Column */
-  .ed-sched-main {
-    flex: 1;
+  /* Sessions column */
+  .ed-row-sessions {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.35rem;
+    flex: 1;
   }
 
-  .ed-sched-title {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.88rem, 1.3vw, 0.98rem);
-    color: var(--color-text);
-    margin: 0;
-    letter-spacing: 0.02em;
-    line-height: 1.3;
+  @media (min-width: 640px) {
+    .ed-row-sessions {
+      align-items: flex-end;
+      text-align: right;
+    }
   }
 
-  .ed-sched-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-  }
-
-  .ed-sched-tag {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.76rem;
-    color: rgba(245, 247, 246, 0.78);
-    background: rgba(12, 230, 68, 0.05);
-    border: 1px solid rgba(12, 230, 68, 0.18);
-    border-radius: 3px;
-    padding: 0.15rem 0.55rem;
+  .ed-row-session-item {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.5rem;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.86rem;
+    color: rgba(245, 247, 246, 0.82);
+    line-height: 1.4;
   }
 
-  .ed-sched-tag-dot {
+  @media (min-width: 640px) {
+    .ed-row-session-item {
+      flex-direction: row-reverse;
+    }
+  }
+
+  .ed-row-session-dot {
     width: 4px;
     height: 4px;
     border-radius: 50%;
     background: var(--color-primary);
+    opacity: 0.65;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
-  /* ── VENUE PANEL ──────────────────────────────────── */
+  .ed-schedule-row:hover .ed-row-session-dot {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+
+  .ed-row-session-text {
+    margin: 0;
+  }
+
   .ed-venue-panel {
     background: rgba(6, 14, 12, 0.85);
     border: 1px solid rgba(12, 230, 68, 0.22);
@@ -553,12 +575,10 @@ const STYLES = `
     letter-spacing: 0.02em;
   }
 
-  .ed-venue-title span { color: var(--color-primary); }
-
   .ed-venue-sub {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.72rem;
-    color: rgba(12, 230, 68, 0.85);
+    color: var(--color-primary);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     margin: 0;
@@ -654,11 +674,6 @@ const STYLES = `
   }
 `;
 
-/* =========================================================
-   DATA DEFINITIONS
-   ========================================================= */
-
-// 6 3D Flip Cards (Fixed & Untouched)
 const CARDS = [
   {
     Icon: Calendar,
@@ -703,58 +718,29 @@ const CARDS = [
     backBody: "60 seats available for non-IEEE students with paid registration access.",
   },
 ];
-
-// ISQIP '26 Curriculum & Training Milestones (4-Day Architecture)
 const SCHEDULE = [
   {
-    dayNum: "Day 01",
-    date: "Sep 19",
-    weekday: "Saturday",
-    title: "Domain Training — Phase I",
-    sessions: [
-      "Inauguration Ceremony",
-      "Domain Tracks (CS / EC / EEE)",
-      "Core Foundation Workshops",
-    ],
+    date: "September 19, 2026",
+    day: "Saturday",
+    sessions: ["Opening Ceremony", "Domain Training - Day 1"],
   },
   {
-    dayNum: "Day 02",
-    date: "Sep 20",
-    weekday: "Sunday",
-    title: "Domain Training — Phase II",
-    sessions: [
-      "Hands-on Project Development",
-      "Mentored Lab Build Sprint",
-      "Hardware / Software Testing",
-    ],
+    date: "September 20, 2026",
+    day: "Sunday",
+    sessions: ["Domain Training - Day 2", "Hands-on Projects"],
   },
   {
-    dayNum: "Day 03",
-    date: "Sep 26",
-    weekday: "Saturday",
-    title: "General Training — Career & Aptitude",
-    sessions: [
-      "Resume Engineering & Review",
-      "Aptitude & Logical Reasoning",
-      "Group Discussion Simulations",
-    ],
+    date: "September 26, 2026",
+    day: "Saturday",
+    sessions: ["General Training - Day 3", "Aptitude & Resume Building"],
   },
   {
-    dayNum: "Day 04",
-    date: "Sep 27",
-    weekday: "Sunday",
-    title: "Mock Interviews & Valedictory",
-    sessions: [
-      "1-on-1 Mock Interviews (HR & Tech)",
-      "Capstone Project Demonstrations",
-      "Valedictory & Certificate Distribution",
-    ],
+    date: "September 27, 2026",
+    day: "Sunday",
+    sessions: ["General Training - Day 4", "Mock Interviews & Closing"],
   },
 ];
 
-/* =========================================================
-   FLIP CARD (FIXED & UNTOUCHED)
-   ========================================================= */
 function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
   const [flipped, setFlipped] = useState(false);
 
@@ -766,7 +752,6 @@ function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
       >
         <div className="ed-card-inner">
 
-          {/* FRONT */}
           <div className="ed-card-front">
             <div className="ed-card-icon-glow">
               <Icon className="ed-card-icon" size={24} strokeWidth={1.5} />
@@ -775,7 +760,6 @@ function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
             <p className="ed-card-value">{value}</p>
           </div>
 
-          {/* BACK */}
           <div className="ed-card-back">
             <span className="ed-card-back-bloom" aria-hidden="true" />
             <p className="ed-card-back-label">{label}</p>
@@ -790,9 +774,6 @@ function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
   );
 }
 
-/* =========================================================
-   MAIN COMPONENT
-   ========================================================= */
 export default function EventDetails() {
   useEffect(() => {
     AOS.init({ duration: 850, once: true, offset: 50, easing: "ease-out" });
@@ -805,7 +786,6 @@ export default function EventDetails() {
       <section id="event-details" className="ed-section">
         <div className="ed-inner">
 
-          {/* Header */}
           <div className="ed-header" data-aos="fade-down">
             <div className="ed-eyebrow">
               <span className="ed-eyebrow-dot" />
@@ -821,58 +801,88 @@ export default function EventDetails() {
             </div>
           </div>
 
-          {/* 3D Flip Cards (Fixed & Preserved) */}
           <div className="ed-cards-grid">
             {CARDS.map((card, i) => (
               <FlipCard key={card.label} {...card} delay={i * 70} />
             ))}
           </div>
 
-          {/* Lower Section: Event Schedule & Event Venue */}
           <div className="ed-lower-grid">
 
-            {/* Left Column: Event Schedule */}
             <div data-aos="fade-right" data-aos-delay="80">
               <div className="ed-subheading-wrap">
-                <span className="ed-subheading-tag">// MILESTONE_TIMELINE</span>
+                <span className="ed-subheading-tag">// PROGRAMME_TIMELINE</span>
                 <h3 className="ed-subheading">
-                  Programme <span>Schedule</span>
+                  Event <span>Schedule</span>
                 </h3>
               </div>
 
-              <div className="ed-schedule-stack">
+              <motion.div
+                className="ed-schedule-list"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-40px" }}
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.1,
+                      delayChildren: 0.05,
+                    },
+                  },
+                }}
+              >
                 {SCHEDULE.map((item, index) => (
-                  <div
-                    className="ed-sched-card"
-                    key={item.dayNum}
-                    data-aos="fade-up"
-                    data-aos-delay={100 + index * 60}
+                  <motion.div
+                    className="ed-schedule-row"
+                    key={item.date}
+                    layout
+                    variants={{
+                      hidden: { opacity: 0, y: 16 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: {
+                          type: "spring",
+                          stiffness: 280,
+                          damping: 26,
+                        },
+                      },
+                    }}
+                    whileHover={{
+                      x: 4,
+                      transition: { type: "spring", stiffness: 400, damping: 30 },
+                    }}
                   >
-                    {/* Date / Day Lead */}
-                    <div className="ed-sched-lead">
-                      <span className="ed-sched-daynum">{item.dayNum}</span>
-                      <p className="ed-sched-date">{item.date}</p>
-                      <span className="ed-sched-weekday">{item.weekday}</span>
-                    </div>
+                    {/* Index Marker */}
+                    <span className="ed-row-index">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
 
-                    {/* Content & Modules */}
-                    <div className="ed-sched-main">
-                      <h4 className="ed-sched-title">{item.title}</h4>
-                      <div className="ed-sched-tags">
+                    {/* Content */}
+                    <div className="ed-row-content">
+                      {/* Date & Day */}
+                      <div className="ed-row-date-block">
+                        <h4 className="ed-row-date">{item.date}</h4>
+                        <p className="ed-row-day">{item.day}</p>
+                      </div>
+
+                      {/* Sessions List */}
+                      <div className="ed-row-sessions">
                         {item.sessions.map((session, sIdx) => (
-                          <span className="ed-sched-tag" key={sIdx}>
-                            <span className="ed-sched-tag-dot" />
-                            {session}
-                          </span>
+                          <div className="ed-row-session-item" key={sIdx}>
+                            <span className="ed-row-session-dot" />
+                            <p className="ed-row-session-text">{session}</p>
+                          </div>
                         ))}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             </div>
 
-            {/* Right Column: Event Venue */}
             <div data-aos="fade-left" data-aos-delay="140">
               <div className="ed-subheading-wrap">
                 <span className="ed-subheading-tag">// BASE_LOCATION</span>
@@ -884,39 +894,27 @@ export default function EventDetails() {
               <div className="ed-venue-panel">
                 <div className="ed-venue-header">
                   <h4 className="ed-venue-title">
-                    College of Engineering <span>Chengannur</span>
+                    IHRD College Of Applied Science, Perissery
                   </h4>
-                  <p className="ed-venue-sub">IEEE Student Branch CEC // Alappuzha, Kerala</p>
+                  <p className="ed-venue-sub">IEEE Student Branch CEC</p>
                 </div>
 
-                {/* Cyberpunk Map Frame */}
                 <div className="ed-map-frame">
                   <iframe
-                    src="https://maps.google.com/maps?q=College%20of%20Engineering%20Chengannur&t=&z=15&ie=UTF8&iwloc=&output=embed"
-                    title="College of Engineering Chengannur Google Map"
+                    src="https://maps.google.com/maps?q=College%20of%20Applied%20Science%20Perissery&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                    title="College of Applied Science Perissery Google Map"
                     loading="lazy"
                     allowFullScreen
                   />
                 </div>
 
-                {/* Venue Details Breakdown */}
                 <div className="ed-venue-details">
                   <div className="ed-venue-row">
                     <MapPin className="ed-venue-icon" size={16} />
                     <div className="ed-venue-info">
-                      <p className="ed-venue-label">Campus Address</p>
+                      <p className="ed-venue-label">Address</p>
                       <p className="ed-venue-value">
-                        College of Engineering Chengannur, SH1, Chengannur, Kerala 689121
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="ed-venue-row">
-                    <Train className="ed-venue-icon" size={16} />
-                    <div className="ed-venue-info">
-                      <p className="ed-venue-label">Transit Connectivity</p>
-                      <p className="ed-venue-value">
-                        1.5 km from Chengannur Railway Station (CNGR) &amp; KSRTC Bus Station
+                        College of Applied Science Perissery, Chengannur, Kerala 689126
                       </p>
                     </div>
                   </div>
@@ -924,23 +922,28 @@ export default function EventDetails() {
                   <div className="ed-venue-row">
                     <Clock className="ed-venue-icon" size={16} />
                     <div className="ed-venue-info">
-                      <p className="ed-venue-label">Mode &amp; Timings</p>
-                      <p className="ed-venue-value">
-                        100% Offline (On-Campus) &bull; 09:00 AM – 05:00 PM IST
-                      </p>
+                      <p className="ed-venue-label">Timing</p>
+                      <p className="ed-venue-value">9:00 AM - 5:00 PM</p>
+                    </div>
+                  </div>
+
+                  <div className="ed-venue-row">
+                    <Radio className="ed-venue-icon" size={16} />
+                    <div className="ed-venue-info">
+                      <p className="ed-venue-label">Mode</p>
+                      <p className="ed-venue-value">Offline - On Campus</p>
                     </div>
                   </div>
                 </div>
 
-                {/* View on Maps Link Button */}
                 <a
-                  href="https://maps.google.com/?q=College+of+Engineering+Chengannur"
+                  href="https://maps.app.goo.gl/cU61dU4RdUMPokNx6"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="ed-map-btn"
                 >
                   <MapPin size={14} />
-                  Open in Google Maps
+                  View on Maps
                   <ExternalLink size={13} />
                 </a>
               </div>
