@@ -10,30 +10,31 @@ import {
   Check,
   CreditCard,
   ExternalLink,
+  Calendar,
+  Layers,
+  Sparkles,
+  Navigation,
 } from "lucide-react";
 
-/* =========================================================
-   STYLES
-   ========================================================= */
 const STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Bruno+Ace&display=swap");
 
   .ed-section {
     background: var(--color-background);
-    padding: clamp(4rem, 9vh, 6.5rem) clamp(1.25rem, 6vw, 4.5rem);
+    padding: clamp(4rem, 9vh, 7rem) clamp(1.25rem, 5vw, 4rem);
     position: relative;
     overflow: hidden;
   }
 
-  /* Subtle cyber background grid */
   .ed-section::before {
     content: "";
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(12, 230, 68, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(12, 230, 68, 0.03) 1px, transparent 1px);
-    background-size: 48px 48px;
+      radial-gradient(circle at 50% 0%, rgba(12, 230, 68, 0.07) 0%, transparent 60%),
+      linear-gradient(rgba(12, 230, 68, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(12, 230, 68, 0.035) 1px, transparent 1px);
+    background-size: 100% 100%, 36px 36px, 36px 36px;
     pointer-events: none;
     z-index: 0;
   }
@@ -41,26 +42,31 @@ const STYLES = `
   .ed-inner {
     position: relative;
     z-index: 2;
-    max-width: 1240px;
+    max-width: 1220px;
     margin: 0 auto;
   }
 
-  /* Section Header */
   .ed-header {
     text-align: center;
     margin-bottom: clamp(2.5rem, 5vw, 3.5rem);
+    position: relative;
   }
 
   .ed-eyebrow {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.55rem;
+    padding: 0.35rem 0.9rem;
+    background: rgba(12, 230, 68, 0.06);
+    border: 1px solid rgba(12, 230, 68, 0.25);
+    border-radius: 4px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    color: rgba(12, 230, 68, 0.8);
-    letter-spacing: 0.16em;
+    font-size: clamp(0.7rem, 1.2vw, 0.78rem);
+    color: var(--color-primary);
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    margin-bottom: 0.8rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 14px rgba(12, 230, 68, 0.08);
   }
 
   .ed-eyebrow-dot {
@@ -68,12 +74,18 @@ const STYLES = `
     height: 6px;
     border-radius: 50%;
     background: var(--color-primary);
-    box-shadow: 0 0 8px 2px rgba(12, 230, 68, 0.7);
+    box-shadow: 0 0 8px 2px rgba(12, 230, 68, 0.8);
+    animation: ed-pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes ed-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.8); }
   }
 
   .ed-title {
     font-family: var(--font-mech);
-    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-size: clamp(2.2rem, 5.5vw, 3.4rem);
     color: var(--color-text);
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -83,113 +95,129 @@ const STYLES = `
 
   .ed-title span {
     color: var(--color-primary);
-    text-shadow: 0 0 20px rgba(12, 230, 68, 0.35);
+    text-shadow: 0 0 24px rgba(12, 230, 68, 0.45);
   }
 
   .ed-divider {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 0.85rem;
     margin-top: 1rem;
   }
 
   .ed-divider-line {
     height: 1px;
-    width: clamp(35px, 7vw, 80px);
-    background: linear-gradient(90deg, transparent, rgba(12, 230, 68, 0.6));
+    width: clamp(40px, 8vw, 90px);
+    background: linear-gradient(90deg, transparent, rgba(12, 230, 68, 0.65));
   }
 
   .ed-divider-line:last-child {
-    background: linear-gradient(270deg, transparent, rgba(12, 230, 68, 0.6));
+    background: linear-gradient(270deg, transparent, rgba(12, 230, 68, 0.65));
   }
 
   .ed-divider-diamond {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
     background: var(--color-primary);
     transform: rotate(45deg);
-    box-shadow: 0 0 8px 2px rgba(12, 230, 68, 0.6);
+    box-shadow: 0 0 10px 2px rgba(12, 230, 68, 0.7);
   }
 
-  /* 4 Stats Banner */
-  .ed-banner {
-    position: relative;
-    background: rgba(12, 230, 68, 0.04);
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    border-radius: 12px;
-    padding: clamp(1.5rem, 3.5vw, 2.25rem) clamp(1rem, 3vw, 2rem);
+  .ed-stats-deck {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
     margin-bottom: clamp(2rem, 4vw, 3rem);
-    overflow: hidden;
-    box-shadow: 0 0 25px rgba(12, 230, 68, 0.04);
   }
 
-  .ed-banner::before {
+  @media (max-width: 900px) {
+    .ed-stats-deck {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .ed-stats-deck {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+  }
+
+  .ed-stat-pod {
+    position: relative;
+    background: rgba(8, 16, 12, 0.85);
+    border: 1px solid rgba(12, 230, 68, 0.22);
+    border-radius: 6px;
+    padding: 1.25rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.75rem;
+    transition: all 0.25s ease;
+    overflow: hidden;
+  }
+
+  .ed-stat-pod:hover {
+    border-color: rgba(12, 230, 68, 0.55);
+    background: rgba(12, 230, 68, 0.05);
+    box-shadow: 0 0 20px rgba(12, 230, 68, 0.12);
+    transform: translateY(-2px);
+  }
+
+  /* HUD corner notch */
+  .ed-stat-pod::before {
     content: "";
     position: absolute;
     top: 0;
-    left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(12, 230, 68, 0.8) 50%, transparent);
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 12px 12px 0;
+    border-color: transparent var(--color-primary) transparent transparent;
+    opacity: 0.65;
   }
 
-  .ed-banner-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1.5rem;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .ed-banner-item {
+  .ed-stat-pod-top {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
+    justify-content: space-between;
   }
 
-  .ed-banner-item:not(:last-child) {
-    border-right: 1px solid rgba(12, 230, 68, 0.12);
+  .ed-stat-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(12, 230, 68, 0.55);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
 
-  .ed-banner-val {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(1.8rem, 4vw, 2.6rem);
+  .ed-stat-icon {
+    color: var(--color-primary);
+    opacity: 0.8;
+  }
+
+  .ed-stat-val {
+    font-family: 'Bruno Ace', 'Mechsuit', cursive;
+    font-size: clamp(1.75rem, 3.5vw, 2.35rem);
     font-weight: 700;
     color: var(--color-primary);
     line-height: 1;
-    text-shadow: 0 0 14px rgba(12, 230, 68, 0.6);
-    margin: 0;
+    text-shadow: 0 0 16px rgba(12, 230, 68, 0.55);
+    margin: 0.2rem 0;
   }
 
-  .ed-banner-lbl {
+  .ed-stat-lbl {
     font-family: 'Share Tech Mono', monospace;
-    font-size: clamp(0.72rem, 1.2vw, 0.85rem);
-    color: rgba(245, 247, 246, 0.7);
+    font-size: clamp(0.72rem, 1.1vw, 0.82rem);
+    color: rgba(245, 247, 246, 0.75);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin: 0;
   }
 
-  @media (max-width: 640px) {
-    .ed-banner-grid {
-      grid-template-columns: repeat(2, 1fr);
-      row-gap: 1.5rem;
-    }
-    .ed-banner-item:nth-child(2) {
-      border-right: none;
-    }
-    .ed-banner-item:nth-child(3),
-    .ed-banner-item:nth-child(4) {
-      padding-top: 0.5rem;
-      border-top: 1px solid rgba(12, 230, 68, 0.1);
-    }
-  }
-
-  /* 2 Seats / Pricing Cards */
   .ed-seats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -205,45 +233,55 @@ const STYLES = `
 
   .ed-seat-card {
     position: relative;
+    background: rgba(6, 14, 11, 0.92);
     border: 1px solid rgba(12, 230, 68, 0.28);
-    background: rgba(6, 14, 12, 0.85);
-    border-radius: 12px;
-    padding: clamp(1.5rem, 3vw, 2rem);
-    transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    border-radius: 8px;
+    padding: clamp(1.4rem, 3vw, 1.85rem);
+    transition: all 0.3s ease;
     overflow: hidden;
   }
 
   .ed-seat-card:hover {
     border-color: rgba(12, 230, 68, 0.65);
-    box-shadow: 0 0 30px rgba(12, 230, 68, 0.12);
+    box-shadow: 0 0 32px rgba(12, 230, 68, 0.15);
     transform: translateY(-2px);
   }
 
-  /* Corner bracket accents */
-  .ed-seat-card::before,
-  .ed-seat-card::after {
-    content: "";
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    pointer-events: none;
+  .ed-seat-card.alt {
+    border-color: rgba(255, 170, 51, 0.28);
   }
 
-  .ed-seat-card::before {
-    top: -1px;
-    left: -1px;
-    border-top: 2px solid var(--color-primary);
-    border-left: 2px solid var(--color-primary);
+  .ed-seat-card.alt:hover {
+    border-color: rgba(255, 170, 51, 0.65);
+    box-shadow: 0 0 32px rgba(255, 170, 51, 0.15);
   }
 
-  .ed-seat-card::after {
-    bottom: -1px;
-    right: -1px;
-    border-bottom: 2px solid var(--color-primary);
-    border-right: 2px solid var(--color-primary);
+  .ed-seat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid rgba(12, 230, 68, 0.12);
   }
 
-  .ed-seat-content {
+  .ed-seat-card.alt .ed-seat-card-header {
+    border-bottom-color: rgba(255, 170, 51, 0.15);
+  }
+
+  .ed-seat-protocol-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    color: rgba(12, 230, 68, 0.6);
+    text-transform: uppercase;
+  }
+
+  .ed-seat-card.alt .ed-seat-protocol-tag {
+    color: rgba(255, 170, 51, 0.7);
+  }
+
+  .ed-seat-body {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -251,12 +289,17 @@ const STYLES = `
   }
 
   .ed-seat-count {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-family: 'Bruno Ace', 'Mechsuit', cursive;
+    font-size: clamp(1.6rem, 3.2vw, 2.2rem);
     color: var(--color-primary);
-    margin: 0 0 0.35rem;
+    margin: 0 0 0.3rem;
     line-height: 1;
-    text-shadow: 0 0 10px rgba(12, 230, 68, 0.4);
+    text-shadow: 0 0 14px rgba(12, 230, 68, 0.45);
+  }
+
+  .ed-seat-card.alt .ed-seat-count {
+    color: #FFAA33;
+    text-shadow: 0 0 14px rgba(255, 170, 51, 0.45);
   }
 
   .ed-seat-label {
@@ -264,60 +307,89 @@ const STYLES = `
     font-size: clamp(1rem, 2vw, 1.15rem);
     font-weight: 600;
     color: var(--color-text);
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.85rem;
+  }
+
+  .ed-capacity-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0.9rem;
+    max-width: 220px;
+  }
+
+  .ed-capacity-segment {
+    height: 4px;
+    flex: 1;
+    background: rgba(12, 230, 68, 0.2);
+    border-radius: 1px;
+  }
+
+  .ed-capacity-segment.active {
+    background: var(--color-primary);
+    box-shadow: 0 0 6px rgba(12, 230, 68, 0.8);
+  }
+
+  .ed-seat-card.alt .ed-capacity-segment {
+    background: rgba(255, 170, 51, 0.2);
+  }
+
+  .ed-seat-card.alt .ed-capacity-segment.active {
+    background: #FFAA33;
+    box-shadow: 0 0 6px rgba(255, 170, 51, 0.8);
   }
 
   .ed-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.45rem;
     padding: 0.35rem 0.85rem;
-    border-radius: 9999px;
+    border-radius: 4px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
+    font-size: 0.74rem;
     font-weight: 700;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
   .ed-badge-free {
-    background: rgba(12, 230, 68, 0.15);
-    border: 1px solid rgba(12, 230, 68, 0.45);
+    background: rgba(12, 230, 68, 0.12);
+    border: 1px solid rgba(12, 230, 68, 0.5);
     color: var(--color-primary);
-    box-shadow: 0 0 10px rgba(12, 230, 68, 0.15);
+    box-shadow: 0 0 12px rgba(12, 230, 68, 0.2);
   }
 
   .ed-badge-paid {
-    background: rgba(255, 170, 51, 0.15);
-    border: 1px solid rgba(255, 170, 51, 0.45);
+    background: rgba(255, 170, 51, 0.12);
+    border: 1px solid rgba(255, 170, 51, 0.5);
     color: #FFAA33;
-    box-shadow: 0 0 10px rgba(255, 170, 51, 0.15);
+    box-shadow: 0 0 12px rgba(255, 170, 51, 0.2);
   }
 
-  .ed-seat-icon-glow {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
+  .ed-seat-icon-box {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    background: radial-gradient(circle, rgba(12, 230, 68, 0.15) 0%, rgba(12, 230, 68, 0.02) 70%, transparent 100%);
+    border: 1px solid rgba(12, 230, 68, 0.35);
+    background: rgba(12, 230, 68, 0.06);
     color: var(--color-primary);
+    box-shadow: inset 0 0 16px rgba(12, 230, 68, 0.12);
   }
 
-  .ed-seat-icon-glow.alt {
-    border-color: rgba(255, 170, 51, 0.3);
-    background: radial-gradient(circle, rgba(255, 170, 51, 0.15) 0%, rgba(255, 170, 51, 0.02) 70%, transparent 100%);
+  .ed-seat-card.alt .ed-seat-icon-box {
+    border-color: rgba(255, 170, 51, 0.35);
+    background: rgba(255, 170, 51, 0.06);
     color: #FFAA33;
+    box-shadow: inset 0 0 16px rgba(255, 170, 51, 0.12);
   }
 
-  /* Two Column Section: Schedule & Venue */
   .ed-grid-lower {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(2rem, 5vw, 3.5rem);
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: clamp(2rem, 4.5vw, 3.5rem);
     align-items: start;
   }
 
@@ -328,44 +400,107 @@ const STYLES = `
     }
   }
 
+  .ed-subheading-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.4rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid rgba(12, 230, 68, 0.18);
+  }
+
   .ed-subheading {
     font-family: var(--font-mech);
-    font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+    font-size: clamp(1.3rem, 2.2vw, 1.7rem);
     color: var(--color-text);
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    margin: 0 0 1.5rem;
+    margin: 0;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
   }
 
   .ed-subheading span {
     color: var(--color-primary);
+    text-shadow: 0 0 12px rgba(12, 230, 68, 0.4);
   }
 
-  /* Schedule Cards */
+  .ed-subheading-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.66rem;
+    color: rgba(12, 230, 68, 0.5);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
   .ed-schedule-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .ed-day-card {
-    border: 1px solid rgba(12, 230, 68, 0.2);
-    background: rgba(12, 230, 68, 0.025);
-    border-radius: 10px;
-    padding: clamp(1.2rem, 2.5vw, 1.5rem);
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    transition: border-color 0.25s, background 0.25s, transform 0.25s;
     position: relative;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    padding-left: 1.5rem;
   }
 
-  @media (min-width: 600px) {
-    .ed-day-card {
+  .ed-schedule-list::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    bottom: 14px;
+    left: 4px;
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      rgba(12, 230, 68, 0.6),
+      rgba(12, 230, 68, 0.25) 50%,
+      rgba(12, 230, 68, 0.6)
+    );
+    box-shadow: 0 0 6px rgba(12, 230, 68, 0.3);
+  }
+
+  .ed-day-node {
+    position: relative;
+    border: 1px solid rgba(12, 230, 68, 0.22);
+    background: rgba(6, 14, 10, 0.75);
+    border-radius: 6px;
+    padding: clamp(1.1rem, 2vw, 1.35rem) clamp(1.2rem, 2.5vw, 1.5rem);
+    transition: all 0.25s ease;
+  }
+
+  .ed-day-node:hover {
+    border-color: rgba(12, 230, 68, 0.6);
+    background: rgba(12, 230, 68, 0.05);
+    transform: translateX(4px);
+    box-shadow: 0 0 20px rgba(12, 230, 68, 0.1);
+  }
+
+  .ed-day-pin {
+    position: absolute;
+    left: -1.5rem;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--color-primary);
+    background: var(--color-background);
+    box-shadow: 0 0 8px 1px rgba(12, 230, 68, 0.6);
+    border-radius: 1px;
+    transition: all 0.25s;
+  }
+
+  .ed-day-node:hover .ed-day-pin {
+    background: var(--color-primary);
+    box-shadow: 0 0 12px 3px rgba(12, 230, 68, 0.9);
+  }
+
+  .ed-day-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .ed-day-inner {
       flex-direction: row;
       align-items: center;
       justify-content: space-between;
@@ -373,13 +508,7 @@ const STYLES = `
     }
   }
 
-  .ed-day-card:hover {
-    border-color: rgba(12, 230, 68, 0.5);
-    background: rgba(12, 230, 68, 0.05);
-    transform: translateX(4px);
-  }
-
-  .ed-day-meta {
+  .ed-day-header-meta {
     flex-shrink: 0;
   }
 
@@ -387,28 +516,33 @@ const STYLES = `
     font-family: 'Bruno Ace', cursive;
     font-size: clamp(0.95rem, 1.5vw, 1.1rem);
     color: var(--color-text);
-    margin: 0 0 0.25rem;
+    margin: 0 0 0.3rem;
     letter-spacing: 0.02em;
   }
 
   .ed-day-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    background: rgba(12, 230, 68, 0.08);
+    border: 1px solid rgba(12, 230, 68, 0.3);
+    border-radius: 3px;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 700;
     color: var(--color-primary);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
   }
 
   .ed-day-sessions {
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
-    text-align: left;
+    gap: 0.4rem;
   }
 
-  @media (min-width: 600px) {
+  @media (min-width: 640px) {
     .ed-day-sessions {
       text-align: right;
       align-items: flex-end;
@@ -418,29 +552,58 @@ const STYLES = `
   .ed-session-item {
     font-family: 'Inter', sans-serif;
     font-size: 0.88rem;
-    color: rgba(245, 247, 246, 0.75);
+    color: rgba(245, 247, 246, 0.78);
     margin: 0;
     line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
-  /* Venue Panel */
-  .ed-venue-card {
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    background: rgba(12, 230, 68, 0.03);
-    border-radius: 12px;
-    padding: clamp(1.5rem, 3.5vw, 2.25rem);
-    position: relative;
-    overflow: hidden;
+  @media (min-width: 640px) {
+    .ed-session-item {
+      flex-direction: row-reverse;
+    }
   }
 
-  .ed-venue-card::before {
-    content: "// VENUE_DETAILS";
+  .ed-session-bullet {
+    color: var(--color-primary);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    color: rgba(12, 230, 68, 0.4);
+    font-size: 0.8rem;
+    opacity: 0.75;
+  }
+
+  .ed-venue-card {
+    position: relative;
+    border: 1px solid rgba(12, 230, 68, 0.3);
+    background: rgba(6, 14, 11, 0.9);
+    border-radius: 8px;
+    padding: clamp(1.4rem, 3vw, 2rem);
+    overflow: hidden;
+    box-shadow: 0 0 25px rgba(12, 230, 68, 0.05);
+  }
+
+  .ed-venue-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(12, 230, 68, 0.15);
+  }
+
+  .ed-venue-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(12, 230, 68, 0.6);
     letter-spacing: 0.16em;
-    display: block;
-    margin-bottom: 0.9rem;
+  }
+
+  .ed-venue-coord {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: rgba(245, 247, 246, 0.4);
+    letter-spacing: 0.08em;
   }
 
   .ed-venue-title {
@@ -456,44 +619,53 @@ const STYLES = `
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.82rem;
     color: var(--color-primary);
-    letter-spacing: 0.05em;
-    margin: 0 0 1.75rem;
+    letter-spacing: 0.06em;
+    margin: 0 0 1.6rem;
   }
 
   .ed-venue-info-list {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
+    gap: 1.15rem;
+    margin-bottom: 1.85rem;
   }
 
   .ed-venue-info-row {
     display: flex;
     align-items: flex-start;
     gap: 0.9rem;
+    background: rgba(12, 230, 68, 0.03);
+    border: 1px solid rgba(12, 230, 68, 0.12);
+    border-radius: 4px;
+    padding: 0.85rem 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .ed-venue-info-row:hover {
+    border-color: rgba(12, 230, 68, 0.35);
   }
 
   .ed-venue-info-icon {
     color: var(--color-primary);
     flex-shrink: 0;
-    margin-top: 0.2rem;
-    filter: drop-shadow(0 0 4px rgba(12, 230, 68, 0.5));
+    margin-top: 0.15rem;
+    filter: drop-shadow(0 0 6px rgba(12, 230, 68, 0.6));
   }
 
   .ed-venue-info-label {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     color: rgba(12, 230, 68, 0.75);
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    margin: 0 0 0.2rem;
+    margin: 0 0 0.25rem;
   }
 
   .ed-venue-info-val {
     font-family: 'Inter', sans-serif;
-    font-size: 0.92rem;
-    color: rgba(245, 247, 246, 0.82);
-    line-height: 1.55;
+    font-size: 0.9rem;
+    color: rgba(245, 247, 246, 0.88);
+    line-height: 1.5;
     margin: 0;
   }
 
@@ -507,59 +679,54 @@ const STYLES = `
     background: var(--color-primary);
     color: #071110;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     text-decoration: none;
-    border-radius: 6px;
-    transition: background 0.25s, box-shadow 0.25s, transform 0.2s;
-    box-shadow: 0 0 16px rgba(12, 230, 68, 0.35);
+    border-radius: 4px;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 20px rgba(12, 230, 68, 0.35);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
   }
 
   .ed-maps-btn:hover {
-    background: #14ff5a;
-    box-shadow: 0 0 26px rgba(12, 230, 68, 0.6), 0 0 50px rgba(12, 230, 68, 0.2);
+    background: #19ff62;
+    box-shadow: 0 0 30px rgba(12, 230, 68, 0.65), 0 0 60px rgba(12, 230, 68, 0.25);
     transform: translateY(-2px);
   }
 `;
 
-/* =========================================================
-   DATA (Faithfully matches https://isqip.cecieee.org/)
-   ========================================================= */
 const STATS = [
-  { value: "4", label: "Days of Training" },
-  { value: "3", label: "Core Domains" },
-  { value: "FREE", label: "For IEEE Members" },
-  { value: "120", label: "Total Seats" },
+  { value: "4", label: "Days of Training", icon: Calendar, code: "PARAM // 01" },
+  { value: "3", label: "Core Domains", icon: Layers, code: "PARAM // 02" },
+  { value: "FREE", label: "For IEEE Members", icon: Sparkles, code: "PARAM // 03" },
+  { value: "120", label: "Total Seats", icon: Users, code: "PARAM // 04" },
 ];
 
 const SCHEDULE_DAYS = [
   {
-    date: "August 2, 2025",
+    date: "August 2, 2026",
     day: "Saturday",
     sessions: ["Opening Ceremony", "Domain Training - Day 1"],
   },
   {
-    date: "August 3, 2025",
+    date: "August 3, 2026",
     day: "Sunday",
     sessions: ["Domain Training - Day 2", "Hands-on Projects"],
   },
   {
-    date: "August 9, 2025",
+    date: "August 9, 2026",
     day: "Saturday",
     sessions: ["General Training - Day 1", "Aptitude & Resume Building"],
   },
   {
-    date: "August 10, 2025",
+    date: "August 10, 2026",
     day: "Sunday",
     sessions: ["General Training - Day 2", "Mock Interviews & Closing"],
   },
 ];
 
-/* =========================================================
-   COMPONENT
-   ========================================================= */
 export default function EventDetails() {
   useEffect(() => {
     AOS.init({ duration: 800, once: true, offset: 60, easing: "ease-out" });
@@ -588,95 +755,131 @@ export default function EventDetails() {
             </div>
           </div>
 
-          {/* 4 Stats Top Banner */}
-          <div className="ed-banner" data-aos="fade-up">
-            <div className="ed-banner-grid">
-              {STATS.map((stat, i) => (
-                <div key={i} className="ed-banner-item">
-                  <p className="ed-banner-val">{stat.value}</p>
-                  <p className="ed-banner-lbl">{stat.label}</p>
+          <div className="ed-stats-deck" data-aos="fade-up">
+            {STATS.map((stat, i) => {
+              const IconComponent = stat.icon;
+              return (
+                <div key={i} className="ed-stat-pod">
+                  <div className="ed-stat-pod-top">
+                    <span className="ed-stat-code">{stat.code}</span>
+                    <IconComponent className="ed-stat-icon" size={16} />
+                  </div>
+                  <div>
+                    <div className="ed-stat-val">{stat.value}</div>
+                    <p className="ed-stat-lbl">{stat.label}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
-
-          {/* 2 Seats / Eligibility Breakdown Cards */}
           <div className="ed-seats-grid">
             {/* IEEE Members */}
             <div className="ed-seat-card" data-aos="fade-right">
-              <div className="ed-seat-content">
+              <div className="ed-seat-card-header">
+                <span className="ed-seat-protocol-tag">// PROTOCOL: IEEE_MEMBER</span>
+                <span className="ed-badge ed-badge-free">
+                  <Check size={13} strokeWidth={2.5} />
+                  FREE
+                </span>
+              </div>
+              <div className="ed-seat-body">
                 <div>
                   <h3 className="ed-seat-count">60 Seats</h3>
                   <p className="ed-seat-label">IEEE Members</p>
-                  <span className="ed-badge ed-badge-free">
-                    <Check size={14} strokeWidth={2.5} />
-                    FREE
-                  </span>
+                  <div className="ed-capacity-bar" title="50% Total Allotment">
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                  </div>
                 </div>
-                <div className="ed-seat-icon-glow">
-                  <UserCheck size={28} strokeWidth={1.75} />
+                <div className="ed-seat-icon-box">
+                  <UserCheck size={30} strokeWidth={1.75} />
                 </div>
               </div>
             </div>
-
-            {/* Non-IEEE Members */}
-            <div className="ed-seat-card" data-aos="fade-left">
-              <div className="ed-seat-content">
+            <div className="ed-seat-card alt" data-aos="fade-left">
+              <div className="ed-seat-card-header">
+                <span className="ed-seat-protocol-tag">// PROTOCOL: NON_IEEE_MEMBER</span>
+                <span className="ed-badge ed-badge-paid">
+                  <CreditCard size={13} strokeWidth={2} />
+                  PAID
+                </span>
+              </div>
+              <div className="ed-seat-body">
                 <div>
                   <h3 className="ed-seat-count">60 Seats</h3>
                   <p className="ed-seat-label">Non-IEEE Members</p>
-                  <span className="ed-badge ed-badge-paid">
-                    <CreditCard size={14} strokeWidth={2} />
-                    PAID
-                  </span>
+                  <div className="ed-capacity-bar" title="50% Total Allotment">
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                    <span className="ed-capacity-segment active" />
+                  </div>
                 </div>
-                <div className="ed-seat-icon-glow alt">
-                  <Users size={28} strokeWidth={1.75} />
+                <div className="ed-seat-icon-box">
+                  <Users size={30} strokeWidth={1.75} />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Two-Column Grid: Event Schedule + Event Venue */}
           <div className="ed-grid-lower">
 
             {/* Left: Event Schedule */}
             <div data-aos="fade-right">
-              <h3 className="ed-subheading">
-                Event <span>Schedule</span>
-              </h3>
+              <div className="ed-subheading-wrap">
+                <h3 className="ed-subheading">
+                  Event <span>Schedule</span>
+                </h3>
+                <span className="ed-subheading-tag">// 4_DAY_TIMELINE</span>
+              </div>
               <div className="ed-schedule-list">
                 {SCHEDULE_DAYS.map((item, idx) => (
-                  <div className="ed-day-card" key={idx}>
-                    <div className="ed-day-meta">
-                      <h4 className="ed-day-date">{item.date}</h4>
-                      <span className="ed-day-badge">{item.day}</span>
-                    </div>
-                    <div className="ed-day-sessions">
-                      {item.sessions.map((session, sIdx) => (
-                        <p className="ed-session-item" key={sIdx}>
-                          {session}
-                        </p>
-                      ))}
+                  <div className="ed-day-node" key={idx}>
+                    <span className="ed-day-pin" />
+                    <div className="ed-day-inner">
+                      <div className="ed-day-header-meta">
+                        <h4 className="ed-day-date">{item.date}</h4>
+                        <span className="ed-day-badge">{item.day}</span>
+                      </div>
+                      <div className="ed-day-sessions">
+                        {item.sessions.map((session, sIdx) => (
+                          <p className="ed-session-item" key={sIdx}>
+                            <span className="ed-session-bullet">&gt;</span>
+                            {session}
+                          </p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right: Event Venue */}
             <div data-aos="fade-left">
-              <h3 className="ed-subheading">
-                Event <span>Venue</span>
-              </h3>
+              <div className="ed-subheading-wrap">
+                <h3 className="ed-subheading">
+                  Event <span>Venue</span>
+                </h3>
+                <span className="ed-subheading-tag">// FACILITY_NODE</span>
+              </div>
+
               <div className="ed-venue-card">
+                <div className="ed-venue-card-top">
+                  <span className="ed-venue-tag">// BASE_LOCATION</span>
+                  <span className="ed-venue-coord">09°19&apos;N 76°37&apos;E</span>
+                </div>
+
                 <h4 className="ed-venue-title">
                   IHRD College Of Applied Science, Perissery
                 </h4>
                 <p className="ed-venue-sub">IEEE Student Branch CEC</p>
 
                 <div className="ed-venue-info-list">
-                  {/* Address */}
+                  
                   <div className="ed-venue-info-row">
                     <MapPin className="ed-venue-info-icon" size={18} />
                     <div>
@@ -688,7 +891,6 @@ export default function EventDetails() {
                     </div>
                   </div>
 
-                  {/* Timing */}
                   <div className="ed-venue-info-row">
                     <Clock className="ed-venue-info-icon" size={18} />
                     <div>
@@ -713,7 +915,7 @@ export default function EventDetails() {
                   rel="noopener noreferrer"
                   className="ed-maps-btn"
                 >
-                  <MapPin size={16} />
+                  <Navigation size={16} />
                   View on Maps
                   <ExternalLink size={14} />
                 </a>
