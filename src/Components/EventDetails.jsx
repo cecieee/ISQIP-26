@@ -163,7 +163,6 @@ const STYLES = `
     transform: translateY(-2px);
   }
 
-  /* HUD corner notch */
   .ed-stat-pod::before {
     content: "";
     position: absolute;
@@ -215,6 +214,9 @@ const STYLES = `
     margin: 0;
   }
 
+  /* ---------------------------------------------------------
+     60 SEATS CARDS WITH MINIMAL 3D HOVER TRANSITION
+     --------------------------------------------------------- */
   .ed-seats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -228,20 +230,30 @@ const STYLES = `
     }
   }
 
+  .ed-seat-card-wrap {
+    perspective: 1000px;
+    height: 100%;
+  }
+
   .ed-seat-card {
     position: relative;
     background: rgba(6, 14, 11, 0.92);
     border: 1px solid rgba(12, 230, 68, 0.28);
     border-radius: 8px;
     padding: clamp(1.4rem, 3vw, 1.85rem);
-    transition: all 0.3s ease;
+    transform-style: preserve-3d;
+    transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.35s ease;
     overflow: hidden;
+    height: 100%;
+    cursor: default;
   }
 
   .ed-seat-card:hover {
-    border-color: rgba(12, 230, 68, 0.65);
-    box-shadow: 0 0 32px rgba(12, 230, 68, 0.15);
-    transform: translateY(-2px);
+    border-color: rgba(12, 230, 68, 0.75);
+    box-shadow:
+      0 18px 36px -8px rgba(0, 0, 0, 0.8),
+      0 0 28px rgba(12, 230, 68, 0.2);
+    transform: translateY(-6px) rotateX(5deg) rotateY(-3deg) scale(1.01);
   }
 
   .ed-seat-card.alt {
@@ -249,8 +261,11 @@ const STYLES = `
   }
 
   .ed-seat-card.alt:hover {
-    border-color: rgba(255, 170, 51, 0.65);
-    box-shadow: 0 0 32px rgba(255, 170, 51, 0.15);
+    border-color: rgba(255, 170, 51, 0.75);
+    box-shadow:
+      0 18px 36px -8px rgba(0, 0, 0, 0.8),
+      0 0 28px rgba(255, 170, 51, 0.2);
+    transform: translateY(-6px) rotateX(5deg) rotateY(3deg) scale(1.01);
   }
 
   .ed-seat-card-header {
@@ -260,6 +275,7 @@ const STYLES = `
     padding-bottom: 0.9rem;
     margin-bottom: 1.1rem;
     border-bottom: 1px solid rgba(12, 230, 68, 0.12);
+    transform: translateZ(12px);
   }
 
   .ed-seat-card.alt .ed-seat-card-header {
@@ -283,6 +299,7 @@ const STYLES = `
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
+    transform: translateZ(16px);
   }
 
   .ed-seat-count {
@@ -374,6 +391,7 @@ const STYLES = `
     background: rgba(12, 230, 68, 0.06);
     color: var(--color-primary);
     box-shadow: inset 0 0 16px rgba(12, 230, 68, 0.12);
+    transform: translateZ(14px);
   }
 
   .ed-seat-card.alt .ed-seat-icon-box {
@@ -383,6 +401,9 @@ const STYLES = `
     box-shadow: inset 0 0 16px rgba(255, 170, 51, 0.12);
   }
 
+  /* ---------------------------------------------------------
+     LOWER GRID: SCHEDULE & VENUE
+     --------------------------------------------------------- */
   .ed-grid-lower {
     display: grid;
     grid-template-columns: 1.15fr 0.85fr;
@@ -403,7 +424,7 @@ const STYLES = `
     justify-content: space-between;
     margin-bottom: 1.4rem;
     padding-bottom: 0.6rem;
-    border-bottom: 1px solid rgba(12, 230, 68, 0.18);
+    border-bottom: 1px solid rgba(12, 230, 68, 0.15);
   }
 
   .ed-subheading {
@@ -431,6 +452,9 @@ const STYLES = `
     text-transform: uppercase;
   }
 
+  /* ---------------------------------------------------------
+     SCHEDULE TIMELINE
+     --------------------------------------------------------- */
   .ed-schedule-list {
     position: relative;
     display: flex;
@@ -457,16 +481,16 @@ const STYLES = `
 
   .ed-day-node {
     position: relative;
-    border: 1px solid rgba(12, 230, 68, 0.22);
-    background: rgba(6, 14, 10, 0.75);
-    border-radius: 6px;
+    border: 1px solid rgba(12, 230, 68, 0.2);
+    background: #050705;
+    border-radius: 8px;
     padding: clamp(1.1rem, 2vw, 1.35rem) clamp(1.2rem, 2.5vw, 1.5rem);
     transition: all 0.25s ease;
   }
 
   .ed-day-node:hover {
     border-color: rgba(12, 230, 68, 0.6);
-    background: rgba(12, 230, 68, 0.05);
+    background: #080c08;
     transform: translateX(4px);
     box-shadow: 0 0 20px rgba(12, 230, 68, 0.1);
   }
@@ -479,7 +503,7 @@ const STYLES = `
     width: 10px;
     height: 10px;
     border: 2px solid var(--color-primary);
-    background: var(--color-background);
+    background: #000000;
     box-shadow: 0 0 8px 1px rgba(12, 230, 68, 0.6);
     border-radius: 1px;
     transition: all 0.25s;
@@ -522,8 +546,8 @@ const STYLES = `
     align-items: center;
     gap: 0.35rem;
     padding: 0.2rem 0.55rem;
-    background: rgba(12, 230, 68, 0.08);
-    border: 1px solid rgba(12, 230, 68, 0.3);
+    background: rgba(12, 230, 68, 0.06);
+    border: 1px solid rgba(12, 230, 68, 0.25);
     border-radius: 3px;
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.68rem;
@@ -570,14 +594,17 @@ const STYLES = `
     opacity: 0.75;
   }
 
+  /* ---------------------------------------------------------
+     VENUE CARD
+     --------------------------------------------------------- */
   .ed-venue-card {
     position: relative;
-    border: 1px solid rgba(12, 230, 68, 0.3);
-    background: rgba(6, 14, 11, 0.9);
+    border: 1px solid rgba(12, 230, 68, 0.25);
+    background: #050705;
     border-radius: 8px;
     padding: clamp(1.4rem, 3vw, 2rem);
     overflow: hidden;
-    box-shadow: 0 0 25px rgba(12, 230, 68, 0.05);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.6);
   }
 
   .ed-venue-card-top {
@@ -586,7 +613,7 @@ const STYLES = `
     justify-content: space-between;
     padding-bottom: 0.75rem;
     margin-bottom: 1.25rem;
-    border-bottom: 1px solid rgba(12, 230, 68, 0.15);
+    border-bottom: 1px solid rgba(12, 230, 68, 0.12);
   }
 
   .ed-venue-tag {
@@ -752,6 +779,7 @@ export default function EventDetails() {
             </div>
           </div>
 
+          {/* 4 Stats Cards */}
           <div className="ed-stats-deck" data-aos="fade-up">
             {STATS.map((stat, i) => {
               const IconComponent = stat.icon;
@@ -769,60 +797,69 @@ export default function EventDetails() {
               );
             })}
           </div>
+
+          {/* 2 Seats Cards with Minimal 3D Hover Transition */}
           <div className="ed-seats-grid">
             {/* IEEE Members */}
-            <div className="ed-seat-card" data-aos="fade-right">
-              <div className="ed-seat-card-header">
-                <span className="ed-seat-protocol-tag">// PROTOCOL: IEEE_MEMBER</span>
-                <span className="ed-badge ed-badge-free">
-                  <Check size={13} strokeWidth={2.5} />
-                  FREE
-                </span>
-              </div>
-              <div className="ed-seat-body">
-                <div>
-                  <h3 className="ed-seat-count">60 Seats</h3>
-                  <p className="ed-seat-label">IEEE Members</p>
-                  <div className="ed-capacity-bar" title="50% Total Allotment">
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                  </div>
+            <div className="ed-seat-card-wrap" data-aos="fade-right">
+              <div className="ed-seat-card">
+                <div className="ed-seat-card-header">
+                  <span className="ed-seat-protocol-tag">// PROTOCOL: IEEE_MEMBER</span>
+                  <span className="ed-badge ed-badge-free">
+                    <Check size={13} strokeWidth={2.5} />
+                    FREE
+                  </span>
                 </div>
-                <div className="ed-seat-icon-box">
-                  <UserCheck size={30} strokeWidth={1.75} />
+                <div className="ed-seat-body">
+                  <div>
+                    <h3 className="ed-seat-count">60 Seats</h3>
+                    <p className="ed-seat-label">IEEE Members</p>
+                    <div className="ed-capacity-bar" title="50% Total Allotment">
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                    </div>
+                  </div>
+                  <div className="ed-seat-icon-box">
+                    <UserCheck size={30} strokeWidth={1.75} />
+                  </div>
                 </div>
               </div>
             </div>
-            <div className="ed-seat-card alt" data-aos="fade-left">
-              <div className="ed-seat-card-header">
-                <span className="ed-seat-protocol-tag">// PROTOCOL: NON_IEEE_MEMBER</span>
-                <span className="ed-badge ed-badge-paid">
-                  <CreditCard size={13} strokeWidth={2} />
-                  PAID
-                </span>
-              </div>
-              <div className="ed-seat-body">
-                <div>
-                  <h3 className="ed-seat-count">60 Seats</h3>
-                  <p className="ed-seat-label">Non-IEEE Members</p>
-                  <div className="ed-capacity-bar" title="50% Total Allotment">
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                    <span className="ed-capacity-segment active" />
-                  </div>
+
+            {/* Non-IEEE Members */}
+            <div className="ed-seat-card-wrap" data-aos="fade-left">
+              <div className="ed-seat-card alt">
+                <div className="ed-seat-card-header">
+                  <span className="ed-seat-protocol-tag">// PROTOCOL: NON_IEEE_MEMBER</span>
+                  <span className="ed-badge ed-badge-paid">
+                    <CreditCard size={13} strokeWidth={2} />
+                    PAID
+                  </span>
                 </div>
-                <div className="ed-seat-icon-box">
-                  <Users size={30} strokeWidth={1.75} />
+                <div className="ed-seat-body">
+                  <div>
+                    <h3 className="ed-seat-count">60 Seats</h3>
+                    <p className="ed-seat-label">Non-IEEE Members</p>
+                    <div className="ed-capacity-bar" title="50% Total Allotment">
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                      <span className="ed-capacity-segment active" />
+                    </div>
+                  </div>
+                  <div className="ed-seat-icon-box">
+                    <Users size={30} strokeWidth={1.75} />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Lower Grid: Schedule & Venue */}
           <div className="ed-grid-lower">
 
             {/* Left: Event Schedule */}
@@ -856,6 +893,7 @@ export default function EventDetails() {
               </div>
             </div>
 
+            {/* Right: Event Venue */}
             <div data-aos="fade-left">
               <div className="ed-subheading-wrap">
                 <h3 className="ed-subheading">
@@ -876,7 +914,7 @@ export default function EventDetails() {
                 <p className="ed-venue-sub">IEEE Student Branch CEC</p>
 
                 <div className="ed-venue-info-list">
-                  
+                  {/* Address */}
                   <div className="ed-venue-info-row">
                     <MapPin className="ed-venue-info-icon" size={18} />
                     <div>
@@ -888,6 +926,7 @@ export default function EventDetails() {
                     </div>
                   </div>
 
+                  {/* Timing */}
                   <div className="ed-venue-info-row">
                     <Clock className="ed-venue-info-icon" size={18} />
                     <div>
