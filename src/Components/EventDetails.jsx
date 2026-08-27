@@ -20,7 +20,7 @@ const STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Bruno+Ace&display=swap");
 
   .ed-section {
-    background: var(--color-background);
+    background: #000000;
     padding: clamp(4rem, 9vh, 7rem) clamp(1.25rem, 5vw, 4rem);
     position: relative;
     overflow: hidden;
@@ -30,11 +30,8 @@ const STYLES = `
     content: "";
     position: absolute;
     inset: 0;
-    background-image:
-      radial-gradient(circle at 50% 0%, rgba(12, 230, 68, 0.07) 0%, transparent 60%),
-      linear-gradient(rgba(12, 230, 68, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(12, 230, 68, 0.035) 1px, transparent 1px);
-    background-size: 100% 100%, 36px 36px, 36px 36px;
+    background-image: radial-gradient(rgba(12, 230, 68, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
     pointer-events: none;
     z-index: 0;
   }
