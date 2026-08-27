@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {
@@ -203,6 +203,26 @@ const STYLES = `
     line-height: 1;
     text-shadow: 0 0 16px rgba(12, 230, 68, 0.55);
     margin: 0.2rem 0;
+    user-select: none;
+    transition: text-shadow 0.2s ease;
+    display: inline-block;
+  }
+
+  .ed-stat-val.glitching {
+    color: #19ff62;
+    text-shadow:
+      -2px 0 rgba(255, 0, 80, 0.75),
+      2px 0 rgba(0, 230, 255, 0.75),
+      0 0 18px rgba(12, 230, 68, 0.85);
+    animation: ed-stat-glitch 0.12s steps(2) infinite;
+  }
+
+  @keyframes ed-stat-glitch {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-1px, 1px); }
+    50% { transform: translate(1px, -1px); }
+    75% { transform: translate(-1px, 0); }
+    100% { transform: translate(0, 1px); }
   }
 
   .ed-stat-lbl {
@@ -753,6 +773,67 @@ const SCHEDULE_DAYS = [
   },
 ];
 
+function GlitchStatValue({ text, delay = 0 }) {
+  const [display, setDisplay] = useState(text);
+  const [isGlitching, setIsGlitching] = useState(false);
+  const chars = "0123456789!@#$%^&*()_+-=<>?/~";
+  const timerRef = useRef(null);
+  const isRunningRef = useRef(false);
+
+  const startGlitch = () => {
+    if (isRunningRef.current) return;
+    isRunningRef.current = true;
+    setIsGlitching(true);
+    let iteration = 0;
+    const maxIterations = Math.max(text.length * 3, 10);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setDisplay(
+        text
+          .split("")
+          .map((char, index) => {
+            if (char === " ") return " ";
+            if (index < iteration / 3) {
+              return text[index];
+            }
+            return chars[Math.floor(Math.random() * chars.length)];
+          })
+          .join("")
+      );
+
+      iteration += 1;
+
+      if (iteration > maxIterations) {
+        clearInterval(timerRef.current);
+        setDisplay(text);
+        setIsGlitching(false);
+        isRunningRef.current = false;
+      }
+    }, 45);
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      startGlitch();
+    }, delay);
+    return () => {
+      clearTimeout(timeout);
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [text, delay]);
+
+  return (
+    <div
+      className={`ed-stat-val ${isGlitching ? "glitching" : ""}`}
+      onMouseEnter={startGlitch}
+    >
+      {display}
+    </div>
+  );
+}
+
 export default function EventDetails() {
   useEffect(() => {
     AOS.init({ duration: 800, once: true, offset: 60, easing: "ease-out" });
@@ -792,7 +873,7 @@ export default function EventDetails() {
                     <IconComponent className="ed-stat-icon" size={16} />
                   </div>
                   <div>
-                    <div className="ed-stat-val">{stat.value}</div>
+                    <GlitchStatValue text={stat.value} delay={i * 180 + 300} />
                     <p className="ed-stat-lbl">{stat.label}</p>
                   </div>
                 </div>
