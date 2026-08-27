@@ -634,15 +634,15 @@
 /* Subtle 3D Oscillating Rotation for DOMAINS Heading */
 @keyframes crtHeadingOscillate {
   0% {
-    transform: perspective(700px) rotateY(-6deg) rotateX(2deg);
+    transform: perspective(500px) rotateY(-7deg) rotateX(3deg);
     text-shadow: 0 0 12px rgba(12, 230, 68, 0.7), 0 0 28px rgba(12, 230, 68, 0.35);
   }
   50% {
-    transform: perspective(700px) rotateY(6deg) rotateX(-2deg);
+    transform: perspective(500px) rotateY(7deg) rotateX(-3deg);
     text-shadow: 0 0 20px rgba(12, 230, 68, 0.95), 0 0 40px rgba(12, 230, 68, 0.55);
   }
   100% {
-    transform: perspective(700px) rotateY(-6deg) rotateX(2deg);
+    transform: perspective(500px) rotateY(-7deg) rotateX(3deg);
     text-shadow: 0 0 12px rgba(12, 230, 68, 0.7), 0 0 28px rgba(12, 230, 68, 0.35);
   }
 }
@@ -993,4 +993,4 @@
 
 
 
-
+

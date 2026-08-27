@@ -5,7 +5,6 @@ const domains = [
     id: 0,
     number: "01",
     title: "CS ISQIP",
-    level: "CYBERSECURITY & DEFENSE",
     description:
       "Dive into hands-on sessions that explore the latest tools, technologies, threats, and defenses in cybersecurity. This track introduces participants to important concepts in network security, ethical hacking, secure systems, digital forensics, and modern cyber defense practices.",
   },
@@ -13,7 +12,6 @@ const domains = [
     id: 1,
     number: "02",
     title: "EC ISQIP",
-    level: "VLSI & SEMICONDUCTORS",
     description:
       "Gain a deeper understanding of VLSI design principles by exploring circuit architectures, digital and analog design methodologies, semiconductor technologies, and modern approaches to hardware development. Participants will get an opportunity to understand how complex electronic systems are designed and implemented.",
   },
@@ -21,7 +19,6 @@ const domains = [
     id: 2,
     number: "03",
     title: "EE ISQIP",
-    level: "RENEWABLE ENERGY & PV",
     description:
       "Learn to model, simulate, and analyze solar PV systems using PVsyst while developing an understanding of system design, performance evaluation, energy generation, and real-world yield assessment. The track provides participants with practical exposure to renewable energy technologies and helps them understand how engineering principles can be applied.",
   },
@@ -64,7 +61,7 @@ const DomainCard = ({ domain, index, isLoaded }) => {
             {domain.title}
           </h3>
           <p className="mt-1 font-mono text-[11px] tracking-widest text-[#0CE644]/70">
-            TRACK // {domain.level}
+            TRACK // 
           </p>
         </div>
 
@@ -204,4 +201,4 @@ export default Domains;
 
 
 
-
+
