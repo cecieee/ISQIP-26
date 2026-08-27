@@ -420,11 +420,21 @@ const STYLES = `
 
   .ed-subheading-wrap {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
     margin-bottom: 1.4rem;
-    padding-bottom: 0.6rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid rgba(12, 230, 68, 0.15);
+  }
+
+  .ed-subheading-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--color-primary);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.85;
   }
 
   .ed-subheading {
@@ -442,14 +452,6 @@ const STYLES = `
   .ed-subheading span {
     color: var(--color-primary);
     text-shadow: 0 0 12px rgba(12, 230, 68, 0.4);
-  }
-
-  .ed-subheading-tag {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.66rem;
-    color: rgba(12, 230, 68, 0.5);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
   }
 
   /* ---------------------------------------------------------
@@ -865,10 +867,10 @@ export default function EventDetails() {
             {/* Left: Event Schedule */}
             <div data-aos="fade-right">
               <div className="ed-subheading-wrap">
+                <span className="ed-subheading-tag">// 4_DAY_TIMELINE</span>
                 <h3 className="ed-subheading">
                   Event <span>Schedule</span>
                 </h3>
-                <span className="ed-subheading-tag">// 4_DAY_TIMELINE</span>
               </div>
               <div className="ed-schedule-list">
                 {SCHEDULE_DAYS.map((item, idx) => (
@@ -896,10 +898,10 @@ export default function EventDetails() {
             {/* Right: Event Venue */}
             <div data-aos="fade-left">
               <div className="ed-subheading-wrap">
+                <span className="ed-subheading-tag">// FACILITY_NODE</span>
                 <h3 className="ed-subheading">
                   Event <span>Venue</span>
                 </h3>
-                <span className="ed-subheading-tag">// FACILITY_NODE</span>
               </div>
 
               <div className="ed-venue-card">
