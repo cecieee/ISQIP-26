@@ -11,6 +11,8 @@ import FAQ from './Components/FAQ'
 import Footer from './Components/Footer'
 
 
+import Highlights from "./Components/Highlights.jsx"
+import Domains from "./Components/Domains.jsx"
 
 function App() {
   return (
@@ -18,17 +20,17 @@ function App() {
       <Navbar />
       <main>
         <Hero />
-        <div className="min-h-screen bg-black">
-          <CountDown />
-        </div>
+        <CountDown />
         <About />
         <WhyParticipate />
         <EventDetails />
         <LearningTracks />
+        <Domains />
+        <Highlights />
         <OrganizedBy />
         <FAQ />
       </main>
-      <Footer />     
+      <Footer />
     </>
   );
 }
