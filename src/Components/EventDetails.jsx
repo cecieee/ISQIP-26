@@ -11,6 +11,7 @@ import {
   Sparkles,
   ExternalLink,
   ChevronDown,
+  RotateCw,
 } from "lucide-react";
 
 const STYLES = `
@@ -122,218 +123,316 @@ const STYLES = `
     box-shadow: 0 0 8px 2px rgba(12,230,68,0.5);
   }
 
-  .ed-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: clamp(1rem, 2.5vw, 1.4rem);
+  /* =========================================================
+     MINIMAL TELEMETRY MATRIX (NON-CARD BESPOKE DESIGN)
+     ========================================================= */
+  .ed-matrix-wrap {
     margin-bottom: clamp(4rem, 8vw, 6rem);
+    position: relative;
   }
 
-  @media (min-width: 900px) {
-    .ed-cards-grid {
-      grid-template-columns: repeat(4, 1fr);
+  /* Unified Grid Frame */
+  .ed-matrix-frame {
+    background: #000000;
+    border: 1px solid rgba(12, 230, 68, 0.25);
+    border-radius: 4px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Seamless 6-Bay Matrix Grid */
+  .ed-matrix-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .ed-matrix-grid {
+      grid-template-columns: repeat(2, 1fr);
     }
-    .ed-card-item:nth-child(5) { grid-column: 2 / 3; }
-    .ed-card-item:nth-child(6) { grid-column: 3 / 4; }
   }
 
-  .ed-card-item {
-    height: 100%;
+  @media (min-width: 1024px) {
+    .ed-matrix-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  /* Seamless Bay Cell */
+  .ed-bay-cell {
+    position: relative;
     min-height: 220px;
+    perspective: 1200px;
+    border-right: 1px solid rgba(12, 230, 68, 0.14);
+    border-bottom: 1px solid rgba(12, 230, 68, 0.14);
+    background: #000000;
   }
 
-  .ed-card-wrap {
-    perspective: 1000px;
-    cursor: pointer;
+  @media (min-width: 1024px) {
+    .ed-bay-cell:nth-child(3n) {
+      border-right: none;
+    }
+    .ed-bay-cell:nth-child(n+4) {
+      border-bottom: none;
+    }
+  }
+
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .ed-bay-cell:nth-child(2n) {
+      border-right: none;
+    }
+    .ed-bay-cell:nth-child(n+5) {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 639px) {
+    .ed-bay-cell {
+      border-right: none;
+    }
+    .ed-bay-cell:last-child {
+      border-bottom: none;
+    }
+  }
+
+  /* Interactive Flipper Wrapper */
+  .ed-bay-wrap {
+    position: relative;
     width: 100%;
     height: 100%;
     min-height: 220px;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
+    cursor: pointer;
     user-select: none;
-    pointer-events: auto;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .ed-card-inner {
+  .ed-bay-inner {
     position: relative;
     width: 100%;
     height: 100%;
     min-height: 220px;
     transform-style: preserve-3d;
     transform-origin: center center;
-    transition: transform 0.7s cubic-bezier(0.23, 1, 0.32, 1);
-    pointer-events: none;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   @media (hover: hover) {
-    .ed-card-wrap:hover .ed-card-inner {
+    .ed-bay-wrap:hover .ed-bay-inner {
       transform: rotateY(180deg);
-    }
-    .ed-card-wrap:hover .ed-card-front::before,
-    .ed-card-wrap:hover .ed-card-front::after {
-      width: 22px;
-      height: 22px;
     }
   }
 
-  .ed-card-wrap.flipped .ed-card-inner {
+  .ed-bay-wrap.is-flipped .ed-bay-inner {
     transform: rotateY(180deg);
   }
 
-  .ed-card-front,
-  .ed-card-back {
+  /* Bay Front & Back Panels */
+  .ed-bay-face {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    background: rgba(6, 14, 12, 0.96);
-    border: 1px solid rgba(12, 230, 68, 0.28);
+    padding: 1.35rem 1.4rem 1.15rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.85rem;
-    padding: 2rem 1.5rem;
-    text-align: center;
-    overflow: hidden;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    justify-content: space-between;
+    background: #000000;
   }
 
-  .ed-card-front::before,
-  .ed-card-front::after,
-  .ed-card-back::before,
-  .ed-card-back::after {
-    content: "";
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    pointer-events: none;
-    transition: width 0.3s, height 0.3s, border-color 0.3s;
-    z-index: 2;
-  }
-
-  .ed-card-front::before,
-  .ed-card-back::before {
-    top: -1px; left: -1px;
-    border-top: 2px solid rgba(12, 230, 68, 0.7);
-    border-left: 2px solid rgba(12, 230, 68, 0.7);
-  }
-
-  .ed-card-front::after,
-  .ed-card-back::after {
-    bottom: -1px; right: -1px;
-    border-bottom: 2px solid rgba(12, 230, 68, 0.7);
-    border-right: 2px solid rgba(12, 230, 68, 0.7);
-  }
-
-  @media (hover: hover) {
-    .ed-card-wrap:hover .ed-card-front,
-    .ed-card-wrap:hover .ed-card-back {
-      border-color: rgba(12, 230, 68, 0.55);
-      box-shadow: 0 0 25px rgba(12, 230, 68, 0.15);
-    }
-    .ed-card-wrap:hover .ed-card-front::before,
-    .ed-card-wrap:hover .ed-card-front::after,
-    .ed-card-wrap:hover .ed-card-back::before,
-    .ed-card-wrap:hover .ed-card-back::after {
-      width: 22px;
-      height: 22px;
-      border-color: var(--color-primary);
-    }
-  }
-
-  .ed-card-icon-glow {
-    position: relative;
+  /* Bay Header */
+  .ed-bay-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 54px;
-    height: 54px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(12, 230, 68, 0.15) 0%, rgba(12, 230, 68, 0.03) 70%, transparent 100%);
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    box-shadow: 0 0 15px rgba(12, 230, 68, 0.1);
+    justify-content: space-between;
+    gap: 0.5rem;
   }
 
-  .ed-card-icon {
-    color: var(--color-primary);
-    filter: drop-shadow(0 0 6px rgba(12, 230, 68, 0.65));
+  .ed-bay-tag-group {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
   }
 
-  .ed-card-label {
+  .ed-bay-index {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.7rem;
-    color: rgba(12, 230, 68, 0.7);
-    letter-spacing: 0.14em;
+    color: var(--color-primary);
+    background: rgba(12, 230, 68, 0.08);
+    border: 1px solid rgba(12, 230, 68, 0.25);
+    padding: 0.1rem 0.35rem;
+    border-radius: 2px;
+  }
+
+  .ed-bay-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: rgba(245, 247, 246, 0.6);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     margin: 0;
   }
 
-  .ed-card-value {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.85rem, 1.4vw, 0.98rem);
-    color: var(--color-text);
-    line-height: 1.45;
-    margin: 0;
-    letter-spacing: 0.02em;
-  }
-
-  .ed-card-back {
-    transform: rotateY(180deg);
-    border-color: rgba(12, 230, 68, 0.5);
-    gap: 0.7rem;
-    padding: 1.75rem 1.5rem;
-  }
-
-  .ed-card-back-bloom {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at 50% 30%, rgba(12, 230, 68, 0.08) 0%, transparent 65%);
-    pointer-events: none;
-  }
-
-  .ed-card-back-label {
+  .ed-bay-flip-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.62rem;
     color: rgba(12, 230, 68, 0.6);
-    letter-spacing: 0.14em;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid rgba(12, 230, 68, 0.18);
+    border-radius: 2px;
     text-transform: uppercase;
-    margin: 0;
-    position: relative;
-    z-index: 1;
+    letter-spacing: 0.05em;
+    transition: all 0.2s ease;
   }
 
-  .ed-card-back-title {
-    font-family: var(--font-mech);
-    font-size: 1.1rem;
+  .ed-bay-wrap:hover .ed-bay-flip-trigger {
     color: var(--color-primary);
-    letter-spacing: 0.03em;
+    border-color: rgba(12, 230, 68, 0.5);
+    background: rgba(12, 230, 68, 0.08);
+  }
+
+  /* Bay Front Content */
+  .ed-bay-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    margin: 0.75rem 0;
+  }
+
+  .ed-bay-icon-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .ed-bay-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+  }
+
+  .ed-bay-val {
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    color: var(--color-text);
     margin: 0;
     line-height: 1.25;
-    text-shadow: 0 0 14px rgba(12, 230, 68, 0.35);
-    position: relative;
-    z-index: 1;
+    letter-spacing: 0.02em;
+  }
+
+  .ed-bay-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    color: rgba(245, 247, 246, 0.6);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  /* Bay Footer */
+  .ed-bay-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(245, 247, 246, 0.06);
+  }
+
+  .ed-bay-status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.68rem;
+    color: rgba(12, 230, 68, 0.85);
+  }
+
+  .ed-bay-status-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    box-shadow: 0 0 5px rgba(12, 230, 68, 0.7);
+    animation: ed-blink 1.8s ease-in-out infinite;
+  }
+
+  .ed-bay-hint {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(245, 247, 246, 0.3);
     text-transform: uppercase;
   }
 
-  .ed-card-back-divider {
-    width: 36px;
-    height: 1px;
-    background: rgba(12, 230, 68, 0.35);
-    position: relative;
-    z-index: 1;
+  /* Bay Back Face (Pure Solid Black Background) */
+  .ed-bay-back {
+    transform: rotateY(180deg);
+    background: #000000;
   }
 
-  .ed-card-back-body {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.85rem;
-    color: rgba(245, 247, 246, 0.72);
-    line-height: 1.65;
+  .ed-bay-back-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin: 0.55rem 0;
+  }
+
+  .ed-bay-back-title {
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(0.92rem, 1.2vw, 1.08rem);
+    color: var(--color-primary);
     margin: 0;
-    max-width: 24ch;
-    position: relative;
-    z-index: 1;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+  }
+
+  .ed-bay-back-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    color: rgba(245, 247, 246, 0.78);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .ed-bay-specs-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.45rem;
+    margin-top: 0.2rem;
+  }
+
+  .ed-bay-spec-chip {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: rgba(245, 247, 246, 0.8);
+    background: #0a0a0a;
+    border: 1px solid rgba(12, 230, 68, 0.2);
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    letter-spacing: 0.04em;
+  }
+
+  .ed-bay-back-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(245, 247, 246, 0.08);
+  }
+
+  .ed-bay-back-return {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.62rem;
+    color: rgba(12, 230, 68, 0.7);
+    text-transform: uppercase;
   }
 
   .ed-lower-grid {
@@ -778,46 +877,76 @@ const STYLES = `
 
 const CARDS = [
   {
+    index: "01",
+    label: "TIMELINE",
     Icon: Calendar,
-    label: "Date",
-    value: "Sep 15 – Oct 10, 2026",
-    backTitle: "Duration",
-    backBody: "4-week intensive programme with weekend & weekday sessions.",
+    frontVal: "Sep 15 – Oct 10",
+    frontSub: "4-Week Cohort Schedule",
+    statusPill: "26 Days Duration",
+    backTitle: "4-Week Intensive",
+    backDesc:
+      "A fast-paced 4-week hybrid schedule blending core domain training, hands-on development sprints, and career readiness sessions.",
+    chips: ["Weekend & Evenings", "No Academic Clash"],
   },
   {
+    index: "02",
+    label: "HOST CAMPUS",
     Icon: MapPin,
-    label: "Venue",
-    value: "CEC Main Campus, Chengannur",
-    backTitle: "Campus",
-    backBody: "College of Engineering Chengannur — fully on-campus, hands-on experience.",
+    frontVal: "CEC Main Campus",
+    frontSub: "College of Engineering Chengannur",
+    statusPill: "Chengannur, Kerala",
+    backTitle: "Campus Facilities",
+    backDesc:
+      "Fully on-campus, hosted at College of Engineering Chengannur with access to department labs and seminar auditoriums.",
+    chips: ["Hands-on Labs", "IEEE SB Host"],
   },
   {
+    index: "03",
+    label: "FORMAT",
     Icon: Radio,
-    label: "Mode",
-    value: "Offline",
-    backTitle: "On-Campus",
-    backBody: "100% offline, hands-on intensive workshops conducted on CEC campus.",
+    frontVal: "100% Offline",
+    frontSub: "Hands-On In-Person Labs",
+    statusPill: "Physical Attendance",
+    backTitle: "On-Campus Experience",
+    backDesc:
+      "Zero virtual disconnects. Direct face-to-face mentorship, live debugging with industry trainers, and active peer collaboration.",
+    chips: ["Live Mentorship", "Physical Cohort"],
   },
   {
+    index: "04",
+    label: "PACING",
     Icon: Clock,
-    label: "Session Length",
-    value: "3–4 Hrs / Session",
-    backTitle: "Schedule",
-    backBody: "Weekday evenings + Saturday mornings. No clash with academics.",
+    frontVal: "3–4 Hrs / Session",
+    frontSub: "Optimized Study Schedule",
+    statusPill: "Evenings & Saturdays",
+    backTitle: "Curated Hours",
+    backDesc:
+      "Carefully structured around standard college hours — weekday evenings and Saturday mornings to prevent clashes with university academics.",
+    chips: ["Zero Class Clash", "Structured Pace"],
   },
   {
+    index: "05",
+    label: "IEEE TRACK",
     Icon: Sparkles,
-    label: "IEEE Members",
-    value: "Free • 60 Seats",
-    backTitle: "Sponsored",
-    backBody: "60 reserved seats completely free for IEEE members, sponsored by IEEE SB CEC.",
+    frontVal: "Free • 60 Seats",
+    frontSub: "Sponsored by IEEE SB CEC",
+    statusPill: "100% Fee Waiver",
+    backTitle: "IEEE Sponsored Seats",
+    backDesc:
+      "60 reserved seats with full tuition fee covered courtesy of IEEE Student Branch CEC. Exclusive benefit for active IEEE members.",
+    chips: ["60 Reserved Seats", "IEEE CEC Sponsored"],
   },
   {
+    index: "06",
+    label: "OPEN TRACK",
     Icon: CreditCard,
-    label: "Non-IEEE Members",
-    value: "Paid • 60 Seats",
-    backTitle: "Registration",
-    backBody: "60 seats available for non-IEEE students with paid registration access.",
+    frontVal: "Paid • 60 Seats",
+    frontSub: "Open to All Engineering Students",
+    statusPill: "Direct Registration",
+    backTitle: "General Admission",
+    backDesc:
+      "60 seats open for external & non-IEEE engineering students seeking comprehensive technical training and placement prep.",
+    chips: ["60 Open Seats", "Universal Access"],
   },
 ];
 const SCHEDULE = [
@@ -853,33 +982,111 @@ const VENUE = {
   mapLink: "https://maps.app.goo.gl/cU61dU4RdUMPokNx6",
 };
 
-function FlipCard({ Icon, label, value, backTitle, backBody, delay }) {
+function TelemetryBay({
+  index,
+  label,
+  Icon,
+  frontVal,
+  frontSub,
+  statusPill,
+  backTitle,
+  backDesc,
+  chips,
+  delay,
+}) {
   const [flipped, setFlipped] = useState(false);
 
+  const toggleFlip = () => {
+    setFlipped((f) => !f);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setFlipped((f) => !f);
+    }
+  };
+
   return (
-    <div className="ed-card-item" data-aos="fade-up" data-aos-delay={delay}>
+    <div className="ed-bay-cell" data-aos="fade-up" data-aos-delay={delay}>
       <div
-        className={`ed-card-wrap${flipped ? " flipped" : ""}`}
-        onClick={() => setFlipped((f) => !f)}
+        className={`ed-bay-wrap${flipped ? " is-flipped" : ""}`}
+        onClick={toggleFlip}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="button"
+        aria-pressed={flipped}
+        aria-label={`${label}: ${frontVal}. Click to flip.`}
       >
-        <div className="ed-card-inner">
-
-          <div className="ed-card-front">
-            <div className="ed-card-icon-glow">
-              <Icon className="ed-card-icon" size={24} strokeWidth={1.5} />
+        <div className="ed-bay-inner">
+          {/* Front Bay Face */}
+          <div className="ed-bay-face ed-bay-front">
+            <div className="ed-bay-header">
+              <div className="ed-bay-tag-group">
+                <span className="ed-bay-index">{index}</span>
+                <p className="ed-bay-label">{label}</p>
+              </div>
+              <span className="ed-bay-flip-trigger">
+                <RotateCw size={10} />
+                Flip
+              </span>
             </div>
-            <p className="ed-card-label">{label}</p>
-            <p className="ed-card-value">{value}</p>
+
+            <div className="ed-bay-content">
+              <div className="ed-bay-icon-title-row">
+                <Icon className="ed-bay-icon" size={20} strokeWidth={1.75} />
+                <h3 className="ed-bay-val">{frontVal}</h3>
+              </div>
+              <p className="ed-bay-sub">{frontSub}</p>
+            </div>
+
+            <div className="ed-bay-footer">
+              <span className="ed-bay-status-tag">
+                <span className="ed-bay-status-dot" />
+                {statusPill}
+              </span>
+              <span className="ed-bay-hint">Hover / Click</span>
+            </div>
           </div>
 
-          <div className="ed-card-back">
-            <span className="ed-card-back-bloom" aria-hidden="true" />
-            <p className="ed-card-back-label">{label}</p>
-            <p className="ed-card-back-title">{backTitle}</p>
-            <div className="ed-card-back-divider" />
-            <p className="ed-card-back-body">{backBody}</p>
-          </div>
+          {/* Back Bay Face */}
+          <div className="ed-bay-face ed-bay-back">
+            <div className="ed-bay-header">
+              <div className="ed-bay-tag-group">
+                <span className="ed-bay-index">{index}</span>
+                <p className="ed-bay-label">{label}</p>
+              </div>
+              <span className="ed-bay-flip-trigger">
+                <RotateCw size={10} />
+                Back
+              </span>
+            </div>
 
+            <div className="ed-bay-back-body">
+              <h3 className="ed-bay-back-title">{backTitle}</h3>
+              <p className="ed-bay-back-desc">{backDesc}</p>
+              {chips && chips.length > 0 && (
+                <div className="ed-bay-specs-list">
+                  {chips.map((chip, idx) => (
+                    <span key={idx} className="ed-bay-spec-chip">
+                      {chip}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="ed-bay-back-footer">
+              <span className="ed-bay-status-tag">
+                <span className="ed-bay-status-dot" />
+                {statusPill}
+              </span>
+              <span className="ed-bay-back-return">
+                <RotateCw size={10} />
+                Return
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -904,7 +1111,7 @@ export default function EventDetails() {
           <div className="ed-header" data-aos="fade-down">
             <div className="ed-eyebrow">
               <span className="ed-eyebrow-dot" />
-              ISQIP 26 // IEEE SB CEC
+              ISQIP '26
             </div>
             <h2 className="ed-title">
               Event <span>Details</span>
@@ -916,10 +1123,15 @@ export default function EventDetails() {
             </div>
           </div>
 
-          <div className="ed-cards-grid">
-            {CARDS.map((card, i) => (
-              <FlipCard key={card.label} {...card} delay={i * 70} />
-            ))}
+          {/* Minimal 6-Bay Matrix Grid (Non-card Layout) */}
+          <div className="ed-matrix-wrap" data-aos="zoom-in" data-aos-delay="40">
+            <div className="ed-matrix-frame">
+              <div className="ed-matrix-grid">
+                {CARDS.map((card, i) => (
+                  <TelemetryBay key={card.label} {...card} delay={i * 45} />
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="ed-lower-grid">
