@@ -3,15 +3,16 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  MapPin,
-  Calendar,
-  Clock,
-  Radio,
-  CreditCard,
-  Sparkles,
+  CalendarDays,
+  Building2,
+  Cpu,
+  Timer,
+  Award,
+  Users,
   ExternalLink,
   ChevronDown,
   RotateCw,
+  MapPin,
 } from "lucide-react";
 
 const STYLES = `
@@ -25,29 +26,9 @@ const STYLES = `
     overflow: hidden;
   }
 
-  /* subtle grid overlay */
-  .ed-section::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(12,230,68,0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(12,230,68,0.035) 1px, transparent 1px);
-    background-size: 52px 52px;
-    pointer-events: none;
-    z-index: 0;
-  }
 
-  .ed-section::after {
-    content: "";
-    position: absolute;
-    top: 0; left: 0;
-    width: 180px; height: 180px;
-    border-top: 1px solid rgba(12,230,68,0.22);
-    border-left: 1px solid rgba(12,230,68,0.22);
-    pointer-events: none;
-    z-index: 1;
-  }
+
+
 
   .ed-inner {
     position: relative;
@@ -124,79 +105,44 @@ const STYLES = `
   }
 
   /* =========================================================
-     MINIMAL TELEMETRY MATRIX (NON-CARD BESPOKE DESIGN)
+     ARCHITECTURAL MINIMALIST SPEC CARDS
      ========================================================= */
   .ed-matrix-wrap {
     margin-bottom: clamp(4rem, 8vw, 6rem);
     position: relative;
   }
 
-  /* Unified Grid Frame */
   .ed-matrix-frame {
-    background: #000000;
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    border-radius: 4px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7);
+    background: transparent;
     position: relative;
-    overflow: hidden;
   }
 
-  /* Seamless 6-Bay Matrix Grid */
   .ed-matrix-grid {
     display: grid;
     grid-template-columns: 1fr;
+    gap: 1.25rem;
   }
 
   @media (min-width: 640px) {
     .ed-matrix-grid {
       grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
     }
   }
 
   @media (min-width: 1024px) {
     .ed-matrix-grid {
       grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
     }
   }
 
-  /* Seamless Bay Cell */
   .ed-bay-cell {
     position: relative;
     min-height: 220px;
     perspective: 1200px;
-    border-right: 1px solid rgba(12, 230, 68, 0.14);
-    border-bottom: 1px solid rgba(12, 230, 68, 0.14);
-    background: #000000;
   }
 
-  @media (min-width: 1024px) {
-    .ed-bay-cell:nth-child(3n) {
-      border-right: none;
-    }
-    .ed-bay-cell:nth-child(n+4) {
-      border-bottom: none;
-    }
-  }
-
-  @media (min-width: 640px) and (max-width: 1023px) {
-    .ed-bay-cell:nth-child(2n) {
-      border-right: none;
-    }
-    .ed-bay-cell:nth-child(n+5) {
-      border-bottom: none;
-    }
-  }
-
-  @media (max-width: 639px) {
-    .ed-bay-cell {
-      border-right: none;
-    }
-    .ed-bay-cell:last-child {
-      border-bottom: none;
-    }
-  }
-
-  /* Interactive Flipper Wrapper */
   .ed-bay-wrap {
     position: relative;
     width: 100%;
@@ -215,7 +161,7 @@ const STYLES = `
     min-height: 220px;
     transform-style: preserve-3d;
     transform-origin: center center;
-    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   @media (hover: hover) {
@@ -228,7 +174,6 @@ const STYLES = `
     transform: rotateY(180deg);
   }
 
-  /* Bay Front & Back Panels */
   .ed-bay-face {
     position: absolute;
     inset: 0;
@@ -236,101 +181,91 @@ const STYLES = `
     height: 100%;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    padding: 1.35rem 1.4rem 1.15rem;
+    padding: 1.5rem 1.6rem 1.4rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: #000000;
+    background: #08090a;
+    border-radius: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+    border-right: 1px solid rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    transition: border-color 0.3s ease, transform 0.3s ease;
   }
 
-  /* Bay Header */
+  .ed-bay-wrap:hover .ed-bay-face {
+    border-top-color: rgba(12, 230, 68, 0.4);
+    border-left-color: rgba(12, 230, 68, 0.15);
+  }
+
+  /* Card Header */
   .ed-bay-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.5rem;
   }
 
   .ed-bay-tag-group {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: 0.6rem;
   }
 
   .ed-bay-index {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--color-primary);
-    background: rgba(12, 230, 68, 0.08);
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    padding: 0.1rem 0.35rem;
-    border-radius: 2px;
+    letter-spacing: 0.06em;
+    opacity: 0.9;
   }
 
   .ed-bay-label {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.68rem;
-    color: rgba(245, 247, 246, 0.6);
+    color: rgba(245, 247, 246, 0.4);
     letter-spacing: 0.12em;
     text-transform: uppercase;
     margin: 0;
   }
 
-  .ed-bay-flip-trigger {
+  .ed-bay-icon-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    color: rgba(12, 230, 68, 0.6);
-    padding: 0.15rem 0.4rem;
-    border: 1px solid rgba(12, 230, 68, 0.18);
-    border-radius: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    transition: all 0.2s ease;
+    justify-content: center;
+    color: var(--color-primary);
+    opacity: 0.85;
+    transition: transform 0.3s ease, opacity 0.3s ease;
   }
 
-  .ed-bay-wrap:hover .ed-bay-flip-trigger {
-    color: var(--color-primary);
-    border-color: rgba(12, 230, 68, 0.5);
-    background: rgba(12, 230, 68, 0.08);
+  .ed-bay-wrap:hover .ed-bay-icon-badge {
+    transform: scale(1.08);
+    opacity: 1;
   }
 
   /* Bay Front Content */
   .ed-bay-content {
     display: flex;
     flex-direction: column;
-    gap: 0.45rem;
-    margin: 0.75rem 0;
-  }
-
-  .ed-bay-icon-title-row {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    margin-bottom: 0.15rem;
-  }
-
-  .ed-bay-icon {
-    color: var(--color-primary);
-    flex-shrink: 0;
+    gap: 0.35rem;
+    margin: 0.6rem 0;
   }
 
   .ed-bay-val {
     font-family: 'Bruno Ace', cursive;
-    font-size: clamp(1rem, 1.4vw, 1.2rem);
-    color: var(--color-text);
+    font-size: clamp(1.2rem, 1.55vw, 1.4rem);
+    color: #ffffff;
     margin: 0;
-    line-height: 1.25;
-    letter-spacing: 0.02em;
+    line-height: 1.15;
+    letter-spacing: 0.01em;
   }
 
   .ed-bay-sub {
     font-family: 'Inter', sans-serif;
-    font-size: 0.82rem;
-    color: rgba(245, 247, 246, 0.6);
-    line-height: 1.4;
+    font-size: 0.84rem;
+    color: rgba(245, 247, 246, 0.5);
+    line-height: 1.45;
     margin: 0;
   }
 
@@ -338,63 +273,44 @@ const STYLES = `
   .ed-bay-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(245, 247, 246, 0.06);
+    justify-content: flex-start;
   }
 
   .ed-bay-status-tag {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     color: rgba(12, 230, 68, 0.85);
+    letter-spacing: 0.05em;
   }
 
-  .ed-bay-status-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    box-shadow: 0 0 5px rgba(12, 230, 68, 0.7);
-    animation: ed-blink 1.8s ease-in-out infinite;
-  }
-
-  .ed-bay-hint {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    color: rgba(245, 247, 246, 0.3);
-    text-transform: uppercase;
-  }
-
-  /* Bay Back Face (Pure Solid Black Background) */
+  /* Bay Back Face */
   .ed-bay-back {
     transform: rotateY(180deg);
-    background: #000000;
+    background: #08090a;
   }
 
   .ed-bay-back-body {
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
-    margin: 0.55rem 0;
+    gap: 0.5rem;
+    margin: 0.2rem 0;
   }
 
   .ed-bay-back-title {
     font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.92rem, 1.2vw, 1.08rem);
+    font-size: clamp(1rem, 1.3vw, 1.18rem);
     color: var(--color-primary);
     margin: 0;
-    line-height: 1.25;
+    line-height: 1.2;
     letter-spacing: 0.02em;
   }
 
   .ed-bay-back-desc {
     font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    color: rgba(245, 247, 246, 0.78);
+    font-size: 0.82rem;
+    color: rgba(245, 247, 246, 0.72);
     line-height: 1.5;
     margin: 0;
   }
@@ -402,37 +318,24 @@ const STYLES = `
   .ed-bay-specs-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem 0.45rem;
+    gap: 0.4rem;
     margin-top: 0.2rem;
   }
 
   .ed-bay-spec-chip {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.62rem;
-    color: rgba(245, 247, 246, 0.8);
-    background: #0a0a0a;
-    border: 1px solid rgba(12, 230, 68, 0.2);
-    padding: 0.15rem 0.4rem;
-    border-radius: 2px;
+    color: rgba(245, 247, 246, 0.75);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0.15rem 0.5rem;
+    border-radius: 3px;
     letter-spacing: 0.04em;
   }
 
   .ed-bay-back-footer {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding-top: 0.5rem;
-    border-top: 1px solid rgba(245, 247, 246, 0.08);
-  }
-
-  .ed-bay-back-return {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.62rem;
-    color: rgba(12, 230, 68, 0.7);
-    text-transform: uppercase;
+    justify-content: flex-start;
   }
 
   .ed-lower-grid {
@@ -476,7 +379,7 @@ const STYLES = `
 
   .ed-subheading span { color: var(--color-primary); }
 
-  /* ── SCHEDULE STACK ─────────────────────────────────── */
+  /* ── MINIMALIST TIMELINE & VENUE CARDS ────────────── */
   .ed-stack-container {
     position: relative;
     cursor: pointer;
@@ -488,205 +391,298 @@ const STYLES = `
   /* Collapsed stack wrapper */
   .ed-stack-collapsed {
     position: relative;
-    padding-bottom: 28px;
+    padding-bottom: 16px;
   }
 
   /* Depth layers behind the top card */
   .ed-stack-depth {
     position: absolute;
-    left: 0;
-    right: 0;
-    height: 4px;
-    border: 1px solid rgba(12, 230, 68, 0.12);
-    border-top: none;
-    border-radius: 0 0 4px 4px;
-    background: rgba(6, 14, 12, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 12px;
+    background: rgba(6, 10, 8, 0.6);
     pointer-events: none;
+    transition: all 0.3s ease;
+  }
+
+  .ed-stack-container:hover .ed-stack-depth {
+    border-color: rgba(12, 230, 68, 0.12);
   }
 
   /* The hero top card */
   .ed-stack-hero {
     position: relative;
-    background: rgba(6, 14, 12, 0.96);
-    border: 1px solid rgba(12, 230, 68, 0.25);
-    border-radius: 4px;
+    background: linear-gradient(180deg, rgba(13, 19, 15, 0.94) 0%, rgba(7, 11, 9, 0.98) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
     overflow: hidden;
     z-index: 3;
-    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .ed-stack-container:hover .ed-stack-hero {
-    border-color: rgba(12, 230, 68, 0.45);
-    box-shadow: 0 0 20px rgba(12, 230, 68, 0.08);
-  }
-
-  /* Green accent line at the top of hero card */
-  .ed-stack-hero::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--color-primary), rgba(12, 230, 68, 0.3));
+    border-color: rgba(12, 230, 68, 0.35);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 24px rgba(12, 230, 68, 0.08);
+    transform: translateY(-2px);
   }
 
   .ed-stack-hero-inner {
-    padding: 1.15rem 1.25rem 1rem;
+    padding: 1.4rem 1.6rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
   }
 
-  .ed-stack-hero-top {
+  /* Top Anchor Block */
+  .ed-hero-top-block {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .ed-hero-anchor-group {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+  }
+
+  .ed-hero-big-anchor {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(2rem, 3vw, 2.35rem);
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .ed-hero-anchor-divider {
+    width: 1px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.12);
+    flex-shrink: 0;
+  }
+
+  .ed-hero-title-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .ed-hero-main-title {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(1rem, 1.4vw, 1.15rem);
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    margin: 0;
+    line-height: 1.25;
+  }
+
+  .ed-hero-sub-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-primary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .ed-hero-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(245, 247, 246, 0.7);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 0;
+    flex-shrink: 0;
+  }
+
+  .ed-hero-status-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    opacity: 0.9;
+    box-shadow: 0 0 8px rgba(12, 230, 68, 0.7);
+  }
+
+  /* Body Content: Sessions List / Venue details */
+  .ed-hero-body-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding-top: 0.2rem;
+  }
+
+  .ed-hero-session-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.6rem;
+    padding: 0.45rem 0.65rem;
+    background: rgba(255, 255, 255, 0.025);
+    border-radius: 6px;
+    transition: background 0.2s ease;
   }
 
-  .ed-stack-hero-date {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.88rem, 1.3vw, 1rem);
-    color: var(--color-text);
-    margin: 0;
-    letter-spacing: 0.02em;
-    line-height: 1.3;
+  .ed-stack-container:hover .ed-hero-session-row {
+    background: rgba(255, 255, 255, 0.04);
   }
 
-  .ed-stack-hero-day {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.66rem;
-    color: var(--color-primary);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    margin: 0;
-    flex-shrink: 0;
-  }
-
-  .ed-stack-hero-sessions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem 1rem;
-    padding-top: 0.55rem;
-    border-top: 1px solid rgba(245, 247, 246, 0.06);
-  }
-
-  .ed-stack-hero-session {
+  .ed-hero-session-left {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    font-family: 'Inter', sans-serif;
-    font-size: 0.8rem;
-    color: rgba(245, 247, 246, 0.7);
-    line-height: 1.35;
-    margin: 0;
+    gap: 0.65rem;
+    min-width: 0;
   }
 
-  .ed-stack-hero-dot {
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: var(--color-primary);
-    opacity: 0.6;
+  .ed-hero-session-idx {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--color-primary);
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+  }
+
+  .ed-hero-session-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 400;
+    color: rgba(245, 247, 246, 0.85);
+    margin: 0;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ed-hero-session-time {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.66rem;
+    color: rgba(245, 247, 246, 0.4);
+    letter-spacing: 0.04em;
     flex-shrink: 0;
   }
 
-  /* Badge showing "+N more" */
-  .ed-stack-hero-badge {
+  /* Action footer */
+  .ed-hero-footer-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 0.7rem;
-    margin-top: 0.6rem;
-    border-top: 1px solid rgba(245, 247, 246, 0.06);
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
   }
 
-  .ed-stack-hero-more {
+  .ed-hero-dots-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .ed-hero-step-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .ed-hero-step-dot:hover {
+    background: rgba(12, 230, 68, 0.5);
+    transform: scale(1.3);
+  }
+
+  .ed-hero-step-dot.is-active {
+    background: var(--color-primary);
+    box-shadow: 0 0 8px rgba(12, 230, 68, 0.7);
+    transform: scale(1.25);
+  }
+
+  .ed-hero-footer-count {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.66rem;
-    color: rgba(12, 230, 68, 0.6);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin: 0;
+    font-size: 0.68rem;
+    color: rgba(245, 247, 246, 0.45);
+    letter-spacing: 0.06em;
+    margin-left: 0.4rem;
   }
 
-  .ed-stack-cta-label {
+  .ed-hero-expand-link {
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.66rem;
-    color: rgba(12, 230, 68, 0.6);
-    letter-spacing: 0.12em;
+    font-size: 0.68rem;
+    color: var(--color-primary);
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     transition: color 0.2s ease;
   }
 
-  .ed-stack-container:hover .ed-stack-cta-label {
-    color: var(--color-primary);
-  }
-
-  .ed-stack-cta-icon {
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .ed-stack-container:hover .ed-stack-cta-icon {
+  .ed-stack-container:hover .ed-hero-expand-link .ed-action-chevron {
     transform: translateY(2px);
+  }
+
+  .ed-action-chevron {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   /* Expanded schedule list */
   .ed-schedule-expanded {
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(12, 230, 68, 0.18);
+    background: linear-gradient(180deg, rgba(13, 19, 15, 0.92) 0%, rgba(7, 11, 9, 0.96) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   }
 
   .ed-schedule-row {
     position: relative;
     display: grid;
-    grid-template-columns: 2rem 1fr;
+    grid-template-columns: 2.2rem 1fr;
     gap: 1rem;
-    padding: clamp(1.15rem, 2.2vw, 1.45rem) clamp(0.75rem, 1.5vw, 1.25rem);
-    border-bottom: 1px solid rgba(245, 247, 246, 0.08);
+    padding: clamp(1.1rem, 2vw, 1.35rem) clamp(0.9rem, 1.5vw, 1.4rem);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     background: transparent;
     transition: background 0.25s ease;
     align-items: center;
   }
 
   .ed-schedule-row:last-child {
-    border-bottom: 1px solid rgba(12, 230, 68, 0.18);
+    border-bottom: none;
   }
 
   .ed-schedule-row:hover {
     background: rgba(12, 230, 68, 0.03);
   }
 
-  /* Left signal bar on hover */
-  .ed-schedule-row::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 20%;
-    bottom: 20%;
-    width: 2px;
-    background: var(--color-primary);
-    opacity: 0;
-    transform: scaleY(0.4);
-    transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .ed-schedule-row:hover::before {
-    opacity: 1;
-    transform: scaleY(1);
-  }
-
   .ed-row-index {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    color: rgba(12, 230, 68, 0.5);
+    font-size: 0.72rem;
+    color: rgba(12, 230, 68, 0.55);
     letter-spacing: 0.1em;
     user-select: none;
     transition: color 0.25s ease;
-    align-self: center;
   }
 
   .ed-schedule-row:hover .ed-row-index {
@@ -724,21 +720,20 @@ const STYLES = `
   }
 
   .ed-row-date {
-    font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.82rem, 1.4vw, 1.05rem);
-    color: var(--color-text);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
     margin: 0;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
     line-height: 1.25;
-    overflow-wrap: break-word;
-    word-break: break-word;
   }
 
   .ed-row-day {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     color: var(--color-primary);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     margin: 0;
   }
@@ -761,10 +756,10 @@ const STYLES = `
   .ed-row-session-item {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.45rem;
     font-family: 'Inter', sans-serif;
-    font-size: clamp(0.78rem, 1vw, 0.86rem);
-    color: rgba(245, 247, 246, 0.82);
+    font-size: 0.82rem;
+    color: rgba(245, 247, 246, 0.75);
     line-height: 1.4;
   }
 
@@ -798,11 +793,11 @@ const STYLES = `
     align-items: center;
     justify-content: center;
     gap: 0.4rem;
-    padding: 0.85rem 0 0.25rem;
+    padding: 0.9rem 0 0.4rem;
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.68rem;
-    color: rgba(12, 230, 68, 0.55);
-    letter-spacing: 0.14em;
+    color: rgba(12, 230, 68, 0.6);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     cursor: pointer;
     background: none;
@@ -810,7 +805,6 @@ const STYLES = `
     width: 100%;
     transition: color 0.2s ease;
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
   }
 
   .ed-collapse-cta:hover {
@@ -878,97 +872,121 @@ const STYLES = `
 const CARDS = [
   {
     index: "01",
-    label: "TIMELINE",
-    Icon: Calendar,
-    frontVal: "Sep 15 – Oct 10",
-    frontSub: "4-Week Cohort Schedule",
-    statusPill: "26 Days Duration",
-    backTitle: "4-Week Intensive",
+    label: "DURATION",
+    Icon: CalendarDays,
+    frontVal: "26 Days Active",
+    frontSub: "September 15 – October 10",
+    statusPill: "Fall 2026 Cohort",
+    backTitle: "Program Duration",
     backDesc:
-      "A fast-paced 4-week hybrid schedule blending core domain training, hands-on development sprints, and career readiness sessions.",
-    chips: ["Weekend & Evenings", "No Academic Clash"],
+      "A 4-week structured bootcamp engineered to take participants from foundational fundamentals to production-ready project delivery.",
+    chips: ["4 Weeks", "Sprint Schedule"],
   },
   {
     index: "02",
-    label: "HOST CAMPUS",
-    Icon: MapPin,
-    frontVal: "CEC Main Campus",
-    frontSub: "College of Engineering Chengannur",
-    statusPill: "Chengannur, Kerala",
-    backTitle: "Campus Facilities",
+    label: "LOCATION",
+    Icon: Building2,
+    frontVal: "CE Chengannur",
+    frontSub: "Main Campus Labs & Auditoriums",
+    statusPill: "Kerala, India",
+    backTitle: "Venue Infrastructure",
     backDesc:
-      "Fully on-campus, hosted at College of Engineering Chengannur with access to department labs and seminar auditoriums.",
-    chips: ["Hands-on Labs", "IEEE SB Host"],
+      "Hosted directly on-site with full access to high-performance computing facilities, dedicated hardware labs, and seminar halls.",
+    chips: ["On-Campus", "Advanced Lab Access"],
   },
   {
     index: "03",
-    label: "FORMAT",
-    Icon: Radio,
-    frontVal: "100% Offline",
-    frontSub: "Hands-On In-Person Labs",
-    statusPill: "Physical Attendance",
-    backTitle: "On-Campus Experience",
+    label: "LEARNING MODE",
+    Icon: Cpu,
+    frontVal: "In-Person Labs",
+    frontSub: "Direct Mentor-Led Engineering",
+    statusPill: "Zero Virtual Lag",
+    backTitle: "Hands-On Experience",
     backDesc:
-      "Zero virtual disconnects. Direct face-to-face mentorship, live debugging with industry trainers, and active peer collaboration.",
-    chips: ["Live Mentorship", "Physical Cohort"],
+      "Interactive studio environment with live code reviews, instant roadblock resolution, and team-based development sprints.",
+    chips: ["Live Mentoring", "Project Sprints"],
   },
   {
     index: "04",
-    label: "PACING",
-    Icon: Clock,
-    frontVal: "3–4 Hrs / Session",
-    frontSub: "Optimized Study Schedule",
-    statusPill: "Evenings & Saturdays",
-    backTitle: "Curated Hours",
+    label: "COMMITMENT",
+    Icon: Timer,
+    frontVal: "Flexible Hours",
+    frontSub: "Evenings & Weekend Sessions",
+    statusPill: "Zero Lecture Clash",
+    backTitle: "Time Commitment",
     backDesc:
-      "Carefully structured around standard college hours — weekday evenings and Saturday mornings to prevent clashes with university academics.",
-    chips: ["Zero Class Clash", "Structured Pace"],
+      "Intelligently scheduled outside standard academic hours so you can upskill without missing university lectures or labs.",
+    chips: ["After Hours", "Weekend Masterclasses"],
   },
   {
     index: "05",
-    label: "IEEE TRACK",
-    Icon: Sparkles,
-    frontVal: "Free • 60 Seats",
-    frontSub: "Sponsored by IEEE SB CEC",
-    statusPill: "100% Fee Waiver",
-    backTitle: "IEEE Sponsored Seats",
+    label: "IEEE SCHOLARSHIP",
+    Icon: Award,
+    frontVal: "100% Funded",
+    frontSub: "Exclusive to IEEE SB CEC Members",
+    statusPill: "60 Reserved Seats",
+    backTitle: "Sponsored Track",
     backDesc:
-      "60 reserved seats with full tuition fee covered courtesy of IEEE Student Branch CEC. Exclusive benefit for active IEEE members.",
-    chips: ["60 Reserved Seats", "IEEE CEC Sponsored"],
+      "Complete registration waiver and sponsored materials provided by IEEE Student Branch CEC to empower high-potential members.",
+    chips: ["Full Waiver", "Member Exclusive"],
   },
   {
     index: "06",
-    label: "OPEN TRACK",
-    Icon: CreditCard,
-    frontVal: "Paid • 60 Seats",
-    frontSub: "Open to All Engineering Students",
-    statusPill: "Direct Registration",
-    backTitle: "General Admission",
+    label: "OPEN ENROLLMENT",
+    Icon: Users,
+    frontVal: "All Colleges",
+    frontSub: "Open to All Engineering Disciplines",
+    statusPill: "60 Open Seats",
+    backTitle: "Universal Cohort",
     backDesc:
-      "60 seats open for external & non-IEEE engineering students seeking comprehensive technical training and placement prep.",
-    chips: ["60 Open Seats", "Universal Access"],
+      "Open access pathway designed for ambitious engineers across any institution eager to master in-demand technical domains.",
+    chips: ["Cross-College", "Placement Focused"],
   },
 ];
 const SCHEDULE = [
   {
+    dayNum: "19",
+    monthYear: "September 2026",
     date: "September 19, 2026",
     day: "Saturday",
-    sessions: ["Opening Ceremony", "Domain Training - Day 1"],
+    phase: "Cohort Opening",
+    sessions: [
+      { name: "Opening Ceremony", time: "09:30 AM" },
+      { name: "Domain Training - Day 1", time: "01:30 PM" },
+    ],
   },
   {
+    dayNum: "20",
+    monthYear: "September 2026",
     date: "September 20, 2026",
     day: "Sunday",
-    sessions: ["Domain Training - Day 2", "Hands-on Projects"],
+    phase: "Hands-on Sprint",
+    sessions: [
+      { name: "Domain Training - Day 2", time: "09:30 AM" },
+      { name: "Hands-on Projects", time: "01:30 PM" },
+    ],
   },
   {
+    dayNum: "26",
+    monthYear: "September 2026",
     date: "September 26, 2026",
     day: "Saturday",
-    sessions: ["General Training - Day 3", "Aptitude & Resume Building"],
+    phase: "Career Track",
+    sessions: [
+      { name: "General Training - Day 3", time: "09:30 AM" },
+      { name: "Aptitude & Resume Building", time: "01:30 PM" },
+    ],
   },
   {
+    dayNum: "27",
+    monthYear: "September 2026",
     date: "September 27, 2026",
     day: "Sunday",
-    sessions: ["General Training - Day 4", "Mock Interviews & Closing"],
+    phase: "Grand Finale",
+    sessions: [
+      { name: "General Training - Day 4", time: "09:30 AM" },
+      { name: "Mock Interviews & Closing", time: "02:00 PM" },
+    ],
   },
 ];
 
@@ -1026,26 +1044,18 @@ function TelemetryBay({
                 <span className="ed-bay-index">{index}</span>
                 <p className="ed-bay-label">{label}</p>
               </div>
-              <span className="ed-bay-flip-trigger">
-                <RotateCw size={10} />
-                Flip
+              <span className="ed-bay-icon-badge">
+                <Icon size={20} strokeWidth={1.8} />
               </span>
             </div>
 
             <div className="ed-bay-content">
-              <div className="ed-bay-icon-title-row">
-                <Icon className="ed-bay-icon" size={20} strokeWidth={1.75} />
-                <h3 className="ed-bay-val">{frontVal}</h3>
-              </div>
+              <h3 className="ed-bay-val">{frontVal}</h3>
               <p className="ed-bay-sub">{frontSub}</p>
             </div>
 
             <div className="ed-bay-footer">
-              <span className="ed-bay-status-tag">
-                <span className="ed-bay-status-dot" />
-                {statusPill}
-              </span>
-              <span className="ed-bay-hint">Hover / Click</span>
+              <span className="ed-bay-status-tag">{statusPill}</span>
             </div>
           </div>
 
@@ -1056,9 +1066,8 @@ function TelemetryBay({
                 <span className="ed-bay-index">{index}</span>
                 <p className="ed-bay-label">{label}</p>
               </div>
-              <span className="ed-bay-flip-trigger">
-                <RotateCw size={10} />
-                Back
+              <span className="ed-bay-icon-badge">
+                <Icon size={20} strokeWidth={1.8} />
               </span>
             </div>
 
@@ -1077,14 +1086,7 @@ function TelemetryBay({
             </div>
 
             <div className="ed-bay-back-footer">
-              <span className="ed-bay-status-tag">
-                <span className="ed-bay-status-dot" />
-                {statusPill}
-              </span>
-              <span className="ed-bay-back-return">
-                <RotateCw size={10} />
-                Return
-              </span>
+              <span className="ed-bay-status-tag">{statusPill}</span>
             </div>
           </div>
         </div>
@@ -1096,10 +1098,20 @@ function TelemetryBay({
 export default function EventDetails() {
   const [scheduleExpanded, setScheduleExpanded] = useState(false);
   const [venueExpanded, setVenueExpanded] = useState(false);
+  const [activeDayIdx, setActiveDayIdx] = useState(0);
+  const [isSchedulePaused, setIsSchedulePaused] = useState(false);
 
   useEffect(() => {
     AOS.init({ duration: 850, once: true, offset: 50, easing: "ease-out" });
   }, []);
+
+  useEffect(() => {
+    if (isSchedulePaused || scheduleExpanded) return;
+    const interval = setInterval(() => {
+      setActiveDayIdx((prev) => (prev + 1) % SCHEDULE.length);
+    }, 3800);
+    return () => clearInterval(interval);
+  }, [isSchedulePaused, scheduleExpanded]);
 
   return (
     <>
@@ -1109,10 +1121,6 @@ export default function EventDetails() {
         <div className="ed-inner">
 
           <div className="ed-header" data-aos="fade-down">
-            <div className="ed-eyebrow">
-              <span className="ed-eyebrow-dot" />
-              ISQIP '26
-            </div>
             <h2 className="ed-title">
               Event <span>Details</span>
             </h2>
@@ -1124,7 +1132,7 @@ export default function EventDetails() {
           </div>
 
           {/* Minimal 6-Bay Matrix Grid (Non-card Layout) */}
-          <div className="ed-matrix-wrap" data-aos="zoom-in" data-aos-delay="40">
+          <div className="ed-matrix-wrap">
             <div className="ed-matrix-frame">
               <div className="ed-matrix-grid">
                 {CARDS.map((card, i) => (
@@ -1138,7 +1146,6 @@ export default function EventDetails() {
 
             <div data-aos="fade-right" data-aos-delay="80">
               <div className="ed-subheading-wrap">
-                <span className="ed-subheading-tag">// PROGRAMME_TIMELINE</span>
                 <h3 className="ed-subheading">
                   Event <span>Schedule</span>
                 </h3>
@@ -1163,7 +1170,7 @@ export default function EventDetails() {
                       style={{ transformOrigin: "top center" }}
                     >
                       <div className="ed-stack-collapsed">
-                        {/* Hero card — first event fully visible */}
+                        {/* Hero card — auto-cycling carousel */}
                         <motion.div
                           className="ed-stack-hero"
                           initial={{ opacity: 0, y: 20 }}
@@ -1177,34 +1184,82 @@ export default function EventDetails() {
                             },
                           }}
                         >
-                          <div className="ed-stack-hero-inner">
-                            <div className="ed-stack-hero-top">
-                              <p className="ed-stack-hero-date">
-                                {SCHEDULE[0].date}
-                              </p>
-                              <p className="ed-stack-hero-day">
-                                {SCHEDULE[0].day}
-                              </p>
-                            </div>
+                          <div
+                            className="ed-stack-hero-inner"
+                            onMouseEnter={() => setIsSchedulePaused(true)}
+                            onMouseLeave={() => setIsSchedulePaused(false)}
+                          >
+                            <AnimatePresence mode="wait">
+                              <motion.div
+                                key={activeDayIdx}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -6 }}
+                                transition={{ duration: 0.26, ease: "easeOut" }}
+                                style={{ display: "flex", flexDirection: "column", gap: "1.1rem" }}
+                              >
+                                <div className="ed-hero-top-block">
+                                  <div className="ed-hero-anchor-group">
+                                    <h4 className="ed-hero-big-anchor">
+                                      {SCHEDULE[activeDayIdx].dayNum}
+                                    </h4>
+                                    <div className="ed-hero-anchor-divider" />
+                                    <div className="ed-hero-title-meta">
+                                      <h5 className="ed-hero-main-title">
+                                        {SCHEDULE[activeDayIdx].monthYear}
+                                      </h5>
+                                      <p className="ed-hero-sub-meta">
+                                        {SCHEDULE[activeDayIdx].day} • {SCHEDULE[activeDayIdx].phase}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="ed-hero-status-badge">
+                                    <span className="ed-hero-status-pulse" />
+                                    <span>Day 0{activeDayIdx + 1}</span>
+                                  </div>
+                                </div>
 
-                            <div className="ed-stack-hero-sessions">
-                              {SCHEDULE[0].sessions.map((s, i) => (
-                                <p className="ed-stack-hero-session" key={i}>
-                                  <span className="ed-stack-hero-dot" />
-                                  {s}
-                                </p>
-                              ))}
-                            </div>
+                                <div className="ed-hero-body-list">
+                                  {SCHEDULE[activeDayIdx].sessions.map((session, idx) => (
+                                    <div className="ed-hero-session-row" key={idx}>
+                                      <div className="ed-hero-session-left">
+                                        <span className="ed-hero-session-idx">0{idx + 1}</span>
+                                        <p className="ed-hero-session-name">
+                                          {typeof session === "string" ? session : session.name}
+                                        </p>
+                                      </div>
+                                      <span className="ed-hero-session-time">
+                                        {typeof session === "string"
+                                          ? (idx === 0 ? "09:30 AM" : "01:30 PM")
+                                          : session.time}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            </AnimatePresence>
 
-                            <div className="ed-stack-hero-badge">
-                              <p className="ed-stack-hero-more">
-                                +{SCHEDULE.length - 1} more days
-                              </p>
-                              <span className="ed-stack-cta-label">
-                                Expand
+                            <div className="ed-hero-footer-row">
+                              <div className="ed-hero-dots-indicator">
+                                {SCHEDULE.map((_, i) => (
+                                  <button
+                                    key={i}
+                                    type="button"
+                                    aria-label={`Go to Day ${i + 1}`}
+                                    className={`ed-hero-step-dot${i === activeDayIdx ? " is-active" : ""}`}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveDayIdx(i);
+                                    }}
+                                  />
+                                ))}
+                                <span className="ed-hero-footer-count">4 Days</span>
+                              </div>
+                              <span className="ed-hero-expand-link">
+                                View All Dates
                                 <ChevronDown
-                                  size={12}
-                                  className="ed-stack-cta-icon"
+                                  size={13}
+                                  className="ed-action-chevron"
                                 />
                               </span>
                             </div>
@@ -1217,15 +1272,16 @@ export default function EventDetails() {
                             className="ed-stack-depth"
                             key={layer}
                             style={{
+                              top: layer * 5,
                               bottom: -(layer * 5),
-                              left: layer * 6,
-                              right: layer * 6,
+                              left: layer * 8,
+                              right: layer * 8,
                               zIndex: 3 - layer,
-                              opacity: 1 - layer * 0.35,
+                              opacity: 1 - layer * 0.4,
                             }}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{
-                              opacity: 1 - layer * 0.35,
+                              opacity: 1 - layer * 0.4,
                               y: 0,
                               transition: {
                                 delay: 0.08 + layer * 0.06,
@@ -1302,7 +1358,7 @@ export default function EventDetails() {
                                   <div className="ed-row-session-item" key={sIdx}>
                                     <span className="ed-row-session-dot" />
                                     <p className="ed-row-session-text">
-                                      {session}
+                                      {typeof session === "string" ? session : session.name}
                                     </p>
                                   </div>
                                 ))}
@@ -1333,7 +1389,6 @@ export default function EventDetails() {
 
             <div data-aos="fade-left" data-aos-delay="140">
               <div className="ed-subheading-wrap">
-                <span className="ed-subheading-tag">// BASE_LOCATION</span>
                 <h3 className="ed-subheading">
                   Event <span>Venue</span>
                 </h3>
@@ -1373,39 +1428,56 @@ export default function EventDetails() {
                           }}
                         >
                           <div className="ed-stack-hero-inner">
-                            <div className="ed-stack-hero-top">
-                              <p className="ed-stack-hero-date">
-                                {VENUE.name}
-                              </p>
-                              <p className="ed-stack-hero-day">
-                                {VENUE.tag}
-                              </p>
+                            <div className="ed-hero-top-block">
+                              <div className="ed-hero-anchor-group">
+                                <h4
+                                  className="ed-hero-big-anchor"
+                                  style={{
+                                    fontSize: "clamp(1.45rem, 2.3vw, 1.75rem)",
+                                    letterSpacing: "0.02em",
+                                  }}
+                                >
+                                  CAS
+                                </h4>
+                                <div className="ed-hero-anchor-divider" />
+                                <div className="ed-hero-title-meta">
+                                  <h5 className="ed-hero-main-title">{VENUE.name}</h5>
+                                  <p className="ed-hero-sub-meta">{VENUE.tag}</p>
+                                </div>
+                              </div>
+                              <div className="ed-hero-status-badge">
+                                <span className="ed-hero-status-pulse" />
+                                <span>Offline</span>
+                              </div>
                             </div>
 
-                            <div className="ed-stack-hero-sessions">
-                              <p className="ed-stack-hero-session">
-                                <span className="ed-stack-hero-dot" />
-                                Offline • On-Campus
-                              </p>
-                              <p className="ed-stack-hero-session">
-                                <span className="ed-stack-hero-dot" />
-                                09:00 AM – 05:00 PM
-                              </p>
-                              <p className="ed-stack-hero-session">
-                                <span className="ed-stack-hero-dot" />
-                                {VENUE.subtitle}
-                              </p>
+                            <div className="ed-hero-body-list">
+                              <div className="ed-hero-session-row">
+                                <div className="ed-hero-session-left">
+                                  <span className="ed-hero-session-idx">LAB</span>
+                                  <p className="ed-hero-session-name">{VENUE.subtitle}</p>
+                                </div>
+                                <span className="ed-hero-session-time">In-Person</span>
+                              </div>
+                              <div className="ed-hero-session-row">
+                                <div className="ed-hero-session-left">
+                                  <span className="ed-hero-session-idx">TIME</span>
+                                  <p className="ed-hero-session-name">09:00 AM – 05:00 PM IST</p>
+                                </div>
+                                <span className="ed-hero-session-time">Full Day</span>
+                              </div>
                             </div>
 
-                            <div className="ed-stack-hero-badge">
-                              <p className="ed-stack-hero-more">
-                                + Interactive Map & Access
-                              </p>
-                              <span className="ed-stack-cta-label">
-                                Expand
+                            <div className="ed-hero-footer-row">
+                              <div className="ed-hero-dots-indicator">
+                                <span className="ed-hero-step-dot is-active" />
+                                <span className="ed-hero-footer-count">Host Campus</span>
+                              </div>
+                              <span className="ed-hero-expand-link">
+                                View Map & Access
                                 <ChevronDown
-                                  size={12}
-                                  className="ed-stack-cta-icon"
+                                  size={13}
+                                  className="ed-action-chevron"
                                 />
                               </span>
                             </div>
@@ -1418,15 +1490,16 @@ export default function EventDetails() {
                             className="ed-stack-depth"
                             key={layer}
                             style={{
+                              top: layer * 5,
                               bottom: -(layer * 5),
-                              left: layer * 6,
-                              right: layer * 6,
+                              left: layer * 8,
+                              right: layer * 8,
                               zIndex: 3 - layer,
-                              opacity: 1 - layer * 0.35,
+                              opacity: 1 - layer * 0.4,
                             }}
-                            initial={{ opacity: 0, y: 10 }}
+                            initial={{ opacity: 0, y: 8 }}
                             animate={{
-                              opacity: 1 - layer * 0.35,
+                              opacity: 1 - layer * 0.4,
                               y: 0,
                               transition: {
                                 delay: 0.08 + layer * 0.06,

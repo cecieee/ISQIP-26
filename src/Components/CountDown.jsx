@@ -64,7 +64,12 @@ const ScanText = ({
    COUNTDOWN UNIT
    ========================================================= */
 
-const GlitchUnit = ({ value, label, isGlitching }) => {
+const GlitchUnit = ({
+  value,
+  label,
+  isGlitching,
+  theme = "green",
+}) => {
   const displayValue = String(value).padStart(2, "0");
 
   const [glitchDigits, setGlitchDigits] = useState([]);
@@ -114,6 +119,16 @@ const GlitchUnit = ({ value, label, isGlitching }) => {
     return () => clearTimeout(timeout);
   }, [isGlitching, displayValue]);
 
+  const isGreen = theme === "green";
+  const numColorClass = isGreen
+    ? "text-[#0CE644] [text-shadow:0_0_8px_rgba(12,230,68,0.7),0_0_22px_rgba(12,230,68,0.3)]"
+    : "text-[#F5F7F6] [text-shadow:0_0_8px_rgba(245,247,246,0.7),0_0_22px_rgba(245,247,246,0.25)]";
+
+  // Inverted text color for the label
+  const labelColorClass = isGreen
+    ? "text-[#F5F7F6]/75"
+    : "text-[#0CE644]/75";
+
   return (
     <div
       className="
@@ -127,17 +142,22 @@ const GlitchUnit = ({ value, label, isGlitching }) => {
     >
       {/* Number */}
       <div
-        className="
+        className={`
+          flex
+          flex-nowrap
+          items-baseline
+          justify-center
+          whitespace-nowrap
+          font-mech
           font-mechsuit
-          text-5xl
+          text-4xl
           leading-none
-          tracking-wider
-          text-[#0CE644]
-          [text-shadow:0_0_4px_rgba(12,230,68,0.65),0_0_12px_rgba(12,230,68,0.25)]
-          sm:text-6xl
-          md:text-8xl
-          lg:text-9xl
-        "
+          ${numColorClass}
+          sm:text-5xl
+          md:text-7xl
+          lg:text-8xl
+        `}
+        style={{ fontFamily: "'Mechsuit', sans-serif" }}
       >
         {displayValue.split("").map((digit, index) => {
           const isDigitGlitching =
@@ -148,8 +168,8 @@ const GlitchUnit = ({ value, label, isGlitching }) => {
               key={index}
               className={
                 isDigitGlitching
-                  ? "crt-number-glitch inline-block"
-                  : "inline-block"
+                  ? "crt-number-glitch inline-block tracking-normal"
+                  : "inline-block tracking-normal"
               }
             >
               {isDigitGlitching
@@ -162,16 +182,21 @@ const GlitchUnit = ({ value, label, isGlitching }) => {
 
       {/* Label */}
       <span
-        className="
+        className={`
+          mt-3
           whitespace-nowrap
+          font-mech
           font-mechsuit
           text-[10px]
           tracking-[0.25em]
-          text-[#0CE644]/50
+          ${labelColorClass}
+          sm:mt-4
           sm:text-[11px]
+          md:mt-6
           md:text-[13px]
-          lg:text-xl
-        "
+          lg:mt-7
+          lg:text-base
+        `}
       >
         <ScanText small>{label}</ScanText>
       </span>
@@ -241,285 +266,263 @@ const CountDown = () => {
   return (
     <section
       className="
+        crt-screen
         relative
         flex
         w-full
         items-center
         justify-center
         overflow-hidden
-        py-12
-        md:py-16
+        bg-[#020502]
+        py-16
+        md:py-20
+        lg:py-24
       "
     >
       {/* =================================================
-          CRT SCREEN
+          FULL-SECTION CRT EFFECTS (LINE BG)
+          ================================================= */}
+
+      {/* Fine CRT scanlines across entire section */}
+      <div
+        className="
+          crt-scanlines
+          pointer-events-none
+          absolute
+          inset-0
+          z-40
+        "
+      />
+
+      {/* Widely spaced horizontal interference across entire section */}
+      <div className="crt-horizontal-lines" />
+
+      {/* Static / grain across entire section */}
+      <div
+        className="
+          crt-static
+          pointer-events-none
+          absolute
+          inset-0
+          z-40
+        "
+      />
+
+      {/* Additional static lines across entire section */}
+      <div
+        className="
+          crt-static-lines-bg
+          pointer-events-none
+          absolute
+          inset-0
+          z-40
+        "
+      />
+
+      {/* Jagged interference */}
+      <div
+        className="
+          crt-jagged-lines
+          pointer-events-none
+          absolute
+          inset-0
+          z-40
+        "
+      />
+
+      {/* Vignette */}
+      <div
+        className="
+          crt-vignette
+          pointer-events-none
+          absolute
+          inset-0
+          z-50
+        "
+      />
+
+      {/* Subtle center CRT glow */}
+      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,rgba(12,230,68,0.08)_0%,transparent_70%)]" />
+
+      {/* =================================================
+          CONTENT (FLOATING DIRECTLY OVER CRT LINE BG)
           ================================================= */}
 
       <div
         className="
-          crt-screen
+          crt-flicker
           relative
+          z-10
+          flex
           w-full
-          min-h-[250px]
-          overflow-hidden
-          rounded-[18px]
-          border
-          border-[#0CE644]/15
-          bg-[#020402]
+          max-w-6xl
+          flex-col
+          items-center
           px-4
-          py-10
           sm:px-6
-          md:px-10
-          md:py-12
+          md:px-8
         "
       >
         {/* =================================================
-            CRT EFFECTS
+            HEADER
             ================================================= */}
 
-        {/* Fine CRT scanlines */}
-
-        <div
+        <p
           className="
-            crt-scanlines
-            pointer-events-none
-            absolute
-            inset-0
-            z-40
-          "
-        />
-
-        {/* Widely spaced horizontal interference */}
-
-        <div className="crt-horizontal-lines" />
-
-        {/* Static / grain */}
-
-        <div
-          className="
-            crt-static
-            pointer-events-none
-            absolute
-            inset-0
-            z-40
-          "
-        />
-
-        {/* Additional static lines */}
-
-        <div
-          className="
-            crt-static-lines-bg
-            pointer-events-none
-            absolute
-            inset-0
-            z-40
-          "
-        />
-
-        {/* Jagged interference */}
-
-        <div
-          className="
-            crt-jagged-lines
-            pointer-events-none
-            absolute
-            inset-0
-            z-40
-          "
-        />
-
-        {/* Vignette */}
-
-        <div
-          className="
-            crt-vignette
-            pointer-events-none
-            absolute
-            inset-0
-            z-50
-          "
-        />
-
-        {/* =================================================
-            CONTENT
-            ================================================= */}
-
-        <div
-          className="
-            crt-flicker
-            relative
-            z-10
-            flex
-            flex-col
-            items-center
+            mb-8
+            font-mechsuit
+            text-[18px]
+            tracking-[0.25em]
+            text-[#0CE644]/75
+            [text-shadow:0_0_10px_rgba(12,230,68,0.4)]
+            sm:text-[22px]
+            md:mb-12
+            md:text-3xl
           "
         >
-          {/* =================================================
-              HEADER
-              ================================================= */}
+          <ScanText>
+            EVENT STARTS IN
+          </ScanText>
+        </p>
 
-          <p
+        {/* =================================================
+            COUNTDOWN
+            ================================================= */}
+
+        {eventStarted ? (
+          <h2
             className="
               mb-8
               font-mechsuit
-              text-[20px]
-              tracking-[0.2em]
-              md:tracking-[0.2em]
-              text-[#0CE644]/70
-              [text-shadow:0_0_8px_rgba(12,230,68,0.35)]
+              text-[18px]
+              tracking-[0.25em]
+              text-[#0CE644]/75
+              [text-shadow:0_0_10px_rgba(12,230,68,0.4)]
+              sm:text-[22px]
               md:mb-12
               md:text-3xl
             "
           >
             <ScanText>
-              EVENT STARTS IN
+              EVENT STARTED
             </ScanText>
-          </p>
-
-          {/* =================================================
-              COUNTDOWN
-              ================================================= */}
-
-          {eventStarted ? (
-            <h2
-              className="
-                mb-8
-                font-mechsuit
-                text-[20px]
-                tracking-[0.2em]
-                md:tracking-[0.2em]
-                text-[#0CE644]/70
-                [text-shadow:0_0_8px_rgba(12,230,68,0.35)]
-                md:mb-12
-                md:text-3xl
-              "
-            >
-              <ScanText>
-                EVENT STARTED
-              </ScanText>
-            </h2>
-          ) : (
-            <div
-              className="
-                flex
-                w-full
-                max-w-5xl
-                items-center
-                justify-center
-              "
-            >
-              {/* DAYS */}
-
-              <GlitchUnit
-                value={time.days}
-                label="DAYS"
-                isGlitching={glitchUnits.includes(
-                  "days"
-                )}
-              />
-
-              {/* Separator */}
-
-              <span
-                className="
-                  mb-5
-                  shrink-0
-                  font-mechsuit
-                  text-lg
-                  text-[#0CE644]/90
-                  md:text-2xl
-                  lg:text-3xl
-                "
-              >
-                :
-              </span>
-
-              {/* HOURS */}
-
-              <GlitchUnit
-                value={time.hours}
-                label="HOURS"
-                isGlitching={glitchUnits.includes(
-                  "hours"
-                )}
-              />
-
-              {/* Separator */}
-
-              <span
-                className="
-                  mb-5
-                  shrink-0
-                  font-mechsuit
-                  text-lg
-                  text-[#0CE644]/90
-                  md:text-2xl
-                  lg:text-3xl
-                "
-              >
-                :
-              </span>
-
-              {/* MINUTES */}
-
-              <GlitchUnit
-                value={time.minutes}
-                label="MINS"
-                isGlitching={glitchUnits.includes(
-                  "minutes"
-                )}
-              />
-
-              {/* Separator */}
-
-              <span
-                className="
-                  mb-5
-                  shrink-0
-                  font-mechsuit
-                  text-lg
-                  text-[#0CE644]/90
-                  md:text-2xl
-                  lg:text-3xl
-                "
-              >
-                :
-              </span>
-
-              {/* SECONDS */}
-
-              <GlitchUnit
-                value={time.seconds}
-                label="SECS"
-                isGlitching={glitchUnits.includes(
-                  "seconds"
-                )}
-              />
-            </div>
-          )}
-
-          {/* =================================================
-              TERMINAL STATUS
-              ================================================= */}
-
+          </h2>
+        ) : (
           <div
             className="
-              mt-10
               flex
               w-full
               items-center
               justify-center
-              font-mechsuit
-              text-[9px]
-              tracking-[0.18em]
-              text-[#0CE644]/40
-              md:mt-9
-              md:text-xl
+              gap-1.5
+              sm:gap-3
+              md:gap-6
             "
           >
+            {/* DAYS - Green */}
+            <GlitchUnit
+              value={time.days}
+              label="DAYS"
+              theme="green"
+              isGlitching={glitchUnits.includes(
+                "days"
+              )}
+            />
+
+            {/* Separator */}
+            <span
+              className="
+                mb-6
+                shrink-0
+                font-mech
+                font-mechsuit
+                text-2xl
+                text-[#F5F7F6]/60
+                [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+                sm:mb-8
+                sm:text-4xl
+                md:mb-12
+                md:text-6xl
+                lg:text-7xl
+              "
+              style={{ fontFamily: "'Mechsuit', sans-serif" }}
+            >
+              :
+            </span>
+
+            {/* HOURS - White */}
+            <GlitchUnit
+              value={time.hours}
+              label="HOURS"
+              theme="white"
+              isGlitching={glitchUnits.includes(
+                "hours"
+              )}
+            />
+
+            {/* Separator */}
+            <span
+              className="
+                mb-6
+                shrink-0
+                font-mech
+                font-mechsuit
+                text-2xl
+                text-[#0CE644]/80
+                [text-shadow:0_0_8px_rgba(12,230,68,0.5)]
+                sm:mb-8
+                sm:text-4xl
+                md:mb-12
+                md:text-6xl
+                lg:text-7xl
+              "
+              style={{ fontFamily: "'Mechsuit', sans-serif" }}
+            >
+              :
+            </span>
+
+            {/* MINUTES - Green */}
+            <GlitchUnit
+              value={time.minutes}
+              label="MINS"
+              theme="green"
+              isGlitching={glitchUnits.includes(
+                "minutes"
+              )}
+            />
+
+            {/* Separator */}
+            <span
+              className="
+                mb-6
+                shrink-0
+                font-mech
+                font-mechsuit
+                text-2xl
+                text-[#F5F7F6]/60
+                [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+                sm:mb-8
+                sm:text-4xl
+                md:mb-12
+                md:text-6xl
+                lg:text-7xl
+              "
+              style={{ fontFamily: "'Mechsuit', sans-serif" }}
+            >
+              :
+            </span>
+
+            {/* SECONDS - White */}
+            <GlitchUnit
+              value={time.seconds}
+              label="SECS"
+              theme="white"
+              isGlitching={glitchUnits.includes(
+                "seconds"
+              )}
+            />
           </div>
-        </div>
+        )}
       </div>
     </section>
   );

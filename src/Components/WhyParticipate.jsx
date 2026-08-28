@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {
@@ -43,6 +43,12 @@ const STYLES = `
     gap: clamp(0.6rem, 1.5vw, 1rem);
     min-width: 0;
     grid-column: 1;
+    cursor: pointer;
+    transition: transform 0.25s ease;
+  }
+  .wp-row:hover,
+  .wp-row.is-revealed {
+    transform: translateY(-2px);
   }
   .wp-row.wp-row-right { grid-column: 3; }
 
@@ -56,6 +62,12 @@ const STYLES = `
     height: 1px;
     background: rgba(12,230,68,0.6);
     box-shadow: 0 0 4px rgba(12,230,68,0.3);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .wp-row.wp-row-left:hover::after,
+  .wp-row.wp-row-left.is-revealed::after {
+    background: rgba(12,230,68,1);
+    box-shadow: 0 0 8px rgba(12,230,68,0.6);
   }
   .wp-row.wp-row-right::before {
     content: "";
@@ -66,6 +78,12 @@ const STYLES = `
     height: 1px;
     background: rgba(12,230,68,0.6);
     box-shadow: 0 0 4px rgba(12,230,68,0.3);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+  .wp-row.wp-row-right:hover::before,
+  .wp-row.wp-row-right.is-revealed::before {
+    background: rgba(12,230,68,1);
+    box-shadow: 0 0 8px rgba(12,230,68,0.6);
   }
 
   /* pin: belongs to the SAME row as the line, at the SAME top:50% anchor,
@@ -80,6 +98,11 @@ const STYLES = `
     border: 2px solid var(--color-primary);
     background: var(--color-background);
     box-shadow: 0 0 7px 1px rgba(12,230,68,0.45);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .wp-row:hover .wp-row-pin-end,
+  .wp-row.is-revealed .wp-row-pin-end {
+    box-shadow: 0 0 12px 3px rgba(12,230,68,0.8);
   }
   .wp-row-left .wp-row-pin-end {
     right: calc(-1 * clamp(2.5rem, 5vw, 4rem));
@@ -88,7 +111,11 @@ const STYLES = `
     left: calc(-1 * clamp(2.5rem, 5vw, 4rem));
   }
 
-  .wp-row-text { min-width: 0; flex: 1 1 0%; }
+  .wp-row-text { 
+    min-width: 0; 
+    flex: 1 1 0%;
+    position: relative;
+  }
   .wp-row-left .wp-row-text {
     padding-right: clamp(0.75rem, 1.5vw, 1.25rem);
   }
@@ -101,11 +128,29 @@ const STYLES = `
     align-items: center;
     gap: 0.55rem;
     margin-bottom: 0.35rem;
+    transform: translateY(1.1rem); /* aligns title directly on the connector line axis initially */
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .wp-row:hover .wp-row-head,
+  .wp-row.is-revealed .wp-row-head {
+    transform: translateY(0);
   }
   .wp-row-icon {
     color: var(--color-primary);
     flex-shrink: 0;
     filter: drop-shadow(0 0 4px rgba(12,230,68,0.4));
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.6);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+  }
+  .wp-row:hover .wp-row-icon,
+  .wp-row.is-revealed .wp-row-icon,
+  .wp-mobile-row:hover .wp-mobile-row-icon,
+  .wp-mobile-row.is-revealed .wp-mobile-row-icon {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
   }
   .wp-row-title {
     font-family: var(--font-mech);
@@ -115,6 +160,14 @@ const STYLES = `
     text-transform: uppercase;
     letter-spacing: 0.02em;
     line-height: 1.35;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+  }
+  .wp-row:hover .wp-row-title,
+  .wp-row.is-revealed .wp-row-title,
+  .wp-mobile-row:hover .wp-mobile-row-title,
+  .wp-mobile-row.is-revealed .wp-mobile-row-title {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(12,230,68,0.5);
   }
   .wp-row-desc {
     font-family: 'Inter', sans-serif;
@@ -123,6 +176,18 @@ const STYLES = `
     color: rgba(245,247,246,0.72);
     margin: 0;
     max-width: 30ch;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+  }
+  .wp-row:hover .wp-row-desc,
+  .wp-row.is-revealed .wp-row-desc,
+  .wp-mobile-row:hover .wp-mobile-row-desc,
+  .wp-mobile-row.is-revealed .wp-mobile-row-desc {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 
   .wp-row-left .wp-row-head {
@@ -219,6 +284,9 @@ const STYLES = `
     overflow-wrap: normal;
     word-break: normal;
   }
+  .wp-chip-title .wp-chip-highlight {
+    color: var(--color-primary);
+  }
   .wp-chip-sub {
     font-family: 'Share Tech Mono', monospace;
     font-size: 0.7rem;
@@ -264,6 +332,7 @@ const STYLES = `
     align-items: flex-start;
     gap: 0.85rem;
     padding-bottom: clamp(2.1rem, 7vw, 2.75rem);
+    cursor: pointer;
   }
   .wp-mobile-row:last-child { padding-bottom: 0; }
 
@@ -277,6 +346,11 @@ const STYLES = `
     border: 2px solid var(--color-primary);
     background: var(--color-background);
     box-shadow: 0 0 7px 1px rgba(12,230,68,0.45);
+    transition: box-shadow 0.3s ease;
+  }
+  .wp-mobile-row:hover .wp-mobile-pin,
+  .wp-mobile-row.is-revealed .wp-mobile-pin {
+    box-shadow: 0 0 12px 3px rgba(12,230,68,0.8);
   }
   .wp-mobile-row-text { min-width: 0; }
   .wp-mobile-row-head {
@@ -284,6 +358,21 @@ const STYLES = `
     align-items: center;
     gap: 0.55rem;
     margin-bottom: 0.35rem;
+  }
+  .wp-mobile-row-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 4px rgba(12,230,68,0.4));
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.7);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+  }
+  .wp-mobile-row:hover .wp-mobile-row-icon,
+  .wp-mobile-row.is-revealed .wp-mobile-row-icon {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
   }
   .wp-mobile-row-title {
     font-family: var(--font-mech);
@@ -293,6 +382,12 @@ const STYLES = `
     text-transform: uppercase;
     letter-spacing: 0.02em;
     line-height: 1.35;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+  }
+  .wp-mobile-row:hover .wp-mobile-row-title,
+  .wp-mobile-row.is-revealed .wp-mobile-row-title {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(12,230,68,0.5);
   }
   .wp-mobile-row-desc {
     font-family: 'Inter', sans-serif;
@@ -300,6 +395,16 @@ const STYLES = `
     line-height: 1.55;
     color: rgba(245,247,246,0.72);
     margin: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(4px);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+  }
+  .wp-mobile-row:hover .wp-mobile-row-desc,
+  .wp-mobile-row.is-revealed .wp-mobile-row-desc {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 `;
 
@@ -328,6 +433,12 @@ function rowDelay(i) {
 }
 
 export default function WhyParticipate() {
+  const [revealed, setRevealed] = useState({});
+
+  const handleReveal = (key) => {
+    setRevealed((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+  };
+
   useEffect(() => {
     AOS.init({ duration: 850, once: true, offset: 60, easing: "ease-out" });
   }, []);
@@ -339,79 +450,82 @@ export default function WhyParticipate() {
       <section id="benefits" className="wp-section">
         <div className="wp-desktop">
           <div className="wp-board">
-            {LEFT_BENEFITS.map(({ Icon, title, desc }, i) => (
-              <div
-                className="wp-row wp-row-left"
-                key={title}
-                style={{ gridRow: i + 1 }}
-                data-aos="fade-right"
-                data-aos-delay={rowDelay(i)}
-              >
-                <div className="wp-row-text">
-                  <div className="wp-row-head">
-                    <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
-                    <h3 className="wp-row-title">{title}</h3>
+            {LEFT_BENEFITS.map(({ Icon, title, desc }, i) => {
+              const isRevealed = !!revealed[title];
+              return (
+                <div
+                  className={`wp-row wp-row-left ${isRevealed ? "is-revealed" : ""}`}
+                  key={title}
+                  style={{ gridRow: i + 1 }}
+                  onMouseEnter={() => handleReveal(title)}
+                >
+                  <div className="wp-row-text">
+                    <div className="wp-row-head">
+                      <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
+                      <h3 className="wp-row-title">{title}</h3>
+                    </div>
+                    <p className="wp-row-desc">{desc}</p>
                   </div>
-                  <p className="wp-row-desc">{desc}</p>
+                  <span className="wp-row-pin-end" />
                 </div>
-                <span className="wp-row-pin-end" />
-              </div>
-            ))}
+              );
+            })}
 
             <div className="wp-chip" data-aos="zoom-in" data-aos-delay={CHIP_DELAY}>
               <div>
-                
-                <h2 className="wp-chip-title">Why Participate</h2>
-                
+                <h2 className="wp-chip-title">Why <span className="wp-chip-highlight">Participate</span></h2>
               </div>
             </div>
 
-            {RIGHT_BENEFITS.map(({ Icon, title, desc }, i) => (
-              <div
-                className="wp-row wp-row-right"
-                key={title}
-                style={{ gridRow: i + 1 }}
-                data-aos="fade-left"
-                data-aos-delay={rowDelay(i)}
-              >
-                <span className="wp-row-pin-end" />
-                <div className="wp-row-text">
-                  <div className="wp-row-head">
-                    <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
-                    <h3 className="wp-row-title">{title}</h3>
+            {RIGHT_BENEFITS.map(({ Icon, title, desc }, i) => {
+              const isRevealed = !!revealed[title];
+              return (
+                <div
+                  className={`wp-row wp-row-right ${isRevealed ? "is-revealed" : ""}`}
+                  key={title}
+                  style={{ gridRow: i + 1 }}
+                  onMouseEnter={() => handleReveal(title)}
+                >
+                  <span className="wp-row-pin-end" />
+                  <div className="wp-row-text">
+                    <div className="wp-row-head">
+                      <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
+                      <h3 className="wp-row-title">{title}</h3>
+                    </div>
+                    <p className="wp-row-desc">{desc}</p>
                   </div>
-                  <p className="wp-row-desc">{desc}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
         <div className="wp-mobile">
           <div className="wp-mobile-chip" data-aos="zoom-in" data-aos-delay={CHIP_DELAY}>
-            <h2 className="wp-chip-title">Why Participate</h2>
+            <h2 className="wp-chip-title">Why <span className="wp-chip-highlight">Participate</span></h2>
           </div>
 
-          <div className="wp-mobile-rows"></div>
-
           <div className="wp-mobile-rows">
-            {ALL_BENEFITS.map(({ Icon, title, desc }, i) => (
-              <div
-                className="wp-mobile-row"
-                key={title}
-                data-aos="fade-up"
-                data-aos-delay={CHIP_SETTLE + i * ROW_STEP}
-              >
-                <span className="wp-mobile-pin" />
-                <div className="wp-mobile-row-text">
-                  <div className="wp-mobile-row-head">
-                    <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
-                    <h3 className="wp-mobile-row-title">{title}</h3>
+            {ALL_BENEFITS.map(({ Icon, title, desc }, i) => {
+              const isRevealed = !!revealed[title];
+              return (
+                <div
+                  className={`wp-mobile-row ${isRevealed ? "is-revealed" : ""}`}
+                  key={title}
+                  onMouseEnter={() => handleReveal(title)}
+                  onClick={() => handleReveal(title)}
+                >
+                  <span className="wp-mobile-pin" />
+                  <div className="wp-mobile-row-text">
+                    <div className="wp-mobile-row-head">
+                      <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
+                      <h3 className="wp-mobile-row-title">{title}</h3>
+                    </div>
+                    <p className="wp-mobile-row-desc">{desc}</p>
                   </div>
-                  <p className="wp-mobile-row-desc">{desc}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

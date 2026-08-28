@@ -1,436 +1,484 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
-import departureMono from '../assets/Font/DepartureMono-Regular.woff2';
-import mechsuitFont from '../assets/Font/mechsuit/Mechsuit.otf';
+import { useRef, useEffect, useState } from 'react';
+import Matter from 'matter-js';
 import black1 from '../assets/black1.webp';
-import tvLeft from '../assets/tv_left.webp';
-import tvRight from '../assets/tv-right.webp';
 import singleTV from '../assets/singletv.webp';
-
-class Grad {
-  constructor(x, y, z) { this.x = x; this.y = y; this.z = z; }
-  dot2(x, y) { return this.x * x + this.y * y; }
-}
-class Noise {
-  constructor(seed = 0) {
-    this.grad3 = [new Grad(1,1,0),new Grad(-1,1,0),new Grad(1,-1,0),new Grad(-1,-1,0),new Grad(1,0,1),new Grad(-1,0,1),new Grad(1,0,-1),new Grad(-1,0,-1),new Grad(0,1,1),new Grad(0,-1,1),new Grad(0,1,-1),new Grad(0,-1,-1)];
-    this.p = [151,160,137,91,90,15,131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,190,6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,88,237,149,56,87,174,20,125,136,171,168,68,175,74,165,71,134,139,48,27,166,77,146,158,231,83,111,229,122,60,211,133,230,220,105,92,41,55,46,245,40,244,102,143,54,65,25,63,161,1,216,80,73,209,76,132,187,208,89,18,169,200,196,135,130,116,188,159,86,164,100,109,198,173,186,3,64,52,217,226,250,124,123,5,202,38,147,118,126,255,82,85,212,207,206,59,227,47,16,58,17,182,189,28,42,223,183,170,213,119,248,152,2,44,154,163,70,221,153,101,155,167,43,172,9,129,22,39,253,19,98,108,110,79,113,224,232,178,185,112,104,218,246,97,228,251,34,242,193,238,210,144,12,191,179,162,241,81,51,145,235,249,14,239,107,49,192,214,31,181,199,106,157,184,84,204,176,115,121,50,45,127,4,150,254,138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180];
-    this.perm = new Array(512); this.gradP = new Array(512); this.seed(seed);
-  }
-  seed(s) {
-    if (s > 0 && s < 1) s *= 65536; s = Math.floor(s); if (s < 256) s |= s << 8;
-    for (let i = 0; i < 256; i++) {
-      const v = i & 1 ? this.p[i] ^ (s & 255) : this.p[i] ^ ((s >> 8) & 255);
-      this.perm[i] = this.perm[i + 256] = v;
-      this.gradP[i] = this.gradP[i + 256] = this.grad3[v % 12];
-    }
-  }
-  fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
-  lerp(a, b, t) { return (1 - t) * a + t * b; }
-  perlin2(x, y) {
-    let X = Math.floor(x), Y = Math.floor(y); x -= X; y -= Y; X &= 255; Y &= 255;
-    const n00 = this.gradP[X + this.perm[Y]].dot2(x, y);
-    const n01 = this.gradP[X + this.perm[Y + 1]].dot2(x, y - 1);
-    const n10 = this.gradP[X + 1 + this.perm[Y]].dot2(x - 1, y);
-    const n11 = this.gradP[X + 1 + this.perm[Y + 1]].dot2(x - 1, y - 1);
-    const u = this.fade(x);
-    return this.lerp(this.lerp(n00, n10, u), this.lerp(n01, n11, u), this.fade(y));
-  }
-}
-
-function Waves({
-  lineColor = 'rgba(12,230,68,0.18)', backgroundColor = 'transparent',
-  waveSpeedX = 0.0125, waveSpeedY = 0.005, waveAmpX = 32, waveAmpY = 16,
-  xGap = 10, yGap = 32, friction = 0.925, tension = 0.005, maxCursorMove = 100,
-  style = {}, className = '',
-}) {
-  const containerRef = useRef(null), canvasRef = useRef(null), ctxRef = useRef(null);
-  const boundingRef = useRef({ width: 0, height: 0, left: 0, top: 0 });
-  const noiseRef = useRef(new Noise(Math.random())), linesRef = useRef([]);
-  const mouseRef = useRef({ x: -10, y: 0, lx: 0, ly: 0, sx: 0, sy: 0, v: 0, vs: 0, a: 0, set: false });
-  const cfgRef = useRef({ lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap });
-  const frameRef = useRef(null);
-
-  useEffect(() => {
-    cfgRef.current = { lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap };
-  }, [lineColor, waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove, xGap, yGap]);
-
-  useEffect(() => {
-    const canvas = canvasRef.current, container = containerRef.current;
-    ctxRef.current = canvas.getContext('2d');
-    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-
-    function setSize() {
-      boundingRef.current = container.getBoundingClientRect();
-      canvas.width = Math.round(boundingRef.current.width * dpr);
-      canvas.height = Math.round(boundingRef.current.height * dpr);
-      ctxRef.current.setTransform(dpr, 0, 0, dpr, 0, 0);
-    }
-    function setLines() {
-      const { width, height } = boundingRef.current;
-      linesRef.current = [];
-      const { xGap, yGap } = cfgRef.current;
-      const density = width < 640 ? 1.6 : 1;
-      const oW = width + 200, oH = height + 30;
-      const tL = Math.ceil(oW / (xGap * density)), tP = Math.ceil(oH / (yGap * density));
-      const xS = (width - xGap * density * tL) / 2, yS = (height - yGap * density * tP) / 2;
-      for (let i = 0; i <= tL; i++) {
-        const pts = [];
-        for (let j = 0; j <= tP; j++) pts.push({ x: xS + xGap * density * i, y: yS + yGap * density * j, wave: { x: 0, y: 0 }, cursor: { x: 0, y: 0, vx: 0, vy: 0 } });
-        linesRef.current.push(pts);
-      }
-    }
-    function movePoints(time) {
-      const lines = linesRef.current, mouse = mouseRef.current, noise = noiseRef.current;
-      const { waveSpeedX, waveSpeedY, waveAmpX, waveAmpY, friction, tension, maxCursorMove } = cfgRef.current;
-      lines.forEach(pts => { pts.forEach(p => {
-        const mv = noise.perlin2((p.x + time * waveSpeedX) * 0.002, (p.y + time * waveSpeedY) * 0.0015) * 12;
-        p.wave.x = Math.cos(mv) * waveAmpX; p.wave.y = Math.sin(mv) * waveAmpY;
-        const dx = p.x - mouse.sx, dy = p.y - mouse.sy, dist = Math.hypot(dx, dy), l = Math.max(175, mouse.vs);
-        if (dist < l) { const s = 1 - dist / l, f = Math.cos(dist * 0.001) * s; p.cursor.vx += Math.cos(mouse.a) * f * l * mouse.vs * 0.00065; p.cursor.vy += Math.sin(mouse.a) * f * l * mouse.vs * 0.00065; }
-        p.cursor.vx += (0 - p.cursor.x) * tension; p.cursor.vy += (0 - p.cursor.y) * tension;
-        p.cursor.vx *= friction; p.cursor.vy *= friction;
-        p.cursor.x += p.cursor.vx * 2; p.cursor.y += p.cursor.vy * 2;
-        p.cursor.x = Math.min(maxCursorMove, Math.max(-maxCursorMove, p.cursor.x));
-        p.cursor.y = Math.min(maxCursorMove, Math.max(-maxCursorMove, p.cursor.y));
-      }); });
-    }
-    function moved(pt, wc = true) { return { x: Math.round((pt.x + pt.wave.x + (wc ? pt.cursor.x : 0)) * 10) / 10, y: Math.round((pt.y + pt.wave.y + (wc ? pt.cursor.y : 0)) * 10) / 10 }; }
-    function drawLines() {
-      const { width, height } = boundingRef.current, ctx = ctxRef.current;
-      ctx.clearRect(0, 0, width, height); ctx.beginPath(); ctx.strokeStyle = cfgRef.current.lineColor;
-      linesRef.current.forEach(points => {
-        let p1 = moved(points[0], false); ctx.moveTo(p1.x, p1.y);
-        points.forEach((p, idx) => {
-          const isLast = idx === points.length - 1;
-          p1 = moved(p, !isLast);
-          const p2 = moved(points[idx + 1] || points[points.length - 1], !isLast);
-          ctx.lineTo(p1.x, p1.y);
-          if (isLast) ctx.moveTo(p2.x, p2.y);
-        });
-      });
-      ctx.stroke();
-    }
-    function tick(t) {
-      const m = mouseRef.current; m.sx += (m.x - m.sx) * 0.1; m.sy += (m.y - m.sy) * 0.1;
-      const dx = m.x - m.lx, dy = m.y - m.ly, d = Math.hypot(dx, dy);
-      m.v = d; m.vs += (d - m.vs) * 0.1; m.vs = Math.min(100, m.vs); m.lx = m.x; m.ly = m.y; m.a = Math.atan2(dy, dx);
-      movePoints(t); drawLines();
-      frameRef.current = requestAnimationFrame(tick);
-    }
-    function onResize() { setSize(); setLines(); }
-    function updateMouse(x, y) { const m = mouseRef.current, b = boundingRef.current; m.x = x - b.left; m.y = y - b.top; if (!m.set) { m.sx = m.x; m.sy = m.y; m.lx = m.x; m.ly = m.y; m.set = true; } }
-
-    setSize(); setLines();
-
-    if (reduceMotion) {
-      movePoints(0); drawLines();
-    } else {
-      frameRef.current = requestAnimationFrame(tick);
-    }
-
-    const onMove = e => updateMouse(e.clientX, e.clientY);
-    const onTouch = e => { if (e.touches && e.touches[0]) updateMouse(e.touches[0].clientX, e.touches[0].clientY); };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('touchmove', onTouch, { passive: true });
-    return () => {
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('touchmove', onTouch);
-      cancelAnimationFrame(frameRef.current);
-    };
-  }, []);
-
-  return (
-    <div ref={containerRef} className={`waves-wrap ${className}`} style={{ position: 'absolute', inset: 0, overflow: 'hidden', backgroundColor, ...style }}>
-      <canvas ref={canvasRef} style={{ display: 'block', width: '100%', height: '100%' }} />
-    </div>
-  );
-}
+import CRTWarp from './CRTWarp';
 
 const HERO_STYLES = `
-  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600;700&display=swap");
-  @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace&display=swap');
+  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Bruno+Ace&display=swap");
 
-  @font-face {
-    font-family: 'Departure Mono';
-    src: url('${departureMono}') format('woff2');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Mechsuit';
-    src: url('${mechsuitFont}') format('opentype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  .hero-section{
-    background-image: radial-gradient(circle, rgba(12,230,68,0.055) 1px, transparent 1px);
-    background-size: 28px 28px;
-  }
-  .hero-section::before{
-    content:"";
-    pointer-events:none;
-    position:absolute;
-    inset:0;
-    z-index:3;
-    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px);
-    mix-blend-mode: multiply;
-  }
-
-  /* Sticky viewport: prefer dynamic viewport units so mobile browser
-     chrome (the address bar showing/hiding) doesn't clip content */
   .hero-sticky{ height: 100vh; }
   @supports (height: 100svh) { .hero-sticky{ height: 100svh; } }
 
-  .hero-scene{ min-height: 250vh; }
-  @supports (height: 100svh) { .hero-scene{ min-height: 250svh; } }
-  @media (max-width: 640px){
-    /* shorter scroll runway on phones so the reveal doesn't feel like an endless scroll */
-    .hero-scene{ min-height: 190vh; }
-    @supports (height: 100svh) { .hero-scene{ min-height: 190svh; } }
+  .hero-scene{ min-height: 320vh; }
+  @supports (height: 100svh) { .hero-scene{ min-height: 320svh; } }
+  
+  .hero-section{
+    background-image: radial-gradient(circle, rgba(12,230,68,0.055) 1px, transparent 1px);
+    background-size: 28px 28px;
+    width:100%; height:100vh;
+  }
+  @supports (height: 100svh) { .hero-section{ height:100svh; } }
+
+  .hero-kicker {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: clamp(0.72rem, 1.4vw, 0.88rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #0CE644;
+    text-shadow: 0 0 10px rgba(12, 230, 68, 0.4);
+    margin-bottom: 0.2rem;
   }
 
-  /* headline: Share Tech Mono is loaded and reads as an arcade/terminal
-     face, unlike the previous 'Mechsuit' which was never imported and
-     silently fell back to the browser's default sans-serif */
   .hero-headline{
     font-family: 'Mechsuit', sans-serif;
-    color: rgba(12,230,68,0.72);
-    text-shadow: 0 0 8px rgba(12,230,68,0.4), 0 0 28px rgba(12,230,68,.28), 0 0 60px rgba(12,230,68,.12);
-    line-height: 0.9;
-    letter-spacing: 0.02em;
+    color: #FFFFFF;
+    text-shadow: 0 0 20px rgba(12,230,68,0.7), 0 0 50px rgba(12,230,68,0.3), 0 8px 24px rgba(0,0,0,0.9);
+    line-height: 0.95;
+    letter-spacing: 0.05em;
     margin: 0;
-    font-size: clamp(3rem, 13vw, 7rem);
+    font-size: clamp(3.6rem, 15vw, 8.5rem);
+    position: relative;
+    display: inline-block;
   }
 
-  @keyframes h-glitch{0%{clip-path:inset(0 0 96% 0);transform:translate(-2px,0)}20%{clip-path:inset(35% 0 45% 0);transform:translate(2px,0)}45%{clip-path:inset(65% 0 15% 0);transform:translate(-1px,0)}65%{clip-path:inset(0 0 0 0);transform:translate(0,0)}100%{clip-path:inset(0 0 0 0);transform:translate(0,0)}}
-  @keyframes h-glitch-2{0%{clip-path:inset(75% 0 8% 0);transform:translate(3px,0);opacity:.55}30%{clip-path:inset(15% 0 65% 0);transform:translate(-2px,0);opacity:.35}55%{opacity:0}100%{opacity:0}}
-  .hero-hl-wrap{ position:relative; display:inline-block; }
-  .hero-hl-wrap::before,.hero-hl-wrap::after{
+  .hero-hl-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero-hl-wrap::before,
+  .hero-hl-wrap::after {
     content: attr(data-text);
-    position:absolute; inset:0;
-    font-family:'Mechsuit', sans-serif;
-    line-height:0.9;
-    pointer-events:none;
-    opacity:0;
-  }
-  @media (hover:hover){
-    .hero-hl-wrap:hover::before{ color: rgba(12,230,68,0.72); text-shadow:0 0 8px rgba(12,230,68,0.4); animation:h-glitch .4s steps(1) forwards; opacity:1; }
-    .hero-hl-wrap:hover::after{ color:#FFAA33; animation:h-glitch-2 .4s steps(1) forwards; opacity:1; }
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    clip: rect(0, 0, 0, 0);
   }
 
+  /* Left/Green glitch layer - fast dynamic burst cycle (1.2s) */
+  .hero-hl-wrap::before {
+    left: -3px;
+    text-shadow: 3px 0 #0CE644, -2px 0 rgba(12, 230, 68, 0.9);
+    animation: glitch-anim-1 2.2s infinite steps(2, end);
+  }
+
+  /* Right/White-Red glitch layer - fast dynamic burst cycle (1.6s) */
+  .hero-hl-wrap::after {
+    left: 3px;
+    text-shadow: -3px 0 #ffffff, 2px 0 #0CE644;
+    animation: glitch-anim-2 2.6s infinite steps(2, end);
+  }
+
+  @keyframes glitch-anim-1 {
+    0%, 100% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+    5% { clip: rect(18px, 9999px, 42px, 0); transform: translate(-6px, 1px) skew(-2deg); }
+    12% { clip: rect(55px, 9999px, 80px, 0); transform: translate(5px, -1px) skew(1.5deg); }
+    18% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+    38% { clip: rect(70px, 9999px, 98px, 0); transform: translate(-8px, 2px) skew(-3deg); }
+    45% { clip: rect(12px, 9999px, 35px, 0); transform: translate(6px, -1px) skew(2deg); }
+    52% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+    72% { clip: rect(30px, 9999px, 60px, 0); transform: translate(-5px, 1px) skew(1deg); }
+    80% { clip: rect(85px, 9999px, 120px, 0); transform: translate(7px, -2px) skew(-2.5deg); }
+    88% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+  }
+
+  @keyframes glitch-anim-2 {
+    0%, 100% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+    10% { clip: rect(80px, 9999px, 110px, 0); transform: translate(6px, -2px) skew(2.5deg); }
+    20% { clip: rect(25px, 9999px, 50px, 0); transform: translate(-5px, 1px) skew(-1.5deg); }
+    28% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+    55% { clip: rect(10px, 9999px, 38px, 0); transform: translate(6px, 1px) skew(2deg); }
+    64% { clip: rect(60px, 9999px, 90px, 0); transform: translate(-7px, -1px) skew(-3deg); }
+    72% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
+    88% { clip: rect(45px, 9999px, 70px, 0); transform: translate(5px, -2px) skew(-1deg); }
+    94% { clip: rect(95px, 9999px, 130px, 0); transform: translate(-6px, 1px) skew(3.5deg); }
+  }
+
+  .hero-hl-wrap{ position:relative; display:inline-block; }
   .hero-subtitle{
     font-family: 'Bruno Ace', cursive;
-    font-size: clamp(0.72rem, 1.6vw, 1rem);
-    color:#8FAE95;
-    line-height:1.75;
-    max-width: min(560px, 86vw);
-    letter-spacing:0.02em;
+    font-size: clamp(0.85rem, 1.8vw, 1.2rem);
+    color: #B5DAC0;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.95);
+    line-height: 1.6;
+    max-width: min(600px, 90vw);
+    letter-spacing: 0.06em;
     margin: 1rem auto 0;
     text-align: center;
   }
 
-  @keyframes btn-flicker{0%{opacity:.6}20%{opacity:1}40%{opacity:.7}60%{opacity:1}100%{opacity:1}}
+  .hero-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(0.82rem, 1.4vw, 0.95rem);
+    color: #7E9E88;
+    max-width: min(520px, 86vw);
+    line-height: 1.6;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .hero-meta-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(142, 174, 149, 0.75);
+    margin-top: 0.4rem;
+  }
+  .hero-meta-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #0CE644;
+    opacity: 0.7;
+  }
+
   .hero-btn-primary{
     display:inline-flex; align-items:center; gap:8px; text-decoration:none;
-    padding: clamp(11px,2.6vw,14px) clamp(22px,5vw,34px);
-    border-radius:4px; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase;
-    font-weight:700; font-family:'Inter',sans-serif; color:#0A0D0A; background:#0CE644;
-    border:none; cursor:pointer; transition:box-shadow .2s, transform .1s; white-space:nowrap;
+    padding: clamp(12px,2.6vw,15px) clamp(28px,5vw,38px);
+    border-radius:4px; font-size:.85rem; letter-spacing:.14em; text-transform:uppercase;
+    font-weight:700; font-family:'Inter',sans-serif; color:#071110; background:#0CE644;
+    border:none; cursor:pointer; box-shadow:0 0 24px rgba(12,230,68,0.5);
+    transition: all .2s; white-space:nowrap;
   }
-  .hero-btn-primary:hover{ animation:btn-flicker .3s ease forwards; box-shadow:0 0 20px rgba(12,230,68,.65), 0 0 44px rgba(12,230,68,.28); transform:translateY(-2px); }
-  .hero-btn-primary:focus-visible, .hero-btn-outline:focus-visible{ outline:2px solid #0CE644; outline-offset:3px; }
+  .hero-btn-primary:hover{ box-shadow:0 0 35px rgba(12,230,68,0.8); transform:translateY(-2px); }
 
   .hero-btn-outline{
     display:inline-flex; align-items:center; gap:8px; text-decoration:none;
-    padding: clamp(10px,2.4vw,13px) clamp(18px,4.4vw,30px);
-    border-radius:4px; font-size:.85rem; letter-spacing:.1em; text-transform:uppercase;
-    font-weight:500; font-family:'Inter',sans-serif; color:#0CE644; background:transparent;
-    border:1px solid rgba(12,230,68,.55); cursor:pointer;
-    transition:background .2s, box-shadow .2s, border-color .2s, transform .1s; white-space:nowrap;
+    padding: clamp(12px,2.6vw,15px) clamp(28px,5vw,38px);
+    border-radius:4px; font-size:.85rem; letter-spacing:.14em; text-transform:uppercase;
+    font-weight:600; font-family:'Inter',sans-serif; color:#FFFFFF; background:rgba(7,17,16,0.6);
+    border:none; cursor:pointer; backdrop-filter:blur(8px);
+    transition: all .2s; white-space:nowrap;
   }
-  .hero-btn-outline:hover{ background:rgba(12,230,68,.08); border-color:#0CE644; box-shadow:0 0 14px rgba(12,230,68,.3); transform:translateY(-2px); }
+  .hero-btn-outline:hover{ background:rgba(12,230,68,0.15); color:#0CE644; transform:translateY(-2px); }
 
-  .hero-tv-side{
-    position:absolute; bottom:0; height:min(65vh, 460px); width:auto; object-fit:contain;
-  }
-  .hero-tv-single{
-    position:absolute; left:50%; height:min(35vh, 260px); width:auto; object-fit:contain;
-  }
-  @media (max-width:560px){
-    /* side TVs crowd the centered logo on narrow phones — tuck them
-       further to the edges and shrink instead of hiding them outright */
-    .hero-tv-side{ height:min(30vh, 190px); opacity:.85; }
+  .tv-matter-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
   }
 
   .hero-scroll-cue{
     position:absolute; left:50%; transform:translateX(-50%); bottom:clamp(18px,4vh,32px);
     display:flex; flex-direction:column; align-items:center; gap:8px; z-index:6;
     font-family:'Inter',sans-serif; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:#5f7d66;
+    transition: opacity 0.3s;
   }
-  .hero-scroll-cue .bar{ width:1px; height:26px; background:linear-gradient(to bottom, rgba(12,230,68,.7), transparent); animation: blink 1.6s ease-in-out infinite; }
-
-  @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
-
-  @media (prefers-reduced-motion: reduce){
-    .hero-hl-wrap:hover::before, .hero-hl-wrap:hover::after{ animation:none; }
-    .hero-scroll-cue .bar{ animation:none; }
-  }
+  .hero-scroll-cue .bar{ width:1px; height:26px; background:linear-gradient(to bottom, rgba(12,230,68,.7), transparent); }
 `;
 
 export default function Hero() {
   const [scrollY, setScrollY] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const sceneContainerRef = useRef(null);
   const rafRef = useRef(null);
+
+  // Array of live physics bodies state for rendering React TV nodes
+  const [physicsTVs, setPhysicsTVs] = useState([]);
+  const bodiesRef = useRef([]);
 
   useEffect(() => {
     const updateHeight = () => setViewportHeight(window.innerHeight);
     updateHeight();
     window.addEventListener('resize', updateHeight);
+
     const onScroll = () => {
       if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => {
-        setScrollY(window.scrollY);
-        rafRef.current = null;
-      });
+      rafRef.current = requestAnimationFrame(() => { setScrollY(window.scrollY); rafRef.current = null; });
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+    return () => { window.removeEventListener('resize', updateHeight); window.removeEventListener('scroll', onScroll); };
+  }, []);
+
+  // Initialize Matter.js Real Physics Engine (like FancyComponents Gravity)
+  useEffect(() => {
+    const container = sceneContainerRef.current;
+    if (!container) return;
+
+    const width = container.clientWidth || window.innerWidth;
+    const height = container.clientHeight || window.innerHeight;
+
+    const { Engine, World, Bodies, Runner, Mouse, MouseConstraint } = Matter;
+
+    const engine = Engine.create({
+      gravity: { x: 0, y: 1.8, scale: 0.0018 }
+    });
+    const world = engine.world;
+
+    // Dimensions
+    const tvWidth = Math.max(340, Math.min(520, width * 0.32));
+    const tvHeight = tvWidth * 0.58;
+    const heroTVWidth = Math.max(360, Math.min(540, width * 0.34));
+    const heroTVHeight = heroTVWidth * 0.58;
+
+    // Physical hitbox matching solid CRT body inside singletv.webp
+    const hitBoxWidth = tvWidth * 0.65;
+    const hitBoxHeight = tvHeight * 0.68;
+
+    // Floor and side walls only (no artificial floating ledges)
+    const floorY = height - 10;
+    const floor = Bodies.rectangle(width / 2, floorY + 50, width * 3, 100, { isStatic: true, friction: 0.8, restitution: 0.25 });
+    const leftWall = Bodies.rectangle(-40, height / 2, 80, height * 4, { isStatic: true, friction: 0.3, restitution: 0.35 });
+    const rightWall = Bodies.rectangle(width + 40, height / 2, 80, height * 4, { isStatic: true, friction: 0.3, restitution: 0.35 });
+
+    World.add(world, [floor, leftWall, rightWall]);
+
+    // 8 Cascade TVs clustered densely on the left and right wings (light in the middle)
+    const tvConfigs = [
+      // Left Wing Dense Cluster (4 TVs)
+      { x: width * 0.10, y: -100, angle: -0.15, forceX: -1.2, angularVelocity: -0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
+      { x: width * 0.22, y: -140, angle: 0.08, forceX: -0.4, angularVelocity: 0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
+      { x: width * 0.14, y: -340, angle: 0.18, forceX: 0.6, angularVelocity: 0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
+      { x: width * 0.25, y: -480, angle: -0.12, forceX: -0.6, angularVelocity: -0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
+
+      // Right Wing Dense Cluster (4 TVs)
+      { x: width * 0.90, y: -100, angle: 0.15, forceX: 1.2, angularVelocity: 0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
+      { x: width * 0.78, y: -140, angle: -0.08, forceX: 0.4, angularVelocity: -0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
+      { x: width * 0.86, y: -340, angle: -0.18, forceX: -0.6, angularVelocity: -0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
+      { x: width * 0.75, y: -480, angle: 0.12, forceX: 0.6, angularVelocity: 0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
+    ];
+
+    const activeBodies = tvConfigs.map((cfg, id) => {
+      const body = Bodies.rectangle(cfg.x, cfg.y, cfg.hitW, cfg.hitH, {
+        restitution: 0.28,
+        friction: 0.85,
+        frictionStatic: 1.2,
+        frictionAir: 0.007,
+        density: cfg.density,
+        angle: cfg.angle,
+      });
+
+      Matter.Body.setAngularVelocity(body, cfg.angularVelocity);
+      Matter.Body.setVelocity(body, { x: cfg.forceX, y: Math.random() * 2 });
+
+      body.customId = id;
+      body.width = cfg.width;
+      body.height = cfg.height;
+      body.isHero = false;
+      body.side = cfg.x < width / 2 ? 'left' : 'right';
+      return body;
+    });
+
+    World.add(world, activeBodies);
+
+    // After 900ms delay, spawn the Central Hero TV so it makes a dramatic entrance and crashes onto the pile!
+    const delayTimer = setTimeout(() => {
+      const heroHitW = heroTVWidth * 0.65;
+      const heroHitH = heroTVHeight * 0.68;
+      const heroBody = Bodies.rectangle(width / 2, -150, heroHitW, heroHitH, {
+        restitution: 0.22,
+        friction: 0.9,
+        frictionStatic: 1.4,
+        frictionAir: 0.006,
+        density: 0.012,
+        angle: 0.01,
+      });
+
+      Matter.Body.setVelocity(heroBody, { x: 0, y: 3.5 });
+      heroBody.customId = 99;
+      heroBody.width = heroTVWidth;
+      heroBody.height = heroTVHeight;
+      heroBody.isHero = true;
+      heroBody.side = 'center';
+
+      activeBodies.push(heroBody);
+      World.add(world, heroBody);
+    }, 900);
+
+    const runner = Runner.create();
+    Runner.run(runner, engine);
+
+    // Sync loop: copy Matter.js physics coordinates to React state on each animation frame
+    let animId;
+    const syncLoop = () => {
+      const currentData = activeBodies.map(b => ({
+        id: b.customId,
+        x: b.position.x,
+        y: b.position.y,
+        angle: b.angle,
+        width: b.width,
+        height: b.height,
+        isHero: b.isHero,
+        side: b.side,
+      }));
+      setPhysicsTVs(currentData);
+      animId = requestAnimationFrame(syncLoop);
+    };
+    animId = requestAnimationFrame(syncLoop);
 
     return () => {
-      window.removeEventListener('resize', updateHeight);
-      window.removeEventListener('scroll', onScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      clearTimeout(delayTimer);
+      cancelAnimationFrame(animId);
+      Runner.stop(runner);
+      Engine.clear(engine);
+      World.clear(world, false);
     };
   }, []);
 
   const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
+  
+  // Find central hero monitor from physics simulation (id: 'hero')
+  const heroPhysicsTV = physicsTVs.find(tv => tv.isHero);
+  
+  // Continuous fluid zoom from its exact physics landing position into the screen
+  const zoomProgress = Math.min(1, scrollVH / 1.4);
+  const sideOpacity = Math.max(0, 1 - zoomProgress * 2.5);
+  const sideSpread = zoomProgress * 280;
 
-  const tvDropProgress = Math.min(scrollVH / 0.8, 1);
-  const singleTVTop = -80 + tvDropProgress * 100;
-
-  const transitionProgress = Math.max(0, Math.min(1, (scrollVH - 0.8) / 0.3));
-  const tvOpacity = Math.max(0, 1 - transitionProgress);
-  const isqipOpacity = transitionProgress;
-
-  const ctaOpacity = Math.max(0, 1 - Math.max(0, (scrollVH - 2.0) / 0.3));
-
-  const tvScale = 1 - transitionProgress * 0.2;
-  const tvBlur = transitionProgress * 20;
-  const isqipScale = 0.9 + transitionProgress * 0.1;
+  // Zoom scale starts at 1 (when landed) and expands smoothly past the camera
+  const heroScale = 1 + Math.pow(zoomProgress, 1.8) * 11;
+  const heroOpacity = zoomProgress > 0.75 ? Math.max(0, 1 - (zoomProgress - 0.75) / 0.25) : 1;
+  
+  // CRT Warp background and ISQIP UI only emerge AFTER the central TV finishes zooming past (zoomProgress > 0.75)
+  const isqipOpacity = Math.max(0, Math.min(1, (zoomProgress - 0.72) / 0.28));
+  const isqipScale = 0.85 + isqipOpacity * 0.15;
 
   return (
     <>
       <style>{HERO_STYLES}</style>
-
       <section id="home" className="hero-scene" style={{ position: 'relative', background: '#0A0D0A' }}>
-
         <div
+          ref={sceneContainerRef}
           className="hero-sticky hero-section"
-          style={{
-            position: 'sticky',
-            top: 0,
-            overflow: 'hidden',
-            backgroundImage: `url(${black1})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-          }}
+          style={{ position: 'sticky', top: 0, overflow: 'hidden', backgroundImage: `url(${black1})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
         >
+          {/* CRTWarp Background: Fades in on scroll as the central TV enlarges (pitch black initially) */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 1, opacity: isqipOpacity, pointerEvents: 'none', transition: 'opacity 0.1s ease-out' }}>
+            <CRTWarp
+              color="#0CE644"
+              backgroundColor="#071110"
+              speed={0.4}
+              curvature={0.22}
+              scanlineStrength={0.25}
+              scanlineFrequency={180}
+              waveAmplitude={0.22}
+              waveFrequency={2.0}
+              bloom={1.1}
+              bloomRadius={0.9}
+              noise={0.06}
+              vignette={0.25}
+              brightness={1.05}
+              pixelation={1}
+              rgbShift={0.01}
+              mouseReact
+              mouseStrength={0.35}
+              dpr={1.2}
+              fps={60}
+            />
+          </div>
+
+          {/* Dark Contrast Backdrop to make text and CTAs stand out sharply */}
           <div style={{
-            position: 'absolute', bottom: '-10%', left: '-5%', width: '30vw', height: '50vh',
-            background: 'radial-gradient(ellipse, rgba(12,230,68,0.25) 0%, rgba(12,230,68,0.15) 30%, transparent 70%)',
-            filter: 'blur(60px)', opacity: tvOpacity * 0.8, transition: 'opacity 0.3s ease-out', zIndex: 3, pointerEvents: 'none',
+            position: 'absolute',
+            inset: 0,
+            zIndex: 2,
+            background: 'radial-gradient(ellipse at center, rgba(7,17,16,0.72) 0%, rgba(7,17,16,0.45) 45%, transparent 80%)',
+            opacity: isqipOpacity,
+            pointerEvents: 'none',
           }} />
 
-          <div style={{
-            position: 'absolute', bottom: '-10%', right: '-5%', width: '30vw', height: '50vh',
-            background: 'radial-gradient(ellipse, rgba(12,230,68,0.25) 0%, rgba(12,230,68,0.15) 30%, transparent 70%)',
-            filter: 'blur(60px)', opacity: tvOpacity * 0.8, transition: 'opacity 0.3s ease-out', zIndex: 3, pointerEvents: 'none',
-          }} />
+          {/* Ambient Glows */}
+          <div style={{ position: 'absolute', bottom: '-5%', left: '0%', width: '40vw', height: '50vh', background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)', filter: 'blur(55px)', opacity: sideOpacity * 0.95, zIndex: 3, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: '-5%', right: '0%', width: '40vw', height: '50vh', background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)', filter: 'blur(55px)', opacity: sideOpacity * 0.95, zIndex: 3, pointerEvents: 'none' }} />
 
-          <div style={{
-            position: 'absolute', top: `${singleTVTop + 5}vh`, left: '50%', transform: 'translateX(-50%)',
-            width: 'min(25vw, 340px)', height: '40vh',
-            background: 'radial-gradient(ellipse, rgba(12,230,68,0.3) 0%, rgba(12,230,68,0.18) 30%, transparent 70%)',
-            filter: 'blur(50px)', opacity: tvOpacity * 0.9, transition: 'opacity 0.3s ease-out', zIndex: 8, pointerEvents: 'none',
-          }} />
+          {/* Falling Physics TVs (Surrounding monitors) */}
+          {physicsTVs.filter(tv => !tv.isHero).map((tv) => {
+            const spreadX = tv.side === 'left' ? -sideSpread : sideSpread;
+            return (
+              <div
+                key={tv.id}
+                className="tv-matter-item"
+                style={{
+                  width: `${tv.width}px`,
+                  height: `${tv.height}px`,
+                  transform: `translate3d(${tv.x - tv.width / 2 + spreadX}px, ${tv.y - tv.height / 2}px, 0) rotate(${tv.angle}rad)`,
+                  opacity: sideOpacity,
+                  zIndex: 5,
+                }}
+              >
+                <img
+                  src={singleTV}
+                  alt=""
+                  aria-hidden="true"
+                  draggable={false}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
+                />
+              </div>
+            );
+          })}
 
-          <img
-            src={tvLeft} alt="" aria-hidden="true" className="hero-tv-side"
-            style={{
-              left: 0, bottom: -12, objectPosition: 'bottom left', opacity: tvOpacity,
-              transform: `scale(${tvScale})`, transformOrigin: 'bottom left',
-              filter: `blur(${tvBlur}px)`,
-              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
-              zIndex: 5,
-            }}
-          />
-
-          <img
-            src={tvRight} alt="" aria-hidden="true" className="hero-tv-side"
-            style={{
-              right: 0, bottom: -12, objectPosition: 'bottom right', opacity: tvOpacity,
-              transform: `scale(${tvScale})`, transformOrigin: 'bottom right',
-              filter: `blur(${tvBlur}px)`,
-              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
-              zIndex: 5,
-            }}
-          />
-
-          <img
-            src={singleTV} alt="" aria-hidden="true" className="hero-tv-single"
-            style={{
-              top: `${singleTVTop}vh`, transform: `translateX(-50%) scale(${tvScale})`,
-              opacity: tvOpacity, filter: `blur(${tvBlur}px)`,
-              transition: 'opacity 0.3s ease-out, transform 0.3s ease-out, filter 0.3s ease-out',
-              zIndex: 10,
-            }}
-          />
-
-          <div style={{
-            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 20, opacity: isqipOpacity, transform: `scale(${isqipScale})`,
-            transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
-            pointerEvents: isqipOpacity > 0.7 ? 'auto' : 'none',
-            backgroundImage: `url(${black1})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat',
-          }}>
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }}>
-              <Waves lineColor="rgba(12,230,68,0.18)" backgroundColor="transparent" waveSpeedX={0.018} waveSpeedY={0.008} waveAmpX={44} waveAmpY={22} xGap={14} yGap={40} friction={0.93} tension={0.006} maxCursorMove={120} />
+          {/* Hero Central CRT Monitor - Natural Fall + Continuous Zoom-Through */}
+          {heroPhysicsTV && (
+            <div
+              className="tv-matter-item"
+              style={{
+                width: `${heroPhysicsTV.width}px`,
+                height: `${heroPhysicsTV.height}px`,
+                transform: `translate3d(${heroPhysicsTV.x - heroPhysicsTV.width / 2}px, ${heroPhysicsTV.y - heroPhysicsTV.height / 2}px, 0) scale(${heroScale}) rotate(${heroPhysicsTV.angle * (1 - zoomProgress)}rad)`,
+                transformOrigin: '50% 50%',
+                opacity: heroOpacity,
+                zIndex: 10,
+                filter: 'drop-shadow(0 16px 40px rgba(0,0,0,0.95)) drop-shadow(0 0 35px rgba(12,230,68,0.4))',
+              }}
+            >
+              <img
+                src={singleTV}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
+              />
             </div>
+          )}
 
-            <div aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(12,230,68,0.04) 0%, transparent 70%)', pointerEvents: 'none', zIndex: 2 }} />
+          {/* Hero Content (Smoothly emerges on scroll as the Central Monitor zooms through the camera) */}
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 20,
+              opacity: isqipOpacity,
+              pointerEvents: isqipOpacity > 0.6 ? 'auto' : 'none',
+            }}
+          >
+            <div style={{ position: 'relative', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%', maxWidth: '1280px', padding: '2rem', gap: '0.85rem', transform: `scale(${isqipScale})` }}>
+              {/* Presenter Kicker */}
+              <div className="hero-kicker" style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+                <span>IEEE SB College of Engineering Chengannur</span>
+                <span style={{ fontSize: '0.78em', letterSpacing: '0.3em', opacity: 0.85 }}>Presents</span>
+              </div>
 
-            <div style={{
-              position: 'relative', zIndex: 3, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', textAlign: 'center',
-              width: '100%', maxWidth: '1280px', padding: '2rem clamp(1.25rem,5vw,4rem)', minHeight: '100%',
-              gap: 'clamp(1rem, 3vh, 1.75rem)',
-            }}>
-              <h1 className="hero-headline">
-                <span className="hero-hl-wrap" data-text="ISQIP">ISQIP</span>
-              </h1>
+              {/* Main Headline */}
+              <h1 className="hero-headline"><span className="hero-hl-wrap" data-text="ISQIP">ISQIP</span></h1>
 
-              <p className="hero-subtitle">IEEE Student Quality Improvement Programme</p>
+              <p className="hero-subtitle">Innovate · Build · Transcend</p>
+              
 
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', opacity: ctaOpacity, transition: 'opacity 0.4s ease-out' }}>
-                <a href="#register" className="hero-btn-primary">
-                  Register Now
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                </a>
-                <a href="#tracks" className="hero-btn-outline">
-                  Learn More
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><polygon points="3,2 9,6 3,10" fill="currentColor" /></svg>
-                </a>
+
+              {/* Minimalist Action Buttons */}
+              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.8rem' }}>
+                <a href="#register" className="hero-btn-primary">Register Now</a>
+                <a href="#tracks" className="hero-btn-outline">Explore Tracks</a>
               </div>
             </div>
           </div>
 
+          <div className="hero-scroll-cue" style={{ opacity: scrollVH < 0.2 ? 1 : 0, pointerEvents: 'none' }}>
+            <span>Scroll Down</span>
+          </div>
         </div>
       </section>
     </>

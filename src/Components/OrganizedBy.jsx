@@ -6,38 +6,40 @@ const STYLES = `
     padding: clamp(3.5rem, 8vh, 5.5rem) clamp(1.5rem, 5vw, 4rem);
     text-align: center;
   }
-.ob-title {
+  .ob-title {
     font-family: var(--font-mech);
-    font-size: clamp(1.5rem, 3vw, 1.9rem);
+    font-size: clamp(1.5rem, 5vw, 4rem);
     color: var(--color-text);
-    margin: 0 0 2.5rem;   /* was 1rem */
+    margin: 0 0 clamp(3.5rem, 6vw, 4.5rem);
   }
   .ob-accent { color: var(--color-primary); }
 
   .ob-grid {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: clamp(1.75rem, 4vw, 3.5rem);
   }
   .ob-panel {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1rem;
+    padding: 0.75rem 1.5rem;
     transition: transform 0.25s ease, opacity 0.25s ease;
-    opacity: 0.85;
+    opacity: 0.88;
   }
   .ob-panel:hover {
-    transform: scale(1.06);
+    transform: scale(1.08);
     opacity: 1;
   }
 
   .ob-logo {
     max-width: 100%;
-    max-height: 56px;
+    max-height: clamp(75px, 8.5vw, 95px);
+    width: auto;
     object-fit: contain;
   }
   .ob-logo.ob-invert {

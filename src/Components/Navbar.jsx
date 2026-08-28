@@ -231,7 +231,6 @@ export default function Navbar() {
 
         {}
         <a href="#home" className="nb-logo" style={{ opacity: contentOpacity, transition: 'opacity 0.3s' }}>
-          <span className="nb-logo-dot" />
           <img src={logo} alt="ISQIP '26" />
         </a>
 

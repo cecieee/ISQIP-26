@@ -69,8 +69,8 @@ const HighlightCard = React.memo(({ image, index }) => {
           top-0
           h-5
           w-5
-          border-l-2
-          border-t-2
+          border-l-4
+          border-t-4
           border-[#0CE644]
           opacity-0
           transition-all
@@ -121,15 +121,13 @@ const Highlights = () => {
   }, []);
 
   return (
-    <section className="w-full overflow-hidden bg-black py-16 sm:py-20">
+    <section className="w-full overflow-hidden bg-background py-16 sm:py-20">
 
       {/* Heading */}
       <div className="mb-10 text-center md:mb-14">
-        <h2 className="font-mechsuit text-2xl tracking-wide text-[#0CE644] sm:text-3xl">
-          HIGHLIGHTS <span>'25</span>
+        <h2 className="font-mech text-2xl tracking-wide text-[#0CE644] sm:text-6xl">
+          HIGHLIGHTS <span className="text-white">'25</span>
         </h2>
-
-        <div className="mx-auto mt-2 h-[2px] w-12 bg-[#0CE644]" />
       </div>
 
       <div className="flex flex-col gap-5">

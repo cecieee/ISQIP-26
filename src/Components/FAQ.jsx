@@ -29,12 +29,22 @@ const STYLES = `
     margin-bottom: 0.55rem;
   }
 
+  .faq-header {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+  }
+
   .faq-title {
     font-family: "Mechsuit", sans-serif;
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-size: clamp(1.4rem, 2.8vw, 2.2rem);
     letter-spacing: 0.04em;
     color: var(--color-text);
     line-height: 1.15;
+    white-space: nowrap;
+    text-align: center;
     margin: 0 0 clamp(2.5rem, 5vh, 3.5rem);
   }
 
@@ -74,7 +84,7 @@ const STYLES = `
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
-    padding: clamp(1rem, 2.2vh, 1.35rem) 0;
+    padding: clamp(1.1rem, 2.5vh, 1.5rem) 0;
     text-align: left;
     color: var(--color-text);
     transition: color 0.2s;
@@ -104,7 +114,7 @@ const STYLES = `
 
   .faq-q {
     font-family: "Share Tech Mono", monospace;
-    font-size: clamp(0.82rem, 1.5vw, 0.96rem);
+    font-size: clamp(0.95rem, 1.8vw, 1.18rem);
     letter-spacing: 0.03em;
     line-height: 1.5;
     flex: 1;
@@ -113,11 +123,11 @@ const STYLES = `
 
   .faq-idx {
     font-family: "Share Tech Mono", monospace;
-    font-size: 0.68rem;
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem);
     color: rgba(12,230,68,0.5);
     letter-spacing: 0.12em;
     flex-shrink: 0;
-    width: 2.2rem;
+    width: 2.4rem;
     text-align: right;
     transition: color 0.2s;
     padding-right: 0.1rem;
@@ -174,12 +184,11 @@ const STYLES = `
 
   .faq-answer {
     font-family: "Inter", sans-serif;
-    font-size: clamp(0.8rem, 1.35vw, 0.875rem);
+    font-size: clamp(1.1rem, 1.35vw, 0.875rem);
     line-height: 1.78;
     color: rgba(245,247,246,0.6);
     padding-bottom: clamp(1rem, 2.2vh, 1.35rem);
     padding-left: 3.45rem;
-    border-left: 1px solid rgba(12,230,68,0.18);
     margin-left: 0;
   }
 
@@ -308,8 +317,7 @@ export default function FAQ() {
     <>
       <style>{STYLES}</style>
       <section id="faq" className="faq-section">
-        <div style={{ maxWidth: 860, margin: "0 auto" }}>
-          <p className="faq-eyebrow">// FAQ</p>
+        <div className="faq-header">
           <h2 className="faq-title">
             Frequently Asked <span>Questions</span>
           </h2>
