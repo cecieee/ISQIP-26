@@ -96,15 +96,34 @@ const STYLES = `
 
   .coc-item {
     border-bottom: 1px solid rgba(12,230,68,0.12);
-    transition: background 0.2s;
+    position: relative;
+    transition: background 0.25s;
   }
 
   .coc-item:first-child {
     border-top: 1px solid rgba(12,230,68,0.12);
   }
 
+  .coc-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(12,230,68,0.65);
+    box-shadow: 0 0 8px rgba(12,230,68,0.4);
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
   .coc-item:hover {
     background: #0a0a0a;
+  }
+
+  .coc-item:hover::before {
+    transform: scaleY(1);
   }
 
   /* warning item */
@@ -150,7 +169,11 @@ const STYLES = `
     flex-shrink: 0;
     width: 2rem;
     padding-top: 0.22em;
-    transition: color 0.2s;
+    transition: color 0.2s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .coc-item:hover .coc-num {
+    transform: translateX(6px);
   }
 
   .coc-num-warn {
@@ -290,6 +313,77 @@ const STYLES = `
     background: rgba(255,80,80,0.6);
     flex-shrink: 0;
     margin-top: 0.55em;
+  }
+
+  /* ── Terminal acknowledgment ── */
+  .coc-terminal {
+    margin-top: clamp(1.5rem, 3vh, 2.5rem);
+    border: 1px solid rgba(12,230,68,0.18);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #050505;
+  }
+
+  .coc-terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.6rem 1rem;
+    background: rgba(12,230,68,0.03);
+    border-bottom: 1px solid rgba(12,230,68,0.12);
+  }
+
+  .coc-terminal-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+  .coc-terminal-dot:nth-child(1) { background: #ff5f56; }
+  .coc-terminal-dot:nth-child(2) { background: #ffbd2e; }
+  .coc-terminal-dot:nth-child(3) { background: #27c93f; }
+
+  .coc-terminal-label {
+    font-family: "Share Tech Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: rgba(12,230,68,0.5);
+    margin-left: 0.4rem;
+  }
+
+  .coc-terminal-body {
+    padding: clamp(1.1rem, 2.5vw, 1.6rem) clamp(1.25rem, 3vw, 1.8rem);
+  }
+
+  .coc-terminal-line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.65rem;
+    font-family: "Share Tech Mono", monospace;
+    font-size: clamp(0.82rem, 1.3vw, 0.92rem);
+    line-height: 1.8;
+  }
+
+  .coc-terminal-prompt {
+    color: rgba(12,230,68,0.45);
+    flex-shrink: 0;
+    user-select: none;
+  }
+
+  .coc-terminal-cmd {
+    color: rgba(245,247,246,0.7);
+  }
+
+  .coc-terminal-out {
+    font-family: "Inter", sans-serif;
+    font-size: clamp(0.88rem, 1.35vw, 0.96rem);
+    line-height: 1.75;
+    color: rgba(245,247,246,0.68);
+    padding-left: 1.25rem;
+    margin: 0.35rem 0 0.85rem;
+  }
+
+  .coc-terminal-green {
+    color: var(--color-primary);
   }
 `;
 
@@ -431,17 +525,32 @@ export default function CodeofConduct() {
               </div>
             </div>
 
-            {/* Acknowledgment */}
-            <div className="coc-item-ack">
-              <div className="coc-row">
-                <span className="coc-num-ack">✦</span>
-                <div className="coc-content">
-                  <h2 className="coc-heading">Acknowledgment</h2>
-                  <p className="coc-body-ack">
-                    By registering and participating in ISQIP '26, you agree to abide
-                    by this Code of Conduct and contribute to a safe, respectful, and
-                    enriching environment for all.
-                  </p>
+            {/* Acknowledgment — terminal */}
+            <div className="coc-terminal" data-aos="fade-up" data-aos-delay="100">
+              <div className="coc-terminal-bar">
+                <span className="coc-terminal-dot" />
+                <span className="coc-terminal-dot" />
+                <span className="coc-terminal-dot" />
+                <span className="coc-terminal-label">acknowledgment.sh</span>
+              </div>
+              <div className="coc-terminal-body">
+                <div className="coc-terminal-line">
+                  <span className="coc-terminal-prompt">$</span>
+                  <span className="coc-terminal-cmd">
+                    cat <span className="coc-terminal-green">agreement.txt</span>
+                  </span>
+                </div>
+                <div className="coc-terminal-out">
+                  By registering and participating in{" "}
+                  <span className="coc-terminal-green">ISQIP &apos;26</span>, you agree to
+                  abide by this Code of Conduct and contribute to a safe, respectful,
+                  and enriching environment for all.
+                </div>
+                <div className="coc-terminal-line">
+                  <span className="coc-terminal-prompt">$</span>
+                  <span className="coc-terminal-cmd">
+                    echo <span className="coc-terminal-green">&quot;Welcome to ISQIP &apos;26&quot;</span>
+                  </span>
                 </div>
               </div>
             </div>
