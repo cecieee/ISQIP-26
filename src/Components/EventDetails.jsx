@@ -152,6 +152,8 @@ const STYLES = `
     user-select: none;
     outline: none;
     -webkit-tap-highlight-color: transparent;
+    perspective: 1200px;
+    pointer-events: auto;
   }
 
   .ed-bay-inner {
@@ -162,6 +164,8 @@ const STYLES = `
     transform-style: preserve-3d;
     transform-origin: center center;
     transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    will-change: transform;
   }
 
   @media (hover: hover) {
@@ -192,7 +196,11 @@ const STYLES = `
     border-right: 1px solid rgba(255, 255, 255, 0.02);
     border-bottom: 1px solid rgba(0, 0, 0, 0.8);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-    transition: border-color 0.3s ease, transform 0.3s ease;
+    transition: border-color 0.3s ease;
+  }
+
+  .ed-bay-front {
+    transform: rotateY(0deg);
   }
 
   .ed-bay-wrap:hover .ed-bay-face {
