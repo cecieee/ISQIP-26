@@ -137,13 +137,12 @@ const STYLES = `
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* --- row: large faint index numeral, unboxed time, title with
-     a hover-drawn underline. no borders/chips on the content --- */
+  /* --- row: unboxed time, diamond separator, title with a hover-drawn underline --- */
   .sc-row {
     display: grid;
-    grid-template-columns: auto minmax(148px, 180px) 1fr;
+    grid-template-columns: minmax(148px, 180px) auto 1fr;
     align-items: baseline;
-    gap: clamp(1rem, 3vw, 1.75rem);
+    gap: clamp(1rem, 3vw, 2rem);
     padding: 1.3rem 0;
     border-bottom: 1px solid rgba(245,247,246,0.06);
     animation: scRowIn 0.55s cubic-bezier(0.16,1,0.3,1) both;
@@ -155,30 +154,39 @@ const STYLES = `
     background: rgba(12,230,68,0.03);
   }
 
-  .sc-index {
-    font-family: var(--font-mech);
-    font-size: clamp(1.3rem, 2.6vw, 1.7rem);
-    line-height: 1;
-    color: rgba(12,230,68,0.2);
-    transition: color 0.25s ease;
+  .sc-sep {
+    font-family: 'Share Tech Mono', monospace;
+    color: rgba(12,230,68,0.7);
+    font-size: 1.15rem;
+    letter-spacing: 0.1em;
+    padding: 0 0.5rem;
+    align-self: center;
+    text-shadow: 0 0 6px rgba(12,230,68,0.5);
   }
-  .sc-row:hover .sc-index { color: rgba(12,230,68,0.6); }
 
   .sc-time {
+    display: inline-block;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
-    letter-spacing: 0.03em;
-    color: var(--color-primary);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #020a04;
     white-space: nowrap;
+    padding: 0.3rem 0.65rem;
+    background: #0CE644;
+    box-shadow: 0 0 10px rgba(12,230,68,0.5);
+  }
+  .sc-time-label,
+  .sc-time-value {
+    display: none;
   }
 
   .sc-title {
     position: relative;
     display: inline-block;
-    font-family: 'Inter', sans-serif;
-    font-size: 1.05rem;
-    font-weight: 500;
-    letter-spacing: 0.005em;
+    font-family: "Share Tech Mono", monospace;
+    font-size: clamp(0.95rem, 1.7vw, 1.1rem);
+    letter-spacing: 0.03em;
     line-height: 1.45;
     color: var(--color-text);
     padding-bottom: 0.2rem;
@@ -197,15 +205,15 @@ const STYLES = `
 
   @media (max-width: 640px) {
     .sc-row {
-      grid-template-columns: auto 1fr;
+      grid-template-columns: 1fr;
       grid-template-areas:
-        "index time"
-        "title title";
+        "time"
+        "title";
       row-gap: 0.4rem;
     }
-    .sc-index { grid-area: index; }
     .sc-time { grid-area: time; }
     .sc-title { grid-area: title; }
+    .sc-sep { display: none; }
   }
 
   .sc-pending {
@@ -394,8 +402,8 @@ export default function Schedule() {
           {day.rows.length ? (
             day.rows.map((row, i) => (
               <div className="sc-row" style={{ animationDelay: `${i * 70}ms` }} key={i}>
-                <span className="sc-index">{String(i + 1).padStart(2, "0")}</span>
                 <span className="sc-time">{row.time}</span>
+                <span className="sc-sep">✦</span>
                 <span className="sc-title">{row.title}</span>
               </div>
             ))
