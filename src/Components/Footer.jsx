@@ -48,6 +48,11 @@ export default function Footer() {
     { num: "06", name: "Register Now", link: "#register" },
   ];
 
+  const pageLinks = [
+    { num: "01", name: "Schedule", link: "/#schedule" },
+    { num: "02", name: "Code of Conduct", link: "/code-of-conduct" },
+  ];
+
   const contactInfo = [
     { name: "Contact Name", phone: "+91 XXXXX XXXXX" },
     { name: "Contact Name", phone: "+91 XXXXX XXXXX" },
@@ -306,7 +311,7 @@ export default function Footer() {
       <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-6 py-10 sm:px-10 lg:grid-cols-12 lg:px-12">
 
         {/* IEEE SB CEC & ISQIP Logo Lockup */}
-        <div className="flex flex-col items-center lg:col-span-4 lg:items-start">
+        <div className="flex flex-col items-center lg:col-span-3 lg:items-start">
           <div className="flex flex-wrap items-center justify-center gap-3.5 lg:justify-start">
             <a
               href="https://cecieee.org"
@@ -372,7 +377,7 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* EXPLORE */}
+        {/* ROOT LINKS */}
         <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
           <div className="w-full mb-1">
             <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>
@@ -399,8 +404,35 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* PAGES */}
+        <div className="flex flex-col items-center gap-4 lg:col-span-2 lg:items-start">
+          <div className="w-full mb-1">
+            <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>
+              PAGES
+            </h3>
+            <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
+          </div>
+
+          <div className="grid w-full grid-cols-2 gap-x-4 gap-y-3.5 sm:grid-cols-1 sm:gap-y-3.5">
+            {pageLinks.map((item) => (
+              <a
+                key={item.num}
+                href={item.link}
+                className="group ft-bracket-link inline-flex items-center gap-2 py-1 text-xs"
+              >
+                <span className="font-mono text-xs font-bold text-primary transition-transform duration-250 group-hover:scale-105" style={{ textShadow: "0 0 6px #000, 0 0 3px #000" }}>
+                  {item.num}
+                </span>
+                <span className="font-inter text-sm font-medium text-text/70 transition-colors group-hover:text-primary" style={{ textShadow: "0 0 8px #000, 0 0 4px #000" }}>
+                  {item.name}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+
         {/* GET IN TOUCH */}
-        <div className="flex flex-col items-center gap-4 lg:col-span-4 lg:items-start">
+        <div className="flex flex-col items-center gap-4 lg:col-span-3 lg:items-start">
           <div className="w-full mb-1">
             <h3 className="font-mech text-[11px] uppercase tracking-widest text-primary" style={headingStyle}>GET IN TOUCH</h3>
             <div style={{ height: "1px", marginTop: "6px", background: "linear-gradient(to right, rgba(12,230,68,0.55), rgba(12,230,68,0.08) 70%, transparent)" }} />
