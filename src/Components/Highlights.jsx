@@ -121,7 +121,9 @@ const Highlights = () => {
   }, []);
 
   return (
-    <section className="w-full overflow-hidden bg-background py-16 sm:py-20">
+    <section 
+    id="highlights"
+    className="w-full overflow-hidden bg-background py-16 sm:py-20">
 
       {/* Heading */}
       <div className="mb-10 text-center md:mb-14">
