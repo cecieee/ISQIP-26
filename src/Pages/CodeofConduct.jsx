@@ -67,26 +67,32 @@ const STYLES = `
     box-shadow: 0 0 8px 2px rgba(12, 230, 68, 0.5);
   }
 
-  /* intro box */
+  /* ── Simple Top Description ── */
   .coc-intro {
-    max-width: 860px;
-    border: 1px solid rgba(12,230,68,0.15);
-    border-left: 3px solid rgba(12,230,68,0.6);
-    border-radius: 0 4px 4px 0;
-    padding: clamp(1rem, 2.5vw, 1.4rem) clamp(1.25rem, 3vw, 2rem);
-    background: #080808;
-    text-align: left;
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
   }
 
   .coc-intro p {
     font-family: "Inter", sans-serif;
     font-size: clamp(0.93rem, 1.4vw, 1.02rem);
     line-height: 1.8;
-    color: rgba(245,247,246,0.68);
+    color: rgba(245, 247, 246, 0.85);
     margin: 0;
   }
 
-  /* ── Section list ── */
+  .coc-intro strong {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  .coc-intro .coc-highlight-green {
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+
+  /* ── Section list (clean, no hover effects) ── */
   .coc-list {
     display: flex;
     flex-direction: column;
@@ -97,48 +103,18 @@ const STYLES = `
   .coc-item {
     border-bottom: 1px solid rgba(12,230,68,0.12);
     position: relative;
-    transition: background 0.25s;
   }
 
   .coc-item:first-child {
     border-top: 1px solid rgba(12,230,68,0.12);
   }
 
-  .coc-item::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: rgba(12,230,68,0.65);
-    box-shadow: 0 0 8px rgba(12,230,68,0.4);
-    transform: scaleY(0);
-    transform-origin: top;
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .coc-item:hover {
-    background: #0a0a0a;
-  }
-
-  .coc-item:hover::before {
-    transform: scaleY(1);
-  }
-
   /* warning item */
   .coc-item-warn {
     border-bottom: 1px solid rgba(255,80,80,0.15);
-    border-left: 2px solid rgba(255,80,80,0.5);
+    border-left: 2px solid rgba(255,80,80,0.7);
     padding-left: 1.1rem;
     background: rgba(255,50,50,0.02);
-    transition: background 0.2s, border-left-color 0.2s, box-shadow 0.2s;
-  }
-
-  .coc-item-warn:hover {
-    background: rgba(255,50,50,0.06);
-    border-left-color: rgba(255,80,80,0.9);
-    box-shadow: inset 3px 0 12px rgba(255,60,60,0.08);
   }
 
   /* ack item */
@@ -146,11 +122,6 @@ const STYLES = `
     border-top: 1px solid rgba(12,230,68,0.12);
     border-bottom: 1px solid rgba(12,230,68,0.12);
     background: #080808;
-    transition: background 0.2s;
-  }
-
-  .coc-item-ack:hover {
-    background: #0e0e0e;
   }
 
   /* inner row: number + content */
@@ -164,22 +135,17 @@ const STYLES = `
   .coc-num {
     font-family: "Share Tech Mono", monospace;
     font-size: clamp(0.72rem, 1.1vw, 0.82rem);
-    color: rgba(12,230,68,0.45);
+    color: var(--color-primary);
     letter-spacing: 0.12em;
     flex-shrink: 0;
     width: 2rem;
     padding-top: 0.22em;
-    transition: color 0.2s, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .coc-item:hover .coc-num {
-    transform: translateX(6px);
   }
 
   .coc-num-warn {
     font-family: "Share Tech Mono", monospace;
     font-size: 1rem;
-    color: rgba(255,100,100,0.6);
+    color: rgba(255,100,100,0.95);
     flex-shrink: 0;
     width: 2rem;
     padding-top: 0.05em;
@@ -190,16 +156,10 @@ const STYLES = `
   .coc-num-ack {
     font-family: "Share Tech Mono", monospace;
     font-size: 0.85rem;
-    color: rgba(12,230,68,0.5);
+    color: var(--color-primary);
     flex-shrink: 0;
     width: 1.5rem;
     padding-top: 0.18em;
-    transition: color 0.2s;
-  }
-
-  .coc-item:hover .coc-num,
-  .coc-item-ack:hover .coc-num-ack {
-    color: rgba(12,230,68,0.9);
   }
 
   .coc-content {
@@ -218,14 +178,6 @@ const STYLES = `
     line-height: 1.4;
     position: relative;
     display: inline-block;
-    transition: text-shadow 0.25s, letter-spacing 0.25s;
-  }
-
-  /* hover: glow + slight letter spacing expand */
-  .coc-item:hover .coc-heading,
-  .coc-item-ack:hover .coc-heading {
-    text-shadow: 0 0 12px rgba(12,230,68,0.55), 0 0 28px rgba(12,230,68,0.2);
-    letter-spacing: 0.22em;
   }
 
   .coc-heading-warn {
@@ -236,26 +188,13 @@ const STYLES = `
     color: rgba(255,130,130,0.95);
     margin: 0 0 0.65rem;
     line-height: 1.4;
-    transition: text-shadow 0.25s, letter-spacing 0.25s;
-  }
-
-  /* warning hover — red pulse glow */
-  @keyframes warn-pulse {
-    0%   { text-shadow: 0 0 6px rgba(255,80,80,0.4); }
-    50%  { text-shadow: 0 0 16px rgba(255,80,80,0.75), 0 0 32px rgba(255,80,80,0.2); }
-    100% { text-shadow: 0 0 6px rgba(255,80,80,0.4); }
-  }
-
-  .coc-item-warn:hover .coc-heading-warn {
-    animation: warn-pulse 1.4s ease-in-out infinite;
-    letter-spacing: 0.22em;
   }
 
   .coc-body {
     font-family: "Inter", sans-serif;
     font-size: clamp(0.9rem, 1.4vw, 1rem);
     line-height: 1.8;
-    color: rgba(245,247,246,0.68);
+    color: rgba(245,247,246,0.85);
     margin: 0;
   }
 
@@ -264,7 +203,7 @@ const STYLES = `
   }
 
   .coc-body strong {
-    color: rgba(255,130,130,0.9);
+    color: rgba(255,130,130,0.95);
     font-weight: 600;
   }
 
@@ -272,7 +211,7 @@ const STYLES = `
     font-family: "Inter", sans-serif;
     font-size: clamp(0.9rem, 1.4vw, 1rem);
     line-height: 1.78;
-    color: rgba(245,247,246,0.65);
+    color: rgba(245,247,246,0.85);
     font-weight: 500;
     margin: 0;
   }
@@ -294,14 +233,14 @@ const STYLES = `
     font-family: "Inter", sans-serif;
     font-size: clamp(0.9rem, 1.4vw, 1rem);
     line-height: 1.7;
-    color: rgba(245,247,246,0.58);
+    color: rgba(245,247,246,0.85);
   }
 
   .coc-dot {
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: rgba(12,230,68,0.55);
+    background: var(--color-primary);
     flex-shrink: 0;
     margin-top: 0.55em;
   }
@@ -310,7 +249,7 @@ const STYLES = `
     width: 5px;
     height: 5px;
     border-radius: 50%;
-    background: rgba(255,80,80,0.6);
+    background: rgba(255,80,80,0.95);
     flex-shrink: 0;
     margin-top: 0.55em;
   }
@@ -450,8 +389,10 @@ export default function CodeofConduct() {
             </div>
             <div className="coc-intro">
               <p>
-                All participants, mentors, and volunteers of ISQIP '26 are
-                expected to uphold the values of IEEE and maintain a professional,
+                All participants, mentors, and volunteers of{" "}
+                <span className="coc-highlight-green">ISQIP &apos;26</span> are
+                expected to uphold the values of{" "}
+                <strong>IEEE</strong> and maintain a professional,
                 respectful, and inclusive environment throughout the event.
               </p>
             </div>
