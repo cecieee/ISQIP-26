@@ -9,13 +9,13 @@ import WhyParticipate from './Components/WhyParticipate'
 import EventDetails from './Components/EventDetails'
 import LearningTracks from './Components/LearningTracks'
 import Domains from "./Components/Domains.jsx"
-import Schedule from './Components/Schedule'
 import Highlights from "./Components/Highlights.jsx"
 import OrganizedBy from './Components/OrganizedBy'
 import FAQ from './Components/FAQ'
 import Footer from './Components/Footer'
 
 import CodeofConduct from './Pages/CodeofConduct'
+import Schedule from './Pages/Schedule'
 
 function LandingPage() {
   return (
@@ -27,7 +27,6 @@ function LandingPage() {
       <EventDetails />
       <LearningTracks />
       <Domains />
-      <Schedule />
       <Highlights />
       <OrganizedBy />
       <FAQ />
@@ -41,6 +40,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/schedule" element={<Schedule />} />
         <Route path="/code-of-conduct" element={<CodeofConduct />} />
       </Routes>
       <Footer />

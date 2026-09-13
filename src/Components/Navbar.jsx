@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import logo from "../assets/isqip26.webp";
 
 const NAV_LINKS = [
-  { label: "Home",         href: "#home" },
-  { label: "About",        href: "#about" },
-  { label: "Benefits",     href: "#benefits" },
-  { label: "Tracks",       href: "#tracks" },
-  { label: "Highlights",   href: "#highlights" },
-  { label: "Certificates", href: "#certificates" },
-  { label: "Schedule",     href: "#schedule" },
+  { label: "Home",         href: "/" },
+  { label: "About",        href: "/#about" },
+  { label: "Benefits",     href: "/#benefits" },
+  { label: "Tracks",       href: "/#tracks" },
+  { label: "Highlights",   href: "/#highlights" },
+  { label: "Certificates", href: "/#certificates" },
+  { label: "Schedule",     href: "/schedule" },
 ];
 
 const STYLES = `
@@ -192,6 +193,7 @@ const STYLES = `
 `;
 
 export default function Navbar() {
+  const { pathname } = useLocation();
   const [scrollY,  setScrollY]  = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -214,11 +216,14 @@ export default function Navbar() {
   }, []);
 
   const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
+  const isSubpage = pathname !== "/";
   
   const progress       = Math.min(1, Math.max(0, scrollY / 300));
-  const visible        = scrollVH > 2.2; // Show navbar after 2.2 viewport heights
-  const contentOpacity = Math.max(0, (progress - 0.3) / 0.7);
-  const width          = visible
+  const visible        = isSubpage || scrollVH > 2.2;
+  const contentOpacity = isSubpage ? 1 : Math.max(0, (progress - 0.3) / 0.7);
+  const width          = isSubpage
+    ? 'min(92vw, 1100px)'
+    : visible
     ? `min(${Math.round(38 + progress * 54)}vw, ${Math.round(380 + progress * 720)}px)`
     : '48px';
 
