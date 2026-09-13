@@ -22,12 +22,19 @@ const HERO_STYLES = `
 
   .hero-kicker {
     font-family: 'Share Tech Mono', monospace;
-    font-size: clamp(0.72rem, 1.4vw, 0.88rem);
+    font-size: clamp(0.65rem, 1.3vw, 0.88rem);
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: #0CE644;
     text-shadow: 0 0 10px rgba(12, 230, 68, 0.4);
     margin-bottom: 0.2rem;
+  }
+  
+  @media (max-width: 640px) {
+    .hero-kicker {
+      font-size: clamp(0.6rem, 1.8vw, 0.75rem);
+      letter-spacing: 0.18em;
+    }
   }
 
   .hero-headline{
@@ -37,9 +44,22 @@ const HERO_STYLES = `
     line-height: 0.95;
     letter-spacing: 0.05em;
     margin: 0;
-    font-size: clamp(3.6rem, 15vw, 8.5rem);
+    font-size: clamp(2.5rem, 15vw, 8.5rem);
     position: relative;
     display: inline-block;
+  }
+  
+  @media (max-width: 640px) {
+    .hero-headline {
+      font-size: clamp(2rem, 16vw, 3.5rem);
+      line-height: 1.05;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .hero-headline {
+      font-size: clamp(1.8rem, 14vw, 2.8rem);
+    }
   }
 
   .hero-hl-wrap {
