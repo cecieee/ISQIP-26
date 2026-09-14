@@ -14,12 +14,14 @@ import Highlights from "./Components/Highlights.jsx"
 import OrganizedBy from './Components/OrganizedBy'
 import FAQ from './Components/FAQ'
 import Footer from './Components/Footer'
+import LoadingScreen from "./Components/LoadingScreen.jsx"
 
 import CodeofConduct from './Pages/CodeofConduct'
 
 function LandingPage() {
   return (
     <main>
+      <LoadingScreen/>
       <Hero />
       <CountDown />
       <About />

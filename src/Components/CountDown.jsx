@@ -130,16 +130,18 @@ const GlitchUnit = ({
     : "text-[#0CE644]/75";
 
   return (
-    <div
-      className="
-        flex
-        min-w-0
-        flex-1
-        flex-col
-        items-center
-        gap-2
-      "
-    >
+<div
+        className="
+          flex
+          min-w-0
+          flex-1
+          flex-col
+          items-center
+          gap-1.5
+          sm:gap-1
+          md:gap-6
+        "
+      >
       {/* Number */}
       <div
         className={`
@@ -150,12 +152,12 @@ const GlitchUnit = ({
           whitespace-nowrap
           font-mech
           font-mechsuit
-          text-4xl
+          text-3xl
           leading-none
           ${numColorClass}
-          sm:text-5xl
-          md:text-7xl
-          lg:text-8xl
+          sm:text-3xl
+          md:text-6xl
+          lg:text-7xl
         `}
         style={{ fontFamily: "'Mechsuit', sans-serif" }}
       >
@@ -190,8 +192,9 @@ const GlitchUnit = ({
           text-[10px]
           tracking-[0.25em]
           ${labelColorClass}
-          sm:mt-4
-          sm:text-[11px]
+          sm:mt-1
+          sm:text-[9px]
+          sm:tracking-[0.2em]
           md:mt-6
           md:text-[13px]
           lg:mt-7
@@ -408,17 +411,17 @@ const CountDown = () => {
             </ScanText>
           </h2>
         ) : (
-          <div
-            className="
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-1.5
-              sm:gap-3
-              md:gap-6
-            "
-          >
+<div
+        className="
+          flex
+          w-full
+          items-center
+          justify-center
+          gap-1.5
+          sm:gap-1
+          md:gap-6
+        "
+      >
             {/* DAYS - Green */}
             <GlitchUnit
               value={time.days}
@@ -430,25 +433,26 @@ const CountDown = () => {
             />
 
             {/* Separator */}
-            <span
-              className="
-                mb-6
-                shrink-0
-                font-mech
-                font-mechsuit
-                text-2xl
-                text-[#F5F7F6]/60
-                [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
-                sm:mb-8
-                sm:text-4xl
-                md:mb-12
-                md:text-6xl
-                lg:text-7xl
-              "
-              style={{ fontFamily: "'Mechsuit', sans-serif" }}
-            >
-              :
-            </span>
+<span
+  className="
+    shrink-0
+    font-mech
+    font-mechsuit
+    text-2xl
+    text-[#F5F7F6]/60
+    [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+    translate-y-[-14px]
+    sm:translate-y-[-10px]
+    sm:text-3xl
+    md:translate-y-[-32px]
+    md:text-6xl
+    lg:translate-y-[-38px]
+    lg:text-7xl
+  "
+  style={{ fontFamily: "'Mechsuit', sans-serif" }}
+>
+  :
+</span>
 
             {/* HOURS - White */}
             <GlitchUnit
@@ -461,25 +465,26 @@ const CountDown = () => {
             />
 
             {/* Separator */}
-            <span
-              className="
-                mb-6
-                shrink-0
-                font-mech
-                font-mechsuit
-                text-2xl
-                text-[#0CE644]/80
-                [text-shadow:0_0_8px_rgba(12,230,68,0.5)]
-                sm:mb-8
-                sm:text-4xl
-                md:mb-12
-                md:text-6xl
-                lg:text-7xl
-              "
-              style={{ fontFamily: "'Mechsuit', sans-serif" }}
-            >
-              :
-            </span>
+<span
+  className="
+    shrink-0
+    font-mech
+    font-mechsuit
+    text-2xl
+    text-[#F5F7F6]/60
+    [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+    translate-y-[-14px]
+    sm:translate-y-[-10px]
+    sm:text-3xl
+    md:translate-y-[-32px]
+    md:text-6xl
+    lg:translate-y-[-38px]
+    lg:text-7xl
+  "
+  style={{ fontFamily: "'Mechsuit', sans-serif" }}
+>
+  :
+</span>
 
             {/* MINUTES - Green */}
             <GlitchUnit
@@ -492,25 +497,26 @@ const CountDown = () => {
             />
 
             {/* Separator */}
-            <span
-              className="
-                mb-6
-                shrink-0
-                font-mech
-                font-mechsuit
-                text-2xl
-                text-[#F5F7F6]/60
-                [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
-                sm:mb-8
-                sm:text-4xl
-                md:mb-12
-                md:text-6xl
-                lg:text-7xl
-              "
-              style={{ fontFamily: "'Mechsuit', sans-serif" }}
-            >
-              :
-            </span>
+<span
+  className="
+    shrink-0
+    font-mech
+    font-mechsuit
+    text-2xl
+    text-[#F5F7F6]/60
+    [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+    translate-y-[-14px]
+    sm:translate-y-[-10px]
+    sm:text-3xl
+    md:translate-y-[-32px]
+    md:text-6xl
+    lg:translate-y-[-38px]
+    lg:text-7xl
+  "
+  style={{ fontFamily: "'Mechsuit', sans-serif" }}
+>
+  :
+</span>
 
             {/* SECONDS - White */}
             <GlitchUnit
