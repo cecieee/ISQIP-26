@@ -127,6 +127,17 @@ const STYLES = `
     height: clamp(380px, 52vw, 680px);
   }
   @media (max-width: 900px) {
+    .ab-outer {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .ab-textcol {
+      padding: clamp(2.5rem, 6vh, 4rem) clamp(1rem, 5vw, 2.5rem) 1.75rem;
+    }
+    .ab-heading {
+      font-size: clamp(1.6rem, 7vw, 2.6rem);
+      margin: 0 0 1.5rem;
+    }
     .ab-imgcol {
       height: clamp(240px, 65vw, 420px);
       margin: 0 clamp(1.25rem, 6vw, 3rem);
