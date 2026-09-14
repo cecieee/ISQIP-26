@@ -286,8 +286,6 @@ const STYLES = `
     .faq-answer {
       padding-left: 1.75rem;
       padding-right: 0;
-      font-size: 0.8rem;
-      line-height: 1.62;
     }
     .faq-contact {
       flex-direction: column;
@@ -315,8 +313,6 @@ const STYLES = `
     }
     .faq-answer {
       padding-left: 1.5rem;
-      font-size: 0.76rem;
-      line-height: 1.58;
     }
     .faq-contact-actions {
       flex-direction: column;
