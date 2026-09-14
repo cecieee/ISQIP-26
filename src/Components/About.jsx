@@ -46,7 +46,7 @@ const STYLES = `
 
   .ab-heading {
     font-family: var(--font-mech);
-    font-size: clamp(2.2rem, 4.2vw, 3.6rem);
+    font-size: clamp(1.6rem, 4.2vw, 3.6rem);
     line-height: 1;
     margin: 0 0 2.4rem;
     text-transform: uppercase;
@@ -104,10 +104,21 @@ const STYLES = `
     clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%);
   }
   @media (max-width: 900px) {
+    .ab-outer {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+    .ab-textcol {
+      padding: clamp(2.5rem, 6vh, 4rem) clamp(1rem, 5vw, 2.5rem) 1.75rem;
+    }
+    .ab-heading {
+      font-size: clamp(1.6rem, 7vw, 2.6rem);
+      margin: 0 0 1.5rem;
+    }
     .ab-imgcol {
-      height: clamp(260px, 62vw, 420px);
+      height: clamp(240px, 60vw, 400px);
       clip-path: none;
-      margin: 0 clamp(1.5rem, 6vw, 3rem);
+      margin: 0 clamp(1rem, 5vw, 2.5rem) 3rem;
     }
   }
 
