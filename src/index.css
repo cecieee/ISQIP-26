@@ -20,6 +20,7 @@
 html, body {
   background-color: var(--color-background, #071110);
   color: var(--color-text, #F5F7F6);
+   overflow-x: hidden;
 }
 
 /* Modern Dark Scrollbar */
