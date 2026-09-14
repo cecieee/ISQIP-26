@@ -387,6 +387,23 @@ const STYLES = `
 
   .ed-subheading span { color: var(--color-primary); }
 
+  @media (max-width: 768px) {
+    .ed-subheading-wrap {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .ed-subheading {
+      text-align: center;
+      white-space: nowrap;
+      font-size: clamp(0.95rem, 4.3vw, 1.55rem);
+      letter-spacing: 0.02em;
+      max-width: 100%;
+    }
+  }
+
   /* ── MINIMALIST TIMELINE & VENUE CARDS ────────────── */
   .ed-stack-container {
     position: relative;
@@ -437,10 +454,11 @@ const STYLES = `
   }
 
   .ed-stack-hero-inner {
-    padding: 1.4rem 1.6rem 1.25rem;
+    padding: clamp(1.1rem, 2.5vw, 1.4rem) clamp(1rem, 3vw, 1.6rem) 1.25rem;
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
+    min-width: 0;
   }
 
   /* Top Anchor Block */
@@ -448,18 +466,21 @@ const STYLES = `
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
+    gap: clamp(0.5rem, 1.5vw, 1rem);
+    min-width: 0;
   }
 
   .ed-hero-anchor-group {
     display: flex;
     align-items: center;
-    gap: 1.1rem;
+    gap: clamp(0.6rem, 2vw, 1.1rem);
+    min-width: 0;
+    flex: 1;
   }
 
   .ed-hero-big-anchor {
     font-family: 'Inter', sans-serif;
-    font-size: clamp(2rem, 3vw, 2.35rem);
+    font-size: clamp(1.4rem, 4vw, 2.35rem);
     font-weight: 800;
     color: #ffffff;
     line-height: 1;
@@ -479,6 +500,8 @@ const STYLES = `
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
+    min-width: 0;
+    flex: 1;
   }
 
   .ed-hero-main-title {
@@ -489,6 +512,7 @@ const STYLES = `
     letter-spacing: -0.01em;
     margin: 0;
     line-height: 1.25;
+    overflow-wrap: break-word;
   }
 
   .ed-hero-sub-meta {
@@ -502,6 +526,7 @@ const STYLES = `
     letter-spacing: 0.06em;
     text-transform: uppercase;
     margin: 0;
+    overflow-wrap: break-word;
   }
 
   .ed-hero-status-badge {
@@ -544,6 +569,7 @@ const STYLES = `
     background: rgba(255, 255, 255, 0.025);
     border-radius: 6px;
     transition: background 0.2s ease;
+    min-width: 0;
   }
 
   .ed-stack-container:hover .ed-hero-session-row {
@@ -555,6 +581,7 @@ const STYLES = `
     align-items: center;
     gap: 0.65rem;
     min-width: 0;
+    flex: 1;
   }
 
   .ed-hero-session-idx {
@@ -667,13 +694,14 @@ const STYLES = `
   .ed-schedule-row {
     position: relative;
     display: grid;
-    grid-template-columns: 2.2rem 1fr;
-    gap: 1rem;
+    grid-template-columns: clamp(1.6rem, 2.5vw, 2.2rem) 1fr;
+    gap: clamp(0.5rem, 1.5vw, 1rem);
     padding: clamp(1.1rem, 2vw, 1.35rem) clamp(0.9rem, 1.5vw, 1.4rem);
     border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     background: transparent;
     transition: background 0.25s ease;
     align-items: center;
+    min-width: 0;
   }
 
   .ed-schedule-row:last-child {
