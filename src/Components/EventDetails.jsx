@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { motion, AnimatePresence } from "motion/react";
@@ -377,12 +377,29 @@ const STYLES = `
 
   .ed-subheading {
     font-family: var(--font-mech);
-    font-size: clamp(1.4rem, 3vw, 1.85rem);
+    font-size: clamp(1.25rem, 3.5vw, 1.85rem);
     color: var(--color-text);
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
     margin: 0;
     line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 640px) {
+    .ed-subheading {
+      font-size: clamp(1.15rem, 5.5vw, 1.45rem);
+      letter-spacing: 0.015em;
+      white-space: nowrap;
+    }
+  }
+
+  @media (max-width: 380px) {
+    .ed-subheading {
+      font-size: clamp(1rem, 5vw, 1.15rem);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
   }
 
   .ed-subheading span { color: var(--color-primary); }
@@ -680,7 +697,8 @@ const STYLES = `
     border-bottom: none;
   }
 
-  .ed-schedule-row:hover {
+  .ed-schedule-row:hover,
+  .ed-schedule-row.is-scrolled {
     background: rgba(12, 230, 68, 0.03);
   }
 
@@ -693,7 +711,8 @@ const STYLES = `
     transition: color 0.25s ease;
   }
 
-  .ed-schedule-row:hover .ed-row-index {
+  .ed-schedule-row:hover .ed-row-index,
+  .ed-schedule-row.is-scrolled .ed-row-index {
     color: var(--color-primary);
   }
 
@@ -787,7 +806,8 @@ const STYLES = `
     transition: opacity 0.2s ease;
   }
 
-  .ed-schedule-row:hover .ed-row-session-dot {
+  .ed-schedule-row:hover .ed-row-session-dot,
+  .ed-schedule-row.is-scrolled .ed-row-session-dot {
     opacity: 1;
   }
 
@@ -1108,6 +1128,9 @@ export default function EventDetails() {
   const [venueExpanded, setVenueExpanded] = useState(false);
   const [activeDayIdx, setActiveDayIdx] = useState(0);
   const [isSchedulePaused, setIsSchedulePaused] = useState(false);
+  const [activeScrollIdx, setActiveScrollIdx] = useState(-1);
+  const scheduleListRef = useRef(null);
+  const rowRefs = useRef([]);
 
   useEffect(() => {
     AOS.init({ duration: 850, once: true, offset: 50, easing: "ease-out" });
@@ -1120,6 +1143,121 @@ export default function EventDetails() {
     }, 3800);
     return () => clearInterval(interval);
   }, [isSchedulePaused, scheduleExpanded]);
+
+  useEffect(() => {
+    if (!scheduleExpanded) {
+      setActiveScrollIdx(-1);
+      return;
+    }
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveRow();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const updateActiveRow = () => {
+      if (!scheduleListRef.current) return;
+      const viewportCenter = window.innerHeight * 0.5;
+      const containerRect = scheduleListRef.current.getBoundingClientRect();
+
+      if (containerRect.bottom < 0 || containerRect.top > window.innerHeight) {
+        setActiveScrollIdx(-1);
+        return;
+      }
+
+      let closestIdx = -1;
+      let minDistance = Infinity;
+
+      rowRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const rowCenter = rect.top + rect.height / 2;
+        const distance = Math.abs(rowCenter - viewportCenter);
+
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestIdx = idx;
+          }
+        }
+      });
+
+      if (closestIdx !== -1 && minDistance < window.innerHeight * 0.45) {
+        setActiveScrollIdx(closestIdx);
+      } else {
+        setActiveScrollIdx(-1);
+      }
+    };
+
+    updateActiveRow();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [scheduleExpanded]);
+
+  const [isVenueScrolledActive, setIsVenueScrolledActive] = useState(false);
+  const venueListRef = useRef(null);
+  const venueRowRef = useRef(null);
+
+  useEffect(() => {
+    if (!venueExpanded) {
+      setIsVenueScrolledActive(false);
+      return;
+    }
+
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateVenueRow();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    const updateVenueRow = () => {
+      if (!venueRowRef.current || !venueListRef.current) return;
+      const viewportCenter = window.innerHeight * 0.5;
+      const containerRect = venueListRef.current.getBoundingClientRect();
+
+      if (containerRect.bottom < 0 || containerRect.top > window.innerHeight) {
+        setIsVenueScrolledActive(false);
+        return;
+      }
+
+      const rect = venueRowRef.current.getBoundingClientRect();
+      const rowCenter = rect.top + rect.height / 2;
+      const distance = Math.abs(rowCenter - viewportCenter);
+
+      if (rect.top < window.innerHeight && rect.bottom > 0 && distance < window.innerHeight * 0.45) {
+        setIsVenueScrolledActive(true);
+      } else {
+        setIsVenueScrolledActive(false);
+      }
+    };
+
+    updateVenueRow();
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [venueExpanded]);
 
   return (
     <>
@@ -1326,15 +1464,17 @@ export default function EventDetails() {
                       }}
                       style={{ transformOrigin: "top center" }}
                     >
-                      <div className="ed-schedule-expanded">
+                      <div className="ed-schedule-expanded" ref={scheduleListRef}>
                         {SCHEDULE.map((item, index) => (
                           <motion.div
-                            className="ed-schedule-row"
+                            ref={(el) => (rowRefs.current[index] = el)}
+                            className={`ed-schedule-row${activeScrollIdx === index ? " is-scrolled" : ""}`}
                             key={item.date}
                             initial={{ opacity: 0, y: 14 }}
                             animate={{
                               opacity: 1,
                               y: 0,
+                              x: activeScrollIdx === index ? 4 : 0,
                               transition: {
                                 delay: index * 0.07,
                                 type: "spring",
@@ -1544,13 +1684,15 @@ export default function EventDetails() {
                       }}
                       style={{ transformOrigin: "top center" }}
                     >
-                      <div className="ed-schedule-expanded">
+                      <div className="ed-schedule-expanded" ref={venueListRef}>
                         <motion.div
-                          className="ed-schedule-row"
+                          ref={venueRowRef}
+                          className={`ed-schedule-row${isVenueScrolledActive ? " is-scrolled" : ""}`}
                           initial={{ opacity: 0, y: 14 }}
                           animate={{
                             opacity: 1,
                             y: 0,
+                            x: isVenueScrolledActive ? 4 : 0,
                             transition: {
                               type: "spring",
                               stiffness: 320,
