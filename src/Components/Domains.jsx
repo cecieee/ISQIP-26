@@ -611,7 +611,7 @@ const Domains = () => {
                       {/* DESCRIPTION */}
 
                       <div className="crt-inner-box py-1 sm:py-2">
-                        <p className="font-sans text-[11px] sm:text-sm md:text-base leading-5 sm:leading-relaxed text-white/95 font-normal tracking-wide text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                        <p className="font-sans text-[11px] sm:text-xl md:text-xl leading-5 sm:leading-relaxed text-white/95 font-normal tracking-wide text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                           {activeFeed.description}
                         </p>
                       </div>
@@ -651,6 +651,14 @@ const Domains = () => {
           {/* ===================================================
               VARIANT B — PURE CSS CRT
               < 580px
+
+              NOTE: this range covers a wide span (a small phone up
+              to just under 580px), and the chassis itself grows the
+              whole time via w-full — so every text size below now
+              has 2-3 steps (min-[380px] / min-[460px] / min-[520px])
+              instead of one fixed tiny value, so it actually fills
+              the extra room instead of sitting small with a lot of
+              leftover space around it near the top of the range.
               =================================================== */}
 
           <div className="block min-[580px]:hidden w-full">
@@ -706,14 +714,14 @@ const Domains = () => {
 
                     {/* TOP BAR */}
 
-                    <div className="relative z-30 px-3 py-1 bg-[#020a04]/40 flex items-center justify-between gap-2 font-mono text-xs text-[#0CE644]/90">
+                    <div className="relative z-30 px-3 min-[420px]:px-4 py-1 bg-[#020a04]/40 flex items-center justify-between gap-2 font-mono text-xs min-[420px]:text-sm text-[#0CE644]/90">
                       <span className="inline-flex items-center gap-1 font-bold text-red-500 tracking-wider">
                         <span className="w-2 h-2 rounded-full bg-red-500 crt-rec-dot shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
 
                         REC
                       </span>
 
-                      <span className="px-1.5 py-0.5 rounded bg-[#0CE644]/15 border border-[#0CE644]/40 font-bold text-[#0CE644] text-xs tracking-wider">
+                      <span className="px-1.5 min-[420px]:px-2 py-0.5 rounded bg-[#0CE644]/15 border border-[#0CE644]/40 font-bold text-[#0CE644] text-xs min-[420px]:text-sm tracking-wider">
                         {activeFeed.camId}
                       </span>
                     </div>
@@ -728,6 +736,8 @@ const Domains = () => {
                         h-[calc(100%-28px)]
                         mt-2
                         px-3
+                        min-[420px]:px-4
+                        min-[520px]:px-5
                         py-1
                         flex
                         flex-col
@@ -754,7 +764,7 @@ const Domains = () => {
                       {/* BOOT */}
 
                       {booting && (
-                        <div className="flex-1 flex flex-col items-start justify-center font-mono text-[9px] text-[#0CE644] space-y-1 py-2">
+                        <div className="flex-1 flex flex-col items-start justify-center font-mono text-[9px] min-[420px]:text-xs text-[#0CE644] space-y-1 py-2">
                           {INITIALIZATION_LOGS
                             .slice(0, visibleLogCount)
                             .map((log, idx) => (
@@ -777,11 +787,11 @@ const Domains = () => {
 
                       {prevFeed && isSwitching && (
                         <div className="absolute inset-2 crt-phosphor-ghost opacity-40 pointer-events-none select-none z-10">
-                          <div className="font-mechsuit text-sm text-[#0CE644]">
+                          <div className="font-mechsuit text-sm min-[420px]:text-base text-[#0CE644]">
                             {prevFeed.title}
                           </div>
 
-                          <p className="mt-1 font-mono text-[9px] text-[#0CE644]/60 line-clamp-2">
+                          <p className="mt-1 font-mono text-[9px] min-[420px]:text-[10px] text-[#0CE644]/60 line-clamp-2">
                             {prevFeed.description}
                           </p>
                         </div>
@@ -797,6 +807,8 @@ const Domains = () => {
                             flex-col
                             justify-start
                             gap-1.5
+                            min-[420px]:gap-2
+                            min-[520px]:gap-3
                             transition-all
                             duration-300
                             ${
@@ -815,35 +827,87 @@ const Domains = () => {
 
                           <div>
                             <div className="flex items-start justify-between gap-2">
-                              <h3 className="font-mechsuit text-xs text-[#0CE644] crt-chromatic-text crt-phosphor-glow tracking-wider text-left">
+                              <h3
+                                className="
+                                  font-mechsuit
+                                  text-xs
+                                  min-[380px]:text-sm
+                                  min-[460px]:text-base
+                                  min-[520px]:text-lg
+                                  text-[#0CE644]
+                                  crt-chromatic-text
+                                  crt-phosphor-glow
+                                  tracking-wider
+                                  text-left
+                                "
+                              >
                                 {activeFeed.title}
                               </h3>
 
-                              <span className="inline-flex shrink-0 items-center gap-1 px-1.5 py-0.5 rounded bg-[#0CE644]/15 border border-[#0CE644]/50 font-mono text-[6px] font-bold text-[#0CE644] shadow-[0_0_12px_rgba(12,230,68,0.3)]">
+                              <span
+                                className="
+                                  inline-flex
+                                  shrink-0
+                                  items-center
+                                  gap-1
+                                  px-1.5
+                                  min-[420px]:px-2
+                                  py-0.5
+                                  min-[420px]:py-1
+                                  rounded
+                                  bg-[#0CE644]/15
+                                  border
+                                  border-[#0CE644]/50
+                                  font-mono
+                                  text-[6px]
+                                  min-[380px]:text-[8px]
+                                  min-[460px]:text-[9px]
+                                  min-[520px]:text-[10px]
+                                  font-bold
+                                  text-[#0CE644]
+                                  shadow-[0_0_12px_rgba(12,230,68,0.3)]
+                                "
+                              >
                                 {activeFeed.trackTag}
                               </span>
                             </div>
 
                             {/* DIVIDER */}
 
-                            <div className="flex items-center gap-2 mt-1 opacity-85">
+                            <div className="flex items-center gap-2 mt-1 min-[420px]:mt-2 opacity-85">
                               <span className="h-[1px] flex-1 bg-gradient-to-r from-[#0CE644] via-[#0CE644]/50 to-transparent" />
 
-                              <span className="w-1 h-1 rotate-45 bg-[#0CE644] shadow-[0_0_6px_#0CE644]" />
+                              <span className="w-1 h-1 min-[460px]:w-1.5 min-[460px]:h-1.5 rotate-45 bg-[#0CE644] shadow-[0_0_6px_#0CE644]" />
                             </div>
                           </div>
 
                           {/* DESCRIPTION */}
 
-                          <div className="crt-inner-box flex-1 overflow-hidden">
-                            <p className="font-sans text-[8px] leading-4 text-white/95 font-normal tracking-wide text-center drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+                          <div className="crt-inner-box flex-1 overflow-hidden flex items-center">
+                            <p
+                              className="
+                                font-sans
+                                text-[8px]
+                                min-[380px]:text-[10px]
+                                min-[460px]:text-xs
+                                min-[520px]:text-sm
+                                leading-4
+                                min-[420px]:leading-5
+                                min-[520px]:leading-relaxed
+                                text-white/95
+                                font-normal
+                                tracking-wide
+                                text-center
+                                drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]
+                              "
+                            >
                               {activeFeed.description}
                             </p>
                           </div>
 
                           {/* SIGNAL */}
 
-                          <div className="mt-auto mb-[30px] pr-[30px] pt-0.5 flex items-center justify-end gap-2 font-mono text-[7px]">
+                          <div className="mt-auto mb-[30px] pr-[30px] pt-0.5 flex items-center justify-end gap-2 font-mono text-[7px] min-[420px]:text-[9px] min-[520px]:text-[10px]">
                             <span className="text-[#0CE644]/80 font-semibold tracking-wider">
                               SIGNAL: STABLE
                             </span>
@@ -858,7 +922,7 @@ const Domains = () => {
                     CSS TV CONTROL PANEL
                     ================================================= */}
 
-                <div className="flex w-10 shrink-0 flex-col items-center gap-2 py-1">
+                <div className="flex w-10 min-[460px]:w-12 min-[520px]:w-14 shrink-0 flex-col items-center gap-2 py-1">
 
                   <Knob />
                   <Knob />

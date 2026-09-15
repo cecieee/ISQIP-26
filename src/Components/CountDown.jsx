@@ -120,11 +120,11 @@ const GlitchUnit = ({
   }, [isGlitching, displayValue]);
 
   const isGreen = theme === "green";
+
   const numColorClass = isGreen
     ? "text-[#0CE644] [text-shadow:0_0_8px_rgba(12,230,68,0.7),0_0_22px_rgba(12,230,68,0.3)]"
     : "text-[#F5F7F6] [text-shadow:0_0_8px_rgba(245,247,246,0.7),0_0_22px_rgba(245,247,246,0.25)]";
 
-  // Inverted text color for the label
   const labelColorClass = isGreen
     ? "text-[#F5F7F6]/75"
     : "text-[#0CE644]/75";
@@ -137,7 +137,9 @@ const GlitchUnit = ({
         flex-1
         flex-col
         items-center
-        gap-2
+        gap-1.5
+        sm:gap-1
+        md:gap-6
       "
     >
       {/* Number */}
@@ -150,14 +152,16 @@ const GlitchUnit = ({
           whitespace-nowrap
           font-mech
           font-mechsuit
-          text-4xl
+          text-3xl
           leading-none
           ${numColorClass}
-          sm:text-5xl
-          md:text-7xl
-          lg:text-8xl
+          sm:text-3xl
+          md:text-6xl
+          lg:text-7xl
         `}
-        style={{ fontFamily: "'Mechsuit', sans-serif" }}
+        style={{
+          fontFamily: "'Mechsuit', sans-serif",
+        }}
       >
         {displayValue.split("").map((digit, index) => {
           const isDigitGlitching =
@@ -190,8 +194,9 @@ const GlitchUnit = ({
           text-[10px]
           tracking-[0.25em]
           ${labelColorClass}
-          sm:mt-4
-          sm:text-[11px]
+          sm:mt-1
+          sm:text-[9px]
+          sm:tracking-[0.2em]
           md:mt-6
           md:text-[13px]
           lg:mt-7
@@ -219,9 +224,31 @@ const CountDown = () => {
      ========================================================= */
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(getTimeRemaining());
-    }, 1000);
+    let interval;
+
+    const updateTimer = () => {
+      const newTime = getTimeRemaining();
+
+      setTime(newTime);
+
+      // Once the event has started, permanently stop glitches
+      if (
+        newTime.days === 0 &&
+        newTime.hours === 0 &&
+        newTime.minutes === 0 &&
+        newTime.seconds === 0
+      ) {
+        setGlitchUnits([]);
+
+        if (interval) {
+          clearInterval(interval);
+        }
+      }
+    };
+
+    updateTimer();
+
+    interval = setInterval(updateTimer, 1000);
 
     return () => clearInterval(interval);
   }, []);
@@ -231,7 +258,20 @@ const CountDown = () => {
      ========================================================= */
 
   useEffect(() => {
+    // If event has already started, don't create
+    // the glitch interval at all.
+    if (Date.now() >= EVENT_DATE) {
+      setGlitchUnits([]);
+      return;
+    }
+
     const triggerGlitch = () => {
+      // Don't glitch after event starts
+      if (Date.now() >= EVENT_DATE) {
+        setGlitchUnits([]);
+        return;
+      }
+
       // ALL counters glitch simultaneously
       setGlitchUnits([
         "days",
@@ -257,12 +297,6 @@ const CountDown = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const eventStarted =
-    time.days === 0 &&
-    time.hours === 0 &&
-    time.minutes === 0 &&
-    time.seconds === 0;
-
   return (
     <section
       className="
@@ -280,7 +314,7 @@ const CountDown = () => {
       "
     >
       {/* =================================================
-          FULL-SECTION CRT EFFECTS (LINE BG)
+          FULL-SECTION CRT EFFECTS
           ================================================= */}
 
       {/* Fine CRT scanlines across entire section */}
@@ -294,10 +328,10 @@ const CountDown = () => {
         "
       />
 
-      {/* Widely spaced horizontal interference across entire section */}
+      {/* Widely spaced horizontal interference */}
       <div className="crt-horizontal-lines" />
 
-      {/* Static / grain across entire section */}
+      {/* Static / grain */}
       <div
         className="
           crt-static
@@ -308,7 +342,7 @@ const CountDown = () => {
         "
       />
 
-      {/* Additional static lines across entire section */}
+      {/* Additional static lines */}
       <div
         className="
           crt-static-lines-bg
@@ -342,10 +376,18 @@ const CountDown = () => {
       />
 
       {/* Subtle center CRT glow */}
-      <div className="pointer-events-none absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,rgba(12,230,68,0.08)_0%,transparent_70%)]" />
+      <div
+        className="
+          pointer-events-none
+          absolute
+          inset-0
+          z-0
+          bg-[radial-gradient(ellipse_at_center,rgba(12,230,68,0.08)_0%,transparent_70%)]
+        "
+      />
 
       {/* =================================================
-          CONTENT (FLOATING DIRECTLY OVER CRT LINE BG)
+          CONTENT
           ================================================= */}
 
       <div
@@ -389,140 +431,121 @@ const CountDown = () => {
             COUNTDOWN
             ================================================= */}
 
-        {eventStarted ? (
-          <h2
+        <div
+          className="
+            flex
+            w-full
+            items-center
+            justify-center
+            gap-1.5
+            sm:gap-1
+            md:gap-6
+          "
+        >
+          {/* DAYS - Green */}
+          <GlitchUnit
+            value={time.days}
+            label="DAYS"
+            theme="green"
+            isGlitching={glitchUnits.includes("days")}
+          />
+
+          {/* Separator */}
+          <span
             className="
-              mb-8
+              shrink-0
+              font-mech
               font-mechsuit
-              text-[18px]
-              tracking-[0.25em]
-              text-[#0CE644]/75
-              [text-shadow:0_0_10px_rgba(12,230,68,0.4)]
-              sm:text-[22px]
-              md:mb-12
-              md:text-3xl
+              text-2xl
+              text-[#F5F7F6]/60
+              [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+              translate-y-[-14px]
+              sm:translate-y-[-10px]
+              sm:text-3xl
+              md:translate-y-[-32px]
+              md:text-6xl
+              lg:translate-y-[-38px]
+              lg:text-7xl
             "
+            style={{
+              fontFamily: "'Mechsuit', sans-serif",
+            }}
           >
-            <ScanText>
-              EVENT STARTED
-            </ScanText>
-          </h2>
-        ) : (
-          <div
+            :
+          </span>
+
+          {/* HOURS - White */}
+          <GlitchUnit
+            value={time.hours}
+            label="HOURS"
+            theme="white"
+            isGlitching={glitchUnits.includes("hours")}
+          />
+
+          {/* Separator */}
+          <span
             className="
-              flex
-              w-full
-              items-center
-              justify-center
-              gap-1.5
-              sm:gap-3
-              md:gap-6
+              shrink-0
+              font-mech
+              font-mechsuit
+              text-2xl
+              text-[#F5F7F6]/60
+              [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+              translate-y-[-14px]
+              sm:translate-y-[-10px]
+              sm:text-3xl
+              md:translate-y-[-32px]
+              md:text-6xl
+              lg:translate-y-[-38px]
+              lg:text-7xl
             "
+            style={{
+              fontFamily: "'Mechsuit', sans-serif",
+            }}
           >
-            {/* DAYS - Green */}
-            <GlitchUnit
-              value={time.days}
-              label="DAYS"
-              theme="green"
-              isGlitching={glitchUnits.includes(
-                "days"
-              )}
-            />
+            :
+          </span>
 
-            {/* Separator */}
-            <span
-              className="
-                mb-6
-                shrink-0
-                font-mech
-                font-mechsuit
-                text-2xl
-                text-[#F5F7F6]/60
-                [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
-                sm:mb-8
-                sm:text-4xl
-                md:mb-12
-                md:text-6xl
-                lg:text-7xl
-              "
-              style={{ fontFamily: "'Mechsuit', sans-serif" }}
-            >
-              :
-            </span>
+          {/* MINUTES - Green */}
+          <GlitchUnit
+            value={time.minutes}
+            label="MINS"
+            theme="green"
+            isGlitching={glitchUnits.includes("minutes")}
+          />
 
-            {/* HOURS - White */}
-            <GlitchUnit
-              value={time.hours}
-              label="HOURS"
-              theme="white"
-              isGlitching={glitchUnits.includes(
-                "hours"
-              )}
-            />
+          {/* Separator */}
+          <span
+            className="
+              shrink-0
+              font-mech
+              font-mechsuit
+              text-2xl
+              text-[#F5F7F6]/60
+              [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
+              translate-y-[-14px]
+              sm:translate-y-[-10px]
+              sm:text-3xl
+              md:translate-y-[-32px]
+              md:text-6xl
+              lg:translate-y-[-38px]
+              lg:text-7xl
+            "
+            style={{
+              fontFamily: "'Mechsuit', sans-serif",
+            }}
+          >
+            :
+          </span>
 
-            {/* Separator */}
-            <span
-              className="
-                mb-6
-                shrink-0
-                font-mech
-                font-mechsuit
-                text-2xl
-                text-[#0CE644]/80
-                [text-shadow:0_0_8px_rgba(12,230,68,0.5)]
-                sm:mb-8
-                sm:text-4xl
-                md:mb-12
-                md:text-6xl
-                lg:text-7xl
-              "
-              style={{ fontFamily: "'Mechsuit', sans-serif" }}
-            >
-              :
-            </span>
-
-            {/* MINUTES - Green */}
-            <GlitchUnit
-              value={time.minutes}
-              label="MINS"
-              theme="green"
-              isGlitching={glitchUnits.includes(
-                "minutes"
-              )}
-            />
-
-            {/* Separator */}
-            <span
-              className="
-                mb-6
-                shrink-0
-                font-mech
-                font-mechsuit
-                text-2xl
-                text-[#F5F7F6]/60
-                [text-shadow:0_0_8px_rgba(245,247,246,0.4)]
-                sm:mb-8
-                sm:text-4xl
-                md:mb-12
-                md:text-6xl
-                lg:text-7xl
-              "
-              style={{ fontFamily: "'Mechsuit', sans-serif" }}
-            >
-              :
-            </span>
-
-            {/* SECONDS - White */}
-            <GlitchUnit
-              value={time.seconds}
-              label="SECS"
-              theme="white"
-              isGlitching={glitchUnits.includes(
-                "seconds"
-              )}
-            />
-          </div>
-        )}
+          {/* SECONDS - White */}
+          <GlitchUnit
+            value={time.seconds}
+            label="SECS"
+            theme="white"
+            isGlitching={glitchUnits.includes("seconds")}
+          />
+        </div>
       </div>
     </section>
   );
