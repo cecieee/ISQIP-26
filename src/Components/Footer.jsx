@@ -49,7 +49,7 @@ export default function Footer() {
   ];
 
   const pageLinks = [
-    { num: "01", name: "Schedule", link: "/#schedule" },
+    { num: "01", name: "Schedule", link: "/schedule" },
     { num: "02", name: "Code of Conduct", link: "/code-of-conduct" },
   ];
 
