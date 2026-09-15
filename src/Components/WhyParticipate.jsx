@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import {
@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 const STYLES = `
-  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap");
+  @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Bruno+Ace&display=swap");
 
   .wp-section {
     background: var(--color-background);
@@ -300,111 +300,207 @@ const STYLES = `
     .wp-mobile { display: block; }
   }
 
-  .wp-mobile-chip {
-    position: relative;
-    border: 1px solid rgba(12,230,68,0.6);
-    background: rgba(12,230,68,0.045);
-    box-shadow: 0 0 22px rgba(12,230,68,0.16);
-    padding: 1.5rem 1.5rem;
+  .wp-mobile-header {
     text-align: center;
-    margin: 0 auto clamp(2.75rem, 9vw, 4rem);
-    max-width: 320px;
+    margin-bottom: clamp(2rem, 6vw, 3rem);
   }
 
-  .wp-mobile-rows {
-    position: relative;
-    max-width: 420px;
-    margin: 0 auto;
-    padding-left: 1.75rem;
-  }
-  .wp-mobile-rows::before {
-    content: "";
-    position: absolute;
-    top: 4px;
-    bottom: 4px;
-    left: 4.5px;
-    width: 1px;
-    background: rgba(12,230,68,0.3);
-  }
-
-  .wp-mobile-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.85rem;
-    padding-bottom: clamp(2.1rem, 7vw, 2.75rem);
-    cursor: pointer;
-  }
-  .wp-mobile-row:last-child { padding-bottom: 0; }
-
-  .wp-mobile-pin {
-    position: relative;
-    left: -1.75rem;
-    top: 0.4rem;
-    width: 9px;
-    height: 9px;
-    flex-shrink: 0;
-    border: 2px solid var(--color-primary);
-    background: var(--color-background);
-    box-shadow: 0 0 7px 1px rgba(12,230,68,0.45);
-    transition: box-shadow 0.3s ease;
-  }
-  .wp-mobile-row:hover .wp-mobile-pin,
-  .wp-mobile-row.is-revealed .wp-mobile-pin {
-    box-shadow: 0 0 12px 3px rgba(12,230,68,0.8);
-  }
-  .wp-mobile-row-text { min-width: 0; }
-  .wp-mobile-row-head {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    margin-bottom: 0.35rem;
-  }
-  .wp-mobile-row-icon {
-    color: var(--color-primary);
-    flex-shrink: 0;
-    filter: drop-shadow(0 0 4px rgba(12,230,68,0.4));
-    opacity: 0;
-    visibility: hidden;
-    transform: scale(0.7);
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
-  }
-  .wp-mobile-row:hover .wp-mobile-row-icon,
-  .wp-mobile-row.is-revealed .wp-mobile-row-icon {
-    opacity: 1;
-    visibility: visible;
-    transform: scale(1);
-  }
-  .wp-mobile-row-title {
+  .wp-mobile-title {
     font-family: var(--font-mech);
-    font-size: 0.92rem;
+    font-size: clamp(1.8rem, 6.5vw, 2.4rem);
     color: var(--color-text);
-    margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.02em;
-    line-height: 1.35;
-    transition: color 0.3s ease, text-shadow 0.3s ease;
+    margin: 0 0 0.5rem;
+    line-height: 1.1;
   }
-  .wp-mobile-row:hover .wp-mobile-row-title,
-  .wp-mobile-row.is-revealed .wp-mobile-row-title {
-    color: #ffffff;
-    text-shadow: 0 0 8px rgba(12,230,68,0.5);
+
+  .wp-mobile-title span {
+    color: var(--color-primary);
+    text-shadow: 0 0 14px rgba(12, 230, 68, 0.55), 0 0 28px rgba(12, 230, 68, 0.25);
   }
-  .wp-mobile-row-desc {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.88rem;
-    line-height: 1.55;
-    color: rgba(245,247,246,0.72);
+
+  .wp-mobile-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin-top: 0.9rem;
+  }
+  .wp-mobile-divider-line {
+    height: 1px;
+    width: clamp(30px, 8vw, 60px);
+    background: linear-gradient(90deg, transparent, rgba(12,230,68,0.5));
+  }
+  .wp-mobile-divider-line:last-child {
+    background: linear-gradient(270deg, transparent, rgba(12,230,68,0.5));
+  }
+  .wp-mobile-divider-diamond {
+    width: 5px;
+    height: 5px;
+    background: var(--color-primary);
+    transform: rotate(45deg);
+    box-shadow: 0 0 6px 2px rgba(12,230,68,0.5);
+  }
+
+  .wp-mobile-list {
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid rgba(12, 230, 68, 0.12);
+    border-bottom: 1px solid rgba(12, 230, 68, 0.12);
+  }
+
+  /* 1. Base / Default Item State */
+  .wp-mobile-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1.15rem 0.75rem 1.15rem 1rem;
+    border-bottom: 1px solid rgba(12, 230, 68, 0.08);
+    border-left: 2px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.25s ease,
+                border-left-color 0.25s ease,
+                box-shadow 0.25s ease,
+                transform 0.25s ease;
+  }
+
+  .wp-mobile-item:last-child {
+    border-bottom: none;
+  }
+
+  .wp-mobile-item-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 0.12rem;
+  }
+
+  .wp-mobile-item-icon {
+    color: rgba(245, 247, 246, 0.7);
+    flex-shrink: 0;
+    opacity: 0.75;
+    transform: scale(0.95);
+    transition: opacity 0.25s ease, transform 0.25s ease, filter 0.25s ease, color 0.25s ease;
+  }
+
+  .wp-mobile-item-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .wp-mobile-item-title {
+    font-family: 'Bruno Ace', cursive;
+    font-size: clamp(0.86rem, 2.8vw, 0.96rem);
+    color: var(--color-text, #F5F7F6);
     margin: 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(4px);
-    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    line-height: 1.35;
+    transition: color 0.25s ease, text-shadow 0.25s ease;
   }
-  .wp-mobile-row:hover .wp-mobile-row-desc,
-  .wp-mobile-row.is-revealed .wp-mobile-row-desc {
+
+  /* 2. Previously Revealed State (Persistent open description, soft accent) */
+  .wp-mobile-item.is-past,
+  .wp-mobile-item.is-revealed {
+    border-left-color: rgba(12, 230, 68, 0.35);
+  }
+
+  .wp-mobile-item.is-past .wp-mobile-item-icon,
+  .wp-mobile-item.is-revealed .wp-mobile-item-icon {
+    color: var(--color-primary);
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px rgba(12, 230, 68, 0.4));
+  }
+
+  /* 3. Hover, Active, and Reading Focus States (High-priority interactive state) */
+  .wp-mobile-item:hover,
+  .wp-mobile-item:active,
+  .wp-mobile-item.is-scrolled {
+    background: linear-gradient(90deg, rgba(12, 230, 68, 0.08) 0%, rgba(12, 230, 68, 0.015) 60%, transparent 100%) !important;
+    border-left-color: var(--color-primary) !important;
+    box-shadow: inset 2px 0 8px rgba(12, 230, 68, 0.15) !important;
+    transform: translateX(4px);
+  }
+
+  .wp-mobile-item:hover .wp-mobile-item-title,
+  .wp-mobile-item:active .wp-mobile-item-title,
+  .wp-mobile-item.is-scrolled .wp-mobile-item-title {
+    color: var(--color-primary) !important;
+    text-shadow: 0 0 8px rgba(12, 230, 68, 0.7), 0 0 18px rgba(12, 230, 68, 0.35) !important;
+  }
+
+  .wp-mobile-item:hover .wp-mobile-item-icon,
+  .wp-mobile-item:active .wp-mobile-item-icon,
+  .wp-mobile-item.is-scrolled .wp-mobile-item-icon {
+    opacity: 1 !important;
+    transform: scale(1.14);
+    color: var(--color-primary) !important;
+    filter: drop-shadow(0 0 8px rgba(12, 230, 68, 0.9)) !important;
+  }
+
+  /* Smooth zero-lag grid-based expanding description */
+  .wp-mobile-desc-wrapper {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .wp-mobile-item:hover .wp-mobile-desc-wrapper,
+  .wp-mobile-item:active .wp-mobile-desc-wrapper,
+  .wp-mobile-item.is-scrolled .wp-mobile-desc-wrapper,
+  .wp-mobile-item.is-revealed .wp-mobile-desc-wrapper,
+  .wp-mobile-item.is-past .wp-mobile-desc-wrapper {
+    grid-template-rows: 1fr;
+  }
+
+  .wp-mobile-desc-inner {
+    overflow: hidden;
+  }
+
+  .wp-mobile-item-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: rgba(245, 247, 246, 0.55);
+    margin: 0;
+    padding-top: 0.35rem;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), color 0.3s ease;
+  }
+
+  /* When revealed or past: description is visible and stays open */
+  .wp-mobile-item.is-past .wp-mobile-item-desc,
+  .wp-mobile-item.is-revealed .wp-mobile-item-desc {
     opacity: 1;
-    visibility: visible;
     transform: translateY(0);
+    color: rgba(245, 247, 246, 0.75);
+  }
+
+  /* When actively focused or hovered: description is highlighted bright */
+  .wp-mobile-item:hover .wp-mobile-item-desc,
+  .wp-mobile-item:active .wp-mobile-item-desc,
+  .wp-mobile-item.is-scrolled .wp-mobile-item-desc {
+    opacity: 1 !important;
+    transform: translateY(0);
+    color: rgba(245, 247, 246, 0.95) !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wp-mobile-item, .wp-mobile-item-title,
+    .wp-mobile-item-icon, .wp-mobile-item-desc, .wp-mobile-desc-wrapper {
+      transition: none;
+      transform: none !important;
+    }
   }
 `;
 
@@ -434,13 +530,65 @@ function rowDelay(i) {
 
 export default function WhyParticipate() {
   const [revealed, setRevealed] = useState({});
+  const [activeIdx, setActiveIdx] = useState(-1);
+  const [revealedUpTo, setRevealedUpTo] = useState(-1);
+  const itemRefs = useRef([]);
 
-  const handleReveal = (key) => {
-    setRevealed((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+  const handleToggleReveal = (title, idx) => {
+    setRevealed((prev) => ({ ...prev, [title]: !prev[title] }));
+    setRevealedUpTo((prev) => Math.max(prev, idx));
   };
 
   useEffect(() => {
     AOS.init({ duration: 850, once: true, offset: 60, easing: "ease-out" });
+  }, []);
+
+  useEffect(() => {
+    let ticking = false;
+
+    const updateActiveItem = () => {
+      const focalLine = window.innerHeight * 0.48;
+      let closestIdx = -1;
+      let minDistance = Infinity;
+
+      itemRefs.current.forEach((el, idx) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.bottom > 0 && rect.top < window.innerHeight) {
+          const itemCenter = rect.top + rect.height / 2;
+          const distance = Math.abs(itemCenter - focalLine);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestIdx = idx;
+          }
+        }
+      });
+
+      if (closestIdx !== -1 && minDistance < window.innerHeight * 0.3) {
+        setActiveIdx(closestIdx);
+        setRevealedUpTo((prev) => Math.max(prev, closestIdx));
+      } else {
+        setActiveIdx(-1);
+      }
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveItem();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, []);
 
   return (
@@ -457,7 +605,7 @@ export default function WhyParticipate() {
                   className={`wp-row wp-row-left ${isRevealed ? "is-revealed" : ""}`}
                   key={title}
                   style={{ gridRow: i + 1 }}
-                  onMouseEnter={() => handleReveal(title)}
+                  onMouseEnter={() => setRevealed((prev) => ({ ...prev, [title]: true }))}
                 >
                   <div className="wp-row-text">
                     <div className="wp-row-head">
@@ -484,7 +632,7 @@ export default function WhyParticipate() {
                   className={`wp-row wp-row-right ${isRevealed ? "is-revealed" : ""}`}
                   key={title}
                   style={{ gridRow: i + 1 }}
-                  onMouseEnter={() => handleReveal(title)}
+                  onMouseEnter={() => setRevealed((prev) => ({ ...prev, [title]: true }))}
                 >
                   <span className="wp-row-pin-end" />
                   <div className="wp-row-text">
@@ -501,27 +649,46 @@ export default function WhyParticipate() {
         </div>
 
         <div className="wp-mobile">
-          <div className="wp-mobile-chip" data-aos="zoom-in" data-aos-delay={CHIP_DELAY}>
-            <h2 className="wp-chip-title">Why <span className="wp-chip-highlight">Participate</span></h2>
+          <div className="wp-mobile-header">
+            <h2 className="wp-mobile-title">Why <span>Participate</span></h2>
+            <div className="wp-mobile-divider">
+              <span className="wp-mobile-divider-line" />
+              <span className="wp-mobile-divider-diamond" />
+              <span className="wp-mobile-divider-line" />
+            </div>
           </div>
 
-          <div className="wp-mobile-rows">
+          <div className="wp-mobile-list">
             {ALL_BENEFITS.map(({ Icon, title, desc }, i) => {
-              const isRevealed = !!revealed[title];
+              const isRevealed = !!revealed[title] || i <= revealedUpTo;
+              const isActive = i === activeIdx;
               return (
                 <div
-                  className={`wp-mobile-row ${isRevealed ? "is-revealed" : ""}`}
+                  ref={(el) => (itemRefs.current[i] = el)}
+                  className={`wp-mobile-item${
+                    isActive
+                      ? " is-scrolled"
+                      : i <= revealedUpTo
+                      ? " is-past"
+                      : ""
+                  }${isRevealed ? " is-revealed" : ""}`}
                   key={title}
-                  onMouseEnter={() => handleReveal(title)}
-                  onClick={() => handleReveal(title)}
+                  onClick={() => handleToggleReveal(title, i)}
+                  onMouseEnter={() => {
+                    setRevealed((prev) => ({ ...prev, [title]: true }));
+                    setRevealedUpTo((prev) => Math.max(prev, i));
+                  }}
                 >
-                  <span className="wp-mobile-pin" />
-                  <div className="wp-mobile-row-text">
-                    <div className="wp-mobile-row-head">
-                      <Icon className="wp-row-icon" size={22} strokeWidth={1.5} />
-                      <h3 className="wp-mobile-row-title">{title}</h3>
+                  <div className="wp-mobile-item-icon-wrap">
+                    <Icon className="wp-mobile-item-icon" size={18} strokeWidth={1.8} />
+                  </div>
+                  <div className="wp-mobile-item-body">
+                    <h3 className="wp-mobile-item-title">{title}</h3>
+                    <div className="wp-mobile-desc-wrapper">
+                      <div className="wp-mobile-desc-inner">
+                        <p className="wp-mobile-item-desc">{desc}</p>
+                      </div>
                     </div>
-                    <p className="wp-mobile-row-desc">{desc}</p>
                   </div>
                 </div>
               );
