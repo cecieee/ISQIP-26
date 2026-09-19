@@ -165,7 +165,7 @@ export default function CRTLoadingScreen() {
 
             <feTurbulence
               type="fractalNoise"
-              baseFrequency="0.35"
+              baseFrequency="0.55"
               numOctaves="2"
               seed={noiseSeed}
               stitchTiles="stitch"
@@ -180,15 +180,15 @@ export default function CRTLoadingScreen() {
             <feComponentTransfer>
               <feFuncR
                 type="discrete"
-                tableValues="0 0.15 0.35 0.55 0.75 0.9 1"
+                tableValues="0 0.01 0.08 0.25 0.55 0.90 1"
               />
               <feFuncG
                 type="discrete"
-                tableValues="0 0.15 0.35 0.55 0.75 0.9 1"
+                tableValues="0 0.01 0.08 0.25 0.55 0.90 1"
               />
               <feFuncB
                 type="discrete"
-                tableValues="0 0.15 0.35 0.55 0.75 0.9 1"
+                tableValues="0 0.01 0.08 0.25 0.55 0.90 1"
               />
             </feComponentTransfer>
 
@@ -448,7 +448,7 @@ const STYLES = `
   [data-phase="static"] .crt-intro-static,
   [data-phase="stabilize"] .crt-intro-static {
     background:
-      rgba(2, 60,2, 0.55);
+      rgba(10, 130,0, 1);
 
     background-blend-mode: screen;
   }
