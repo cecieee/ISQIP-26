@@ -490,7 +490,7 @@ export default function Hero() {
             }}
           >
             <LazyCRTWarp
-              active={contentOpacity > 0}
+              active
               delay={250}
               preload
               color="#0CE644"
