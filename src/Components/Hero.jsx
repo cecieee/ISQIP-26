@@ -1,43 +1,61 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import Matter from 'matter-js';
 import black1 from '../assets/black1.webp';
 import singleTV from '../assets/singletv.webp';
 import CRTWarp from './CRTWarp';
 
+/* ─── Injected Styles ─────────────────────────────────────────────────────── */
 const HERO_STYLES = `
   @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;500;600;700&family=Bruno+Ace&display=swap");
 
-  .hero-sticky{ height: 100vh; }
-  @supports (height: 100svh) { .hero-sticky{ height: 100svh; } }
+  /* The outer scroll track – gives the sticky element room to pin */
+  .hero-track {
+    position: relative;
+    height: 300vh;
+    background: #071110;
+  }
 
-  .hero-scene{ min-height: 320vh; }
-  @supports (height: 100svh) { .hero-scene{ min-height: 320svh; } }
-  
-  .hero-section{
+  /* The sticky viewport frame */
+  .hero-pin {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+  }
+  @supports (height: 100svh) {
+    .hero-pin { height: 100svh; }
+  }
+
+  /* Full-viewport scene canvas */
+  .hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
     background-image: radial-gradient(circle, rgba(12,230,68,0.055) 1px, transparent 1px);
     background-size: 28px 28px;
-    width:100%; height:100vh;
+    background-image: url(${black1});
+    background-size: cover;
+    background-position: center;
   }
-  @supports (height: 100svh) { .hero-section{ height:100svh; } }
 
+  /* ── Typography ── */
   .hero-kicker {
     font-family: 'Share Tech Mono', monospace;
     font-size: clamp(0.65rem, 1.3vw, 0.88rem);
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: #0CE644;
-    text-shadow: 0 0 10px rgba(12, 230, 68, 0.4);
+    text-shadow: 0 0 10px rgba(12,230,68,0.4);
     margin-bottom: 0.2rem;
   }
-  
-  @media (max-width: 640px) {
-    .hero-kicker {
-      font-size: clamp(0.6rem, 1.8vw, 0.75rem);
-      letter-spacing: 0.18em;
-    }
+  @media (max-width:640px) {
+    .hero-kicker { font-size: clamp(0.6rem,1.8vw,0.75rem); letter-spacing:0.18em; }
   }
 
-  .hero-headline{
+  .hero-headline {
     font-family: 'Mechsuit', sans-serif;
     color: #FFFFFF;
     text-shadow: 0 0 20px rgba(12,230,68,0.7), 0 0 50px rgba(12,230,68,0.3), 0 8px 24px rgba(0,0,0,0.9);
@@ -48,77 +66,50 @@ const HERO_STYLES = `
     position: relative;
     display: inline-block;
   }
-  
-  @media (max-width: 640px) {
-    .hero-headline {
-      font-size: clamp(2rem, 16vw, 3.5rem);
-      line-height: 1.05;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .hero-headline {
-      font-size: clamp(1.8rem, 14vw, 2.8rem);
-    }
-  }
+  @media (max-width:640px) { .hero-headline { font-size:clamp(2rem,16vw,3.5rem); line-height:1.05; } }
+  @media (max-width:480px) { .hero-headline { font-size:clamp(1.8rem,14vw,2.8rem); } }
 
-  .hero-hl-wrap {
-    position: relative;
-    display: inline-block;
-  }
-
-  .hero-hl-wrap::before,
-  .hero-hl-wrap::after {
+  .hero-hl-wrap { position:relative; display:inline-block; }
+  .hero-hl-wrap::before, .hero-hl-wrap::after {
     content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    clip: rect(0, 0, 0, 0);
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    clip: rect(0,0,0,0);
   }
-
-  /* Left/Green glitch layer - fast dynamic burst cycle (1.2s) */
   .hero-hl-wrap::before {
     left: -3px;
-    text-shadow: 3px 0 #0CE644, -2px 0 rgba(12, 230, 68, 0.9);
-    animation: glitch-anim-1 2.2s infinite steps(2, end);
+    text-shadow: 3px 0 #0CE644, -2px 0 rgba(12,230,68,0.9);
+    animation: glitch1 2.2s infinite steps(2,end);
   }
-
-  /* Right/White-Red glitch layer - fast dynamic burst cycle (1.6s) */
   .hero-hl-wrap::after {
     left: 3px;
     text-shadow: -3px 0 #ffffff, 2px 0 #0CE644;
-    animation: glitch-anim-2 2.6s infinite steps(2, end);
+    animation: glitch2 2.6s infinite steps(2,end);
+  }
+  @keyframes glitch1 {
+    0%,100%{clip:rect(0,0,0,0);transform:translate(0,0)}
+    5%{clip:rect(18px,9999px,42px,0);transform:translate(-6px,1px) skew(-2deg)}
+    12%{clip:rect(55px,9999px,80px,0);transform:translate(5px,-1px) skew(1.5deg)}
+    18%{clip:rect(0,0,0,0);transform:translate(0,0)}
+    38%{clip:rect(70px,9999px,98px,0);transform:translate(-8px,2px) skew(-3deg)}
+    45%{clip:rect(12px,9999px,35px,0);transform:translate(6px,-1px) skew(2deg)}
+    52%{clip:rect(0,0,0,0);transform:translate(0,0)}
+    72%{clip:rect(30px,9999px,60px,0);transform:translate(-5px,1px) skew(1deg)}
+    80%{clip:rect(85px,9999px,120px,0);transform:translate(7px,-2px) skew(-2.5deg)}
+    88%{clip:rect(0,0,0,0);transform:translate(0,0)}
+  }
+  @keyframes glitch2 {
+    0%,100%{clip:rect(0,0,0,0);transform:translate(0,0)}
+    10%{clip:rect(80px,9999px,110px,0);transform:translate(6px,-2px) skew(2.5deg)}
+    20%{clip:rect(25px,9999px,50px,0);transform:translate(-5px,1px) skew(-1.5deg)}
+    28%{clip:rect(0,0,0,0);transform:translate(0,0)}
+    55%{clip:rect(10px,9999px,38px,0);transform:translate(6px,1px) skew(2deg)}
+    64%{clip:rect(60px,9999px,90px,0);transform:translate(-7px,-1px) skew(-3deg)}
+    72%{clip:rect(0,0,0,0);transform:translate(0,0)}
+    88%{clip:rect(45px,9999px,70px,0);transform:translate(5px,-2px) skew(-1deg)}
+    94%{clip:rect(95px,9999px,130px,0);transform:translate(-6px,1px) skew(3.5deg)}
   }
 
-  @keyframes glitch-anim-1 {
-    0%, 100% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-    5% { clip: rect(18px, 9999px, 42px, 0); transform: translate(-6px, 1px) skew(-2deg); }
-    12% { clip: rect(55px, 9999px, 80px, 0); transform: translate(5px, -1px) skew(1.5deg); }
-    18% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-    38% { clip: rect(70px, 9999px, 98px, 0); transform: translate(-8px, 2px) skew(-3deg); }
-    45% { clip: rect(12px, 9999px, 35px, 0); transform: translate(6px, -1px) skew(2deg); }
-    52% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-    72% { clip: rect(30px, 9999px, 60px, 0); transform: translate(-5px, 1px) skew(1deg); }
-    80% { clip: rect(85px, 9999px, 120px, 0); transform: translate(7px, -2px) skew(-2.5deg); }
-    88% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-  }
-
-  @keyframes glitch-anim-2 {
-    0%, 100% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-    10% { clip: rect(80px, 9999px, 110px, 0); transform: translate(6px, -2px) skew(2.5deg); }
-    20% { clip: rect(25px, 9999px, 50px, 0); transform: translate(-5px, 1px) skew(-1.5deg); }
-    28% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-    55% { clip: rect(10px, 9999px, 38px, 0); transform: translate(6px, 1px) skew(2deg); }
-    64% { clip: rect(60px, 9999px, 90px, 0); transform: translate(-7px, -1px) skew(-3deg); }
-    72% { clip: rect(0, 0, 0, 0); transform: translate(0, 0); }
-    88% { clip: rect(45px, 9999px, 70px, 0); transform: translate(5px, -2px) skew(-1deg); }
-    94% { clip: rect(95px, 9999px, 130px, 0); transform: translate(-6px, 1px) skew(3.5deg); }
-  }
-
-  .hero-hl-wrap{ position:relative; display:inline-block; }
-  .hero-subtitle{
+  .hero-subtitle {
     font-family: 'Bruno Ace', cursive;
     font-size: clamp(0.85rem, 1.8vw, 1.2rem);
     color: #B5DAC0;
@@ -130,37 +121,7 @@ const HERO_STYLES = `
     text-align: center;
   }
 
-  .hero-desc {
-    font-family: 'Inter', sans-serif;
-    font-size: clamp(0.82rem, 1.4vw, 0.95rem);
-    color: #7E9E88;
-    max-width: min(520px, 86vw);
-    line-height: 1.6;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .hero-meta-strip {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1.5rem;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(142, 174, 149, 0.75);
-    margin-top: 0.4rem;
-  }
-  .hero-meta-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #0CE644;
-    opacity: 0.7;
-  }
-
-  .hero-btn-primary{
+  .hero-btn-primary {
     display:inline-flex; align-items:center; gap:8px; text-decoration:none;
     padding: clamp(12px,2.6vw,15px) clamp(28px,5vw,38px);
     border-radius:4px; font-size:.85rem; letter-spacing:.14em; text-transform:uppercase;
@@ -168,9 +129,9 @@ const HERO_STYLES = `
     border:none; cursor:pointer; box-shadow:0 0 24px rgba(12,230,68,0.5);
     transition: all .2s; white-space:nowrap;
   }
-  .hero-btn-primary:hover{ box-shadow:0 0 35px rgba(12,230,68,0.8); transform:translateY(-2px); }
+  .hero-btn-primary:hover { box-shadow:0 0 35px rgba(12,230,68,0.8); transform:translateY(-2px); }
 
-  .hero-btn-outline{
+  .hero-btn-outline {
     display:inline-flex; align-items:center; gap:8px; text-decoration:none;
     padding: clamp(12px,2.6vw,15px) clamp(28px,5vw,38px);
     border-radius:4px; font-size:.85rem; letter-spacing:.14em; text-transform:uppercase;
@@ -178,209 +139,294 @@ const HERO_STYLES = `
     border:none; cursor:pointer; backdrop-filter:blur(8px);
     transition: all .2s; white-space:nowrap;
   }
-  .hero-btn-outline:hover{ background:rgba(12,230,68,0.15); color:#0CE644; transform:translateY(-2px); }
+  .hero-btn-outline:hover { background:rgba(12,230,68,0.15); color:#0CE644; transform:translateY(-2px); }
 
-  .tv-matter-item {
+  .tv-item {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     pointer-events: none;
     will-change: transform, opacity;
   }
 
-  .hero-scroll-cue{
+  .hero-scroll-cue {
     position:absolute; left:50%; transform:translateX(-50%); bottom:clamp(18px,4vh,32px);
     display:flex; flex-direction:column; align-items:center; gap:8px; z-index:6;
-    font-family:'Inter',sans-serif; font-size:.68rem; letter-spacing:.18em; text-transform:uppercase; color:#5f7d66;
-    transition: opacity 0.3s;
+    font-family:'Inter',sans-serif; font-size:.68rem; letter-spacing:.18em;
+    text-transform:uppercase; color:#5f7d66;
+    transition: opacity 0.4s;
   }
-  .hero-scroll-cue .bar{ width:1px; height:26px; background:linear-gradient(to bottom, rgba(12,230,68,.7), transparent); }
+  .hero-scroll-cue .cue-bar {
+    width:1px; height:26px;
+    background: linear-gradient(to bottom, rgba(12,230,68,.7), transparent);
+  }
+  @keyframes cue-bounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+  }
+  .hero-scroll-cue .cue-bar { animation: cue-bounce 1.4s ease-in-out infinite; }
 `;
 
+/* ─── Component ────────────────────────────────────────────────────────────── */
 export default function Hero() {
-  const [scrollY, setScrollY] = useState(0);
-  const [viewportHeight, setViewportHeight] = useState(0);
-  const sceneContainerRef = useRef(null);
-  const rafRef = useRef(null);
+  const trackRef = useRef(null);      // the 300vh scroll track
+  const pinRef = useRef(null);        // the sticky 100vh pin
+  const animRef = useRef(null);
 
-  // Array of live physics bodies state for rendering React TV nodes
-  const [physicsTVs, setPhysicsTVs] = useState([]);
-  const bodiesRef = useRef([]);
+  const [scrollP, setScrollP] = useState(0);       // 0→1 across scroll track
+  const [tvState, setTvState] = useState([]);       // live physics positions
+  const [fallDone, setFallDone] = useState(false);  // true once monitors settled
 
+  /* ── Scroll progress ────────────────────────────────────────────────────── */
   useEffect(() => {
-    const updateHeight = () => setViewportHeight(window.innerHeight);
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
+    // Disable browser scroll restoration so reload always starts at top
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    window.scrollTo({ top: 0, behavior: 'instant' });
+
+    const readScroll = () => {
+      if (!trackRef.current) return;
+      const rect = trackRef.current.getBoundingClientRect();
+      const scrollable = rect.height - window.innerHeight;
+      const scrolled = Math.max(0, -rect.top);
+      setScrollP(scrollable > 0 ? Math.min(1, scrolled / scrollable) : 0);
+    };
 
     const onScroll = () => {
-      if (rafRef.current) return;
-      rafRef.current = requestAnimationFrame(() => { setScrollY(window.scrollY); rafRef.current = null; });
+      if (animRef.current) return;
+      animRef.current = requestAnimationFrame(() => {
+        animRef.current = null;
+        readScroll();
+      });
     };
+
+    // Delay first read by one frame so the scrollTo(0) above has taken effect
+    const initRaf = requestAnimationFrame(() => readScroll());
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { window.removeEventListener('resize', updateHeight); window.removeEventListener('scroll', onScroll); };
+
+    return () => {
+      cancelAnimationFrame(initRaf);
+      window.removeEventListener('scroll', onScroll);
+      if (animRef.current) cancelAnimationFrame(animRef.current);
+    };
   }, []);
 
-  // Initialize Matter.js Real Physics Engine (like FancyComponents Gravity)
+  /* ── Matter.js physics – gravity fall intro ─────────────────────────────── */
   useEffect(() => {
-    const container = sceneContainerRef.current;
-    if (!container) return;
+    const pin = pinRef.current;
+    if (!pin) return;
 
-    const width = container.clientWidth || window.innerWidth;
-    const height = container.clientHeight || window.innerHeight;
+    const W = pin.clientWidth  || window.innerWidth;
+    const H = pin.clientHeight || window.innerHeight;
+    const mob = W <= 768;
 
-    const { Engine, World, Bodies, Runner, Mouse, MouseConstraint } = Matter;
+    if (mob) {
+      const heroW = Math.min(220, W * 0.52);
+      const heroH = heroW * 0.58;
+      const staticTVs = [
+        { uid: 0, x: W * 0.14, y: H * 0.62, angle: -0.08, w: heroW * 0.86, h: heroH * 0.86, hero: false, side: 'left' },
+        { uid: 1, x: W * 0.86, y: H * 0.62, angle: 0.08, w: heroW * 0.86, h: heroH * 0.86, hero: false, side: 'right' },
+        { uid: 99, x: W / 2, y: H * 0.62, angle: 0, w: heroW, h: heroH, hero: true, side: 'center' },
+      ];
+      setTvState(staticTVs);
+      setFallDone(true);
+      return;
+    }
+
+    const { Engine, World, Bodies, Runner } = Matter;
 
     const engine = Engine.create({
-      gravity: { x: 0, y: 1.8, scale: 0.0018 }
-    });
-    const world = engine.world;
-
-    // Dimensions
-    const tvWidth = Math.max(340, Math.min(520, width * 0.32));
-    const tvHeight = tvWidth * 0.58;
-    const heroTVWidth = Math.max(360, Math.min(540, width * 0.34));
-    const heroTVHeight = heroTVWidth * 0.58;
-
-    // Physical hitbox matching solid CRT body inside singletv.webp
-    const hitBoxWidth = tvWidth * 0.65;
-    const hitBoxHeight = tvHeight * 0.68;
-
-    // Floor and side walls only (no artificial floating ledges)
-    const floorY = height - 10;
-    const floor = Bodies.rectangle(width / 2, floorY + 50, width * 3, 100, { isStatic: true, friction: 0.8, restitution: 0.25 });
-    const leftWall = Bodies.rectangle(-40, height / 2, 80, height * 4, { isStatic: true, friction: 0.3, restitution: 0.35 });
-    const rightWall = Bodies.rectangle(width + 40, height / 2, 80, height * 4, { isStatic: true, friction: 0.3, restitution: 0.35 });
-
-    World.add(world, [floor, leftWall, rightWall]);
-
-    // 8 Cascade TVs clustered densely on the left and right wings (light in the middle)
-    const tvConfigs = [
-      // Left Wing Dense Cluster (4 TVs)
-      { x: width * 0.10, y: -100, angle: -0.15, forceX: -1.2, angularVelocity: -0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
-      { x: width * 0.22, y: -140, angle: 0.08, forceX: -0.4, angularVelocity: 0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
-      { x: width * 0.14, y: -340, angle: 0.18, forceX: 0.6, angularVelocity: 0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
-      { x: width * 0.25, y: -480, angle: -0.12, forceX: -0.6, angularVelocity: -0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
-
-      // Right Wing Dense Cluster (4 TVs)
-      { x: width * 0.90, y: -100, angle: 0.15, forceX: 1.2, angularVelocity: 0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
-      { x: width * 0.78, y: -140, angle: -0.08, forceX: 0.4, angularVelocity: -0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.006 },
-      { x: width * 0.86, y: -340, angle: -0.18, forceX: -0.6, angularVelocity: -0.03, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
-      { x: width * 0.75, y: -480, angle: 0.12, forceX: 0.6, angularVelocity: 0.02, width: tvWidth, height: tvHeight, hitW: hitBoxWidth, hitH: hitBoxHeight, density: 0.005 },
-    ];
-
-    const activeBodies = tvConfigs.map((cfg, id) => {
-      const body = Bodies.rectangle(cfg.x, cfg.y, cfg.hitW, cfg.hitH, {
-        restitution: 0.28,
-        friction: 0.85,
-        frictionStatic: 1.2,
-        frictionAir: 0.007,
-        density: cfg.density,
-        angle: cfg.angle,
-      });
-
-      Matter.Body.setAngularVelocity(body, cfg.angularVelocity);
-      Matter.Body.setVelocity(body, { x: cfg.forceX, y: Math.random() * 2 });
-
-      body.customId = id;
-      body.width = cfg.width;
-      body.height = cfg.height;
-      body.isHero = false;
-      body.side = cfg.x < width / 2 ? 'left' : 'right';
-      return body;
+      gravity: { x: 0, y: 1.5, scale: 0.0018 },
     });
 
-    World.add(world, activeBodies);
+    /* ── TV sizes ── */
+    const tvW  = mob ? Math.max(140, Math.min(200, W * 0.38)) : Math.max(300, Math.min(460, W * 0.28));
+    const tvH  = tvW * 0.58;
+    const htvW = mob ? Math.max(160, Math.min(250, W * 0.48)) : Math.max(340, Math.min(500, W * 0.32));
+    const htvH = htvW * 0.58;
 
-    // After 900ms delay, spawn the Central Hero TV so it makes a dramatic entrance and crashes onto the pile!
-    const delayTimer = setTimeout(() => {
-      const heroHitW = heroTVWidth * 0.65;
-      const heroHitH = heroTVHeight * 0.68;
-      const heroBody = Bodies.rectangle(width / 2, -150, heroHitW, heroHitH, {
-        restitution: 0.22,
-        friction: 0.9,
-        frictionStatic: 1.4,
-        frictionAir: 0.006,
-        density: 0.012,
-        angle: 0.01,
-      });
+    /* ── Bodies ── */
+    const mkTV = (x, y, w, h, opts = {}) => Bodies.rectangle(x, y, w * 0.64, h * 0.67, {
+      restitution: 0.22, friction: 0.88, frictionStatic: 1.2,
+      frictionAir: 0.007, density: 0.006,
+      ...opts,
+    });
 
-      Matter.Body.setVelocity(heroBody, { x: 0, y: 3.5 });
-      heroBody.customId = 99;
-      heroBody.width = heroTVWidth;
-      heroBody.height = heroTVHeight;
-      heroBody.isHero = true;
-      heroBody.side = 'center';
+    const sideCfgs = mob
+      ? [
+          { x: W * 0.10, y: -90,  angle: -0.15, vx: -0.4 },
+          { x: W * 0.28, y: -220, angle:  0.10, vx:  0.2 },
+          { x: W * 0.90, y: -90,  angle:  0.15, vx:  0.4 },
+          { x: W * 0.72, y: -220, angle: -0.10, vx: -0.2 },
+        ]
+      : [
+          { x: W * 0.09, y: -100, angle: -0.15, vx: -0.9 },
+          { x: W * 0.22, y: -150, angle:  0.08, vx: -0.3 },
+          { x: W * 0.15, y: -340, angle:  0.18, vx:  0.4 },
+          { x: W * 0.26, y: -470, angle: -0.12, vx: -0.5 },
+          { x: W * 0.91, y: -100, angle:  0.15, vx:  0.9 },
+          { x: W * 0.78, y: -150, angle: -0.08, vx:  0.3 },
+          { x: W * 0.85, y: -340, angle: -0.18, vx: -0.4 },
+          { x: W * 0.74, y: -470, angle:  0.12, vx:  0.5 },
+        ];
 
-      activeBodies.push(heroBody);
-      World.add(world, heroBody);
-    }, 900);
+    const sideW = tvW * 0.64;
+    const sideH = tvH * 0.67;
+
+    const sideBodies = sideCfgs.map((c, i) => {
+      const b = mkTV(c.x, c.y, tvW, tvH, { angle: c.angle });
+      Matter.Body.setVelocity(b, { x: c.vx, y: Math.random() * 1.5 + 0.5 });
+      Matter.Body.setAngularVelocity(b, c.angle * 0.15);
+      b._uid  = i;
+      b._w    = tvW;
+      b._h    = tvH;
+      b._hero = false;
+      b._side = c.x < W / 2 ? 'left' : 'right';
+      return b;
+    });
+
+    /* hero TV – drops slightly later (delay via higher initial y) */
+    const heroBody = mkTV(W / 2, -300, htvW, htvH, {
+      density: 0.012, restitution: 0.18, frictionAir: 0.005, angle: 0.003,
+    });
+    Matter.Body.setVelocity(heroBody, { x: 0, y: 2.5 });
+    heroBody._uid  = 99;
+    heroBody._w    = htvW;
+    heroBody._h    = htvH;
+    heroBody._hero = true;
+    heroBody._side = 'center';
+
+    /* floor & walls */
+    const floor = Bodies.rectangle(W / 2, H + 50, W * 3, 100, { isStatic: true, friction: 0.9, restitution: 0.2 });
+    const lWall = Bodies.rectangle(-40, H / 2, 80, H * 4, { isStatic: true });
+    const rWall = Bodies.rectangle(W + 40, H / 2, 80, H * 4, { isStatic: true });
+
+    World.add(engine.world, [...sideBodies, heroBody, floor, lWall, rWall]);
 
     const runner = Runner.create();
     Runner.run(runner, engine);
 
-    // Sync loop: copy Matter.js physics coordinates to React state on each animation frame
-    let animId;
-    const syncLoop = () => {
-      const currentData = activeBodies.map(b => ({
-        id: b.customId,
-        x: b.position.x,
-        y: b.position.y,
+    /* ── Render loop ── */
+    let raf;
+    const allBodies = [...sideBodies, heroBody];
+    let lastUpdate = 0;
+    const frameInterval = 1000 / 30;
+
+    const loop = () => {
+      const now = performance.now();
+      const snapshot = allBodies.map(b => ({
+        uid:   b._uid,
+        x:     b.position.x,
+        y:     b.position.y,
         angle: b.angle,
-        width: b.width,
-        height: b.height,
-        isHero: b.isHero,
-        side: b.side,
+        w:     b._w,
+        h:     b._h,
+        hero:  b._hero,
+        side:  b._side,
+        vx:    b.velocity.x,
+        vy:    b.velocity.y,
       }));
-      setPhysicsTVs(currentData);
-      animId = requestAnimationFrame(syncLoop);
+
+      if (now - lastUpdate >= frameInterval) {
+        lastUpdate = now;
+        setTvState(snapshot);
+      }
+
+      // Detect when all bodies have settled (very low speed)
+      const moving = allBodies.some(b => Math.abs(b.velocity.y) > 0.3 || Math.abs(b.velocity.x) > 0.3);
+      if (!moving) {
+        setFallDone(true);
+      }
+
+      raf = requestAnimationFrame(loop);
     };
-    animId = requestAnimationFrame(syncLoop);
+    raf = requestAnimationFrame(loop);
 
     return () => {
-      clearTimeout(delayTimer);
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(raf);
       Runner.stop(runner);
       Engine.clear(engine);
-      World.clear(world, false);
+      World.clear(engine.world, false);
     };
   }, []);
 
-  const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
-  
-  // Find central hero monitor from physics simulation (id: 'hero')
-  const heroPhysicsTV = physicsTVs.find(tv => tv.isHero);
-  
-  // Continuous fluid zoom from its exact physics landing position into the screen
-  const zoomProgress = Math.min(1, scrollVH / 1.4);
-  const sideOpacity = Math.max(0, 1 - zoomProgress * 2.5);
-  const sideSpread = zoomProgress * 280;
+  /* ── Derived scroll values ──────────────────────────────────────────────── */
+  const isMob = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const W = pinRef.current ? pinRef.current.clientWidth  : (typeof window !== 'undefined' ? window.innerWidth  : 1200);
+  const H = pinRef.current ? pinRef.current.clientHeight : (typeof window !== 'undefined' ? window.innerHeight : 800);
 
-  // Zoom scale starts at 1 (when landed) and expands smoothly past the camera
-  const heroScale = 1 + Math.pow(zoomProgress, 1.8) * 11;
-  const heroOpacity = zoomProgress > 0.75 ? Math.max(0, 1 - (zoomProgress - 0.75) / 0.25) : 1;
-  
-  // CRT Warp background and ISQIP UI only emerge AFTER the central TV finishes zooming past (zoomProgress > 0.75)
-  const isqipOpacity = Math.max(0, Math.min(1, (zoomProgress - 0.72) / 0.28));
-  const isqipScale = 0.85 + isqipOpacity * 0.15;
+  const heroTV = tvState.find(t => t.hero);
 
+  // scrollP: 0 = monitors just fell, 1 = fully zoomed in
+  // We split into two sub-phases:
+  //   Phase A (0 → 0.4): monitors spread + hero monitor zooms toward screen center
+  //   Phase B (0.4 → 1): hero content fades in fully
+  const p = scrollP;
+
+  // Side monitors: spread outward and fade
+  const sideOpacity = Math.max(0, 1 - p * 2.5);
+  const sideSpread  = p * (isMob ? 200 : 400);
+
+  // Hero monitor: interpolate toward center + zoom
+  const hx = heroTV ? heroTV.x : W / 2;
+  const hy = heroTV ? heroTV.y : H * 0.72;
+  const ease = Math.min(1, Math.pow(p, 0.9));
+  const ix = hx + (W / 2 - hx) * ease;
+  const iy = hy + (H / 2 - hy) * ease;
+  const heroScale = 1 + Math.pow(p, 1.6) * (isMob ? 18 : 26);
+  const heroOpacity = p > 0.38 ? Math.max(0, 1 - (p - 0.38) / 0.28) : 1;
+
+  // Hero content: emerges as monitor fades out
+  const contentOpacity = Math.max(0, Math.min(1, (p - 0.3) / 0.45));
+  const contentScale   = 0.9 + contentOpacity * 0.1;
+
+  /* ── Render ─────────────────────────────────────────────────────────────── */
   return (
     <>
       <style>{HERO_STYLES}</style>
-      <section id="home" className="hero-scene" style={{ position: 'relative', background: '#0A0D0A' }}>
-        <div
-          ref={sceneContainerRef}
-          className="hero-sticky hero-section"
-          style={{ position: 'sticky', top: 0, overflow: 'hidden', backgroundImage: `url(${black1})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' }}
-        >
-          {/* CRTWarp Background: Fades in on scroll as the central TV enlarges (pitch black initially) */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 1, opacity: isqipOpacity, pointerEvents: 'none', transition: 'opacity 0.1s ease-out' }}>
+
+      {/* 300vh scroll track — gives the page room to scroll */}
+      <section
+        ref={trackRef}
+        id="home"
+        className="hero-track"
+      >
+        {/* Sticky 100vh pin */}
+        <div ref={pinRef} className="hero-pin">
+
+          {/* Background image */}
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 0,
+              backgroundImage: `url(${black1})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
+          />
+
+          {/* Dot-grid overlay */}
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+              backgroundImage: 'radial-gradient(circle, rgba(12,230,68,0.055) 1px, transparent 1px)',
+              backgroundSize: '28px 28px',
+            }}
+          />
+
+          {/* CRTWarp background – fades in with hero content */}
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 2,
+              opacity: contentOpacity,
+              pointerEvents: 'none',
+              transition: 'opacity 0.1s linear',
+            }}
+          >
             <CRTWarp
               color="#0CE644"
               backgroundColor="#071110"
               speed={0.4}
               curvature={0.22}
               scanlineStrength={0.25}
-              scanlineFrequency={180}
+              scanlineFrequency={isMob ? 100 : 180}
               waveAmplitude={0.22}
               waveFrequency={2.0}
               bloom={1.1}
@@ -390,115 +436,122 @@ export default function Hero() {
               brightness={1.05}
               pixelation={1}
               rgbShift={0.01}
-              mouseReact
+              mouseReact={!isMob}
               mouseStrength={0.35}
-              dpr={1.2}
-              fps={60}
+              dpr={isMob ? 0.75 : 1.2}
+              fps={isMob ? 30 : 60}
             />
           </div>
 
-          {/* Dark Contrast Backdrop to make text and CTAs stand out sharply */}
+          {/* Radial overlay */}
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 3,
+              background: 'radial-gradient(ellipse at center, rgba(7,17,16,0.72) 0%, rgba(7,17,16,0.45) 45%, transparent 80%)',
+              opacity: contentOpacity, pointerEvents: 'none',
+            }}
+          />
+
+          {/* Ambient glow left */}
           <div style={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 2,
-            background: 'radial-gradient(ellipse at center, rgba(7,17,16,0.72) 0%, rgba(7,17,16,0.45) 45%, transparent 80%)',
-            opacity: isqipOpacity,
-            pointerEvents: 'none',
+            position: 'absolute', bottom: '-5%', left: '0%',
+            width: '40vw', height: '50vh', zIndex: 4, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)',
+            filter: 'blur(55px)',
+            opacity: sideOpacity * 0.9,
+          }} />
+          {/* Ambient glow right */}
+          <div style={{
+            position: 'absolute', bottom: '-5%', right: '0%',
+            width: '40vw', height: '50vh', zIndex: 4, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)',
+            filter: 'blur(55px)',
+            opacity: sideOpacity * 0.9,
           }} />
 
-          {/* Ambient Glows */}
-          <div style={{ position: 'absolute', bottom: '-5%', left: '0%', width: '40vw', height: '50vh', background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)', filter: 'blur(55px)', opacity: sideOpacity * 0.95, zIndex: 3, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: '-5%', right: '0%', width: '40vw', height: '50vh', background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)', filter: 'blur(55px)', opacity: sideOpacity * 0.95, zIndex: 3, pointerEvents: 'none' }} />
-
-          {/* Falling Physics TVs (Surrounding monitors) */}
-          {physicsTVs.filter(tv => !tv.isHero).map((tv) => {
+          {/* Side TVs */}
+          {tvState.filter(t => !t.hero).map(tv => {
             const spreadX = tv.side === 'left' ? -sideSpread : sideSpread;
             return (
               <div
-                key={tv.id}
-                className="tv-matter-item"
+                key={tv.uid}
+                className="tv-item"
                 style={{
-                  width: `${tv.width}px`,
-                  height: `${tv.height}px`,
-                  transform: `translate3d(${tv.x - tv.width / 2 + spreadX}px, ${tv.y - tv.height / 2}px, 0) rotate(${tv.angle}rad)`,
+                  width: `${tv.w}px`, height: `${tv.h}px`,
+                  transform: `translate3d(${tv.x - tv.w / 2 + spreadX}px, ${tv.y - tv.h / 2}px, 0) rotate(${tv.angle}rad)`,
                   opacity: sideOpacity,
                   zIndex: 5,
+                  filter: 'drop-shadow(0 12px 30px rgba(0,0,0,0.85))',
                 }}
               >
-                <img
-                  src={singleTV}
-                  alt=""
-                  aria-hidden="true"
-                  draggable={false}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
-                />
+                <img src={singleTV} alt="" aria-hidden="true" draggable={false}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
               </div>
             );
           })}
 
-          {/* Hero Central CRT Monitor - Natural Fall + Continuous Zoom-Through */}
-          {heroPhysicsTV && (
+          {/* Hero (center) TV – zooms toward camera on scroll */}
+          {heroTV && (
             <div
-              className="tv-matter-item"
+              className="tv-item"
               style={{
-                width: `${heroPhysicsTV.width}px`,
-                height: `${heroPhysicsTV.height}px`,
-                transform: `translate3d(${heroPhysicsTV.x - heroPhysicsTV.width / 2}px, ${heroPhysicsTV.y - heroPhysicsTV.height / 2}px, 0) scale(${heroScale}) rotate(${heroPhysicsTV.angle * (1 - zoomProgress)}rad)`,
-                transformOrigin: '50% 50%',
+                width: `${heroTV.w}px`, height: `${heroTV.h}px`,
+                transformOrigin: 'center center',
+                transform: `translate3d(${ix - heroTV.w / 2}px, ${iy - heroTV.h / 2}px, 0) scale(${heroScale}) rotate(${heroTV.angle * (1 - ease)}rad)`,
                 opacity: heroOpacity,
                 zIndex: 10,
                 filter: 'drop-shadow(0 16px 40px rgba(0,0,0,0.95)) drop-shadow(0 0 35px rgba(12,230,68,0.4))',
               }}
             >
-              <img
-                src={singleTV}
-                alt=""
-                aria-hidden="true"
-                draggable={false}
-                style={{ width: '100%', height: '100%', objectFit: 'contain', pointerEvents: 'none' }}
-              />
+              <img src={singleTV} alt="" aria-hidden="true" draggable={false}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             </div>
           )}
 
-          {/* Hero Content (Smoothly emerges on scroll as the Central Monitor zooms through the camera) */}
+          {/* Hero Content */}
           <div
             style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 20,
-              opacity: isqipOpacity,
-              pointerEvents: isqipOpacity > 0.6 ? 'auto' : 'none',
+              position: 'absolute', inset: 0, zIndex: 20,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: contentOpacity,
+              pointerEvents: contentOpacity > 0.6 ? 'auto' : 'none',
+              transform: `scale(${contentScale})`,
+              transformOrigin: 'center center',
+              transition: 'transform 0.05s linear',
             }}
           >
-            <div style={{ position: 'relative', zIndex: 3, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', width: '100%', maxWidth: '1280px', padding: '2rem', gap: '0.85rem', transform: `scale(${isqipScale})` }}>
-              {/* Presenter Kicker */}
-              <div className="hero-kicker" style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center',
+              justifyContent: 'center', textAlign: 'center',
+              width: '100%', maxWidth: '1280px', padding: '2rem', gap: '0.85rem',
+            }}>
+              <div className="hero-kicker" style={{ display:'flex', flexDirection:'column', gap:'4px', alignItems:'center' }}>
                 <span>IEEE SB College of Engineering Chengannur</span>
-                <span style={{ fontSize: '0.78em', letterSpacing: '0.3em', opacity: 0.85 }}>Presents</span>
+                <span style={{ fontSize:'0.78em', letterSpacing:'0.3em', opacity:0.85 }}>Presents</span>
               </div>
 
-              {/* Main Headline */}
-              <h1 className="hero-headline"><span className="hero-hl-wrap" data-text="ISQIP">ISQIP</span></h1>
+              <h1 className="hero-headline">
+                <span className="hero-hl-wrap" data-text="ISQIP">ISQIP</span>
+              </h1>
 
               <p className="hero-subtitle">Innovate · Build · Transcend</p>
-              
 
-
-              {/* Minimalist Action Buttons */}
-              <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.8rem' }}>
+              <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap', justifyContent:'center', marginTop:'0.8rem' }}>
                 <a href="#register" className="hero-btn-primary">Register Now</a>
-                <a href="#tracks" className="hero-btn-outline">Explore Tracks</a>
+                <a href="#tracks"   className="hero-btn-outline">Explore Tracks</a>
               </div>
             </div>
           </div>
 
-          <div className="hero-scroll-cue" style={{ opacity: scrollVH < 0.2 ? 1 : 0, pointerEvents: 'none' }}>
-            <span>Scroll Down</span>
+          {/* Scroll cue */}
+          <div
+            className="hero-scroll-cue"
+            style={{ opacity: p < 0.08 && fallDone ? 1 : 0, pointerEvents: 'none' }}
+          >
+            <span>Scroll</span>
+            <div className="cue-bar" />
           </div>
+
         </div>
       </section>
     </>

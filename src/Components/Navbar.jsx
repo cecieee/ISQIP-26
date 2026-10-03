@@ -117,7 +117,7 @@ const STYLES = `
   .nb-link:hover {
     color: #0CE644;
     background: rgba(12,230,68,0.05);
-    animation: nb-flicker 0.3s linear;
+    animation: nb-flicker 0.7s linear;
   }
 
   
@@ -183,12 +183,72 @@ const STYLES = `
     backdrop-filter: blur(18px);
     max-height: min(75vh, 560px);
     overflow-y: auto;
+    animation: nb-menu-in 0.25s ease-out;
+    transform-origin: top center;
+  }
+
+  @keyframes nb-menu-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(-18px) scaleY(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0) scaleY(1);
+    }
+  }
+
+  @keyframes nb-mobile-link {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @media (max-width: 860px) {
+    .nb {
+      width: min(92vw, 420px) !important;
+      height: 50px;
+      border-radius: 10px;
+    }
+    .nb-logo {
+      padding-left: 12px;
+      padding-right: 10px;
+      border-right: none;
+    }
     .nb-links    { display: none !important; }
     .nb-cta-wrap { display: none !important; }
-    .nb-ham      { display: flex !important; }
+    .nb-ham      { display: flex !important; margin-left: auto; }
+    .nb-drop {
+      width: min(92vw, 420px);
+      padding: 1rem 1.1rem 1.2rem;
+      gap: 0.7rem;
+      animation: nb-menu-in 0.45s ease-out;
+    }
+    .nb-drop .nb-link {
+      font-size: 0.96rem;
+      padding: 0.4rem 0;
+      animation: nb-mobile-link 0.7s ease-out both, nb-flicker 0.8s linear both;
+    }
+    .nb-drop .nb-cta {
+      animation: nb-mobile-link 0.8s ease-out both, nb-glow 0.9s ease-out both;
+    }
+  }
+
+  @media (max-width: 440px) {
+    .nb-logo img { height: 24px; }
+    .nb-logo-dot { width: 6px; height: 6px; }
+    .nb-ham {
+      margin-right: 8px;
+      padding: 5px 8px;
+    }
+    .nb-drop {
+      top: 72px;
+    }
   }
 `;
 
@@ -197,35 +257,46 @@ export default function Navbar() {
   const [scrollY,  setScrollY]  = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [viewportHeight, setViewportHeight] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const updateHeight = () => setViewportHeight(window.innerHeight);
+    const updateHeight = () => {
+      setViewportHeight(window.innerHeight);
+      setIsMobile(window.innerWidth <= 860);
+    };
+
     updateHeight();
     window.addEventListener('resize', updateHeight);
-    
-    const fn = () => { 
-      setScrollY(window.scrollY); 
-      if (window.scrollY <= 0) setMenuOpen(false); 
+
+    const fn = () => {
+      setScrollY(window.scrollY);
+      if (window.scrollY <= 0) setMenuOpen(false);
     };
     window.addEventListener("scroll", fn, { passive: true });
-    
+
     return () => {
       window.removeEventListener("scroll", fn);
       window.removeEventListener('resize', updateHeight);
     };
   }, []);
 
+  useEffect(() => {
+    if (!isMobile) setMenuOpen(false);
+  }, [isMobile]);
+
   const scrollVH = viewportHeight > 0 ? scrollY / viewportHeight : 0;
   const isSubpage = pathname !== "/";
-  
+
   const progress       = Math.min(1, Math.max(0, scrollY / 300));
   const visible        = isSubpage || scrollVH > 2.2;
   const contentOpacity = isSubpage ? 1 : Math.max(0, (progress - 0.3) / 0.7);
-  const width          = isSubpage
-    ? 'min(92vw, 1100px)'
-    : visible
-    ? `min(${Math.round(38 + progress * 54)}vw, ${Math.round(380 + progress * 720)}px)`
-    : '48px';
+  const width          = isMobile
+    ? 'min(92vw, 420px)'
+    : isSubpage
+      ? 'min(92vw, 1100px)'
+      : visible
+        ? `min(${Math.round(38 + progress * 54)}vw, ${Math.round(380 + progress * 720)}px)`
+        : '48px';
 
   return (
     <>
@@ -271,13 +342,17 @@ export default function Navbar() {
       {}
       {menuOpen && (
         <div className="nb-drop">
-          {NAV_LINKS.map(({ label, href }) => (
+          {NAV_LINKS.map(({ label, href }, index) => (
             <a key={label} href={href} className="nb-link"
-              style={{ fontSize:"1rem", padding:"0.3rem 0" }}
+              style={{
+                fontSize:"1rem",
+                padding:"0.3rem 0",
+                animationDelay: `${index * 120}ms`,
+              }}
               onClick={() => setMenuOpen(false)}>{label}</a>
           ))}
           <a href="#register" className="nb-cta"
-            style={{ justifyContent:"center", marginTop:"0.3rem" }}
+            style={{ justifyContent:"center", marginTop:"0.3rem", animationDelay: "0.8s" }}
             onClick={() => setMenuOpen(false)}>Register →</a>
         </div>
       )}

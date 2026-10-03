@@ -225,19 +225,19 @@ const STYLES = `
     }
   }
 
-  /* Fixed Height Card with Natural Full-Height Centering */
+  /* Module card */
   .lt-card {
     position: relative;
-    background: #090e0c;
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 16px;
-    padding: 2.2rem 1.65rem;
+    background: linear-gradient(145deg, rgba(18, 32, 26, 0.98), rgba(7, 14, 12, 0.98));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 2px solid rgba(12, 230, 68, 0.65);
+    border-radius: 8px;
+    padding: 1.35rem 1.35rem 1.1rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    height: 350px;
+    justify-content: space-between;
+    text-align: left;
+    min-height: 330px;
     box-sizing: border-box;
     cursor: pointer;
     overflow: hidden;
@@ -245,76 +245,159 @@ const STYLES = `
     transition: border-color 0.35s ease, background 0.35s ease, box-shadow 0.35s ease, transform 0.35s ease;
   }
 
-  .lt-card:hover {
-    border-color: rgba(12, 230, 68, 0.4);
-    background: #0c1410;
-    transform: translateY(-4px);
-    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65), 0 0 26px rgba(12, 230, 68, 0.08);
+  .lt-card::before {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    right: -72px;
+    top: -78px;
+    border: 1px solid rgba(12, 230, 68, 0.14);
+    border-radius: 50%;
+    box-shadow: 0 0 0 18px rgba(12, 230, 68, 0.025), 0 0 0 36px rgba(12, 230, 68, 0.018);
+    pointer-events: none;
   }
 
-  /* Main Group: Icon & Title */
+  .lt-card:hover {
+    border-color: rgba(12, 230, 68, 0.55);
+    border-top-color: #0CE644;
+    background: linear-gradient(145deg, rgba(20, 43, 29, 0.98), rgba(7, 14, 12, 0.98));
+    transform: translateY(-5px);
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55), 0 0 28px rgba(12, 230, 68, 0.11);
+  }
+
+  .lt-card-top,
+  .lt-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .lt-card-top {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2rem;
+  }
+
+  .lt-card-id,
+  .lt-card-status,
+  .lt-card-kicker,
+  .lt-card-footer {
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .lt-card-id {
+    font-family: 'Inter', sans-serif;
+    color: var(--color-primary, #0CE644);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+
+  .lt-card-status {
+    color: rgba(245, 247, 246, 0.42);
+    font-size: 0.58rem;
+  }
+
+  /* Main content */
   .lt-card-main {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    align-items: flex-start;
   }
 
-  /* Icon */
-  .lt-icon {
-    color: var(--color-primary, #0CE644);
-    margin-bottom: 1.35rem;
+  .lt-icon-shell {
+    width: 58px;
+    height: 58px;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.3s ease, filter 0.3s ease, transform 0.35s ease;
+    color: var(--color-primary, #0CE644);
+    background: rgba(12, 230, 68, 0.08);
+    border: 1px solid rgba(12, 230, 68, 0.28);
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    transition: color 0.3s ease, background 0.3s ease, transform 0.35s ease;
+  }
+
+  .lt-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .lt-card:hover .lt-icon {
-    color: #ffffff;
-    transform: scale(1.08);
-    filter: drop-shadow(0 0 14px rgba(12, 230, 68, 0.6));
+    color: #071110;
   }
 
-  /* Title */
+  .lt-card:hover .lt-icon-shell {
+    background: var(--color-primary, #0CE644);
+    transform: translateY(-2px);
+  }
+
+  .lt-card-kicker {
+    color: rgba(12, 230, 68, 0.68);
+    font-size: 0.62rem;
+    margin: 0 0 0.55rem;
+  }
+
   .lt-card-title {
-    font-family: 'Inter', sans-serif;
-    font-size: clamp(1.22rem, 1.45vw, 1.35rem);
+    font-family: var(--font-mech, sans-serif);
+    font-size: clamp(0.95rem, 1.15vw, 1.2rem);
     font-weight: 700;
     color: #ffffff;
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
     margin: 0;
-    line-height: 1.28;
+    line-height: 1.15;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
 
-  /* Description: Larger font size & smooth centered expansion */
+  /* Description */
   .lt-card-desc-wrap {
-    max-height: 0;
-    opacity: 0;
-    transform: translateY(10px);
-    margin-top: 0;
-    overflow: hidden;
-    transition:
-      max-height 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-      opacity 0.35s ease,
-      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-      margin-top 0.35s ease;
-  }
-
-  .lt-card:hover .lt-card-desc-wrap {
-    max-height: 180px;
-    opacity: 1;
-    transform: translateY(0);
-    margin-top: 1.15rem;
+    position: relative;
+    z-index: 1;
+    margin-top: 1.35rem;
   }
 
   .lt-card-desc {
     font-family: 'Inter', sans-serif;
-    font-size: clamp(0.94rem, 1.15vw, 1.02rem);
-    color: rgba(245, 247, 246, 0.75);
-    line-height: 1.68;
+    font-size: 0.84rem;
+    color: rgba(245, 247, 246, 0.62);
+    line-height: 1.65;
     margin: 0;
-    max-width: 285px;
+    max-width: 290px;
+  }
+
+  .lt-card-footer {
+    position: relative;
+    z-index: 1;
+    color: rgba(245, 247, 246, 0.42);
+    font-size: 0.58rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    margin-top: 1.4rem;
+  }
+
+  .lt-card-arrow {
+    color: var(--color-primary, #0CE644);
+    font-size: 1.15rem;
+    line-height: 0.7;
+    transition: transform 0.3s ease;
+  }
+
+  .lt-card:hover .lt-card-arrow {
+    transform: translate(3px, -3px);
+  }
+
+  @media (max-width: 639px) {
+    .lt-card {
+      min-height: 300px;
+    }
   }
 `;
 
@@ -323,15 +406,28 @@ function TrackCard({ track }) {
 
   return (
     <div className="lt-card" tabIndex={0} role="article" aria-label={`${name} Track`}>
+      <div className="lt-card-top">
+        <span className="lt-card-id">0{track.id}</span>
+        <span className="lt-card-status">Core Module</span>
+      </div>
+
       <div className="lt-card-main">
-        <div className="lt-icon">
-          <Icon />
+        <div className="lt-icon-shell">
+          <div className="lt-icon">
+            <Icon />
+          </div>
         </div>
+        <p className="lt-card-kicker">Track 0{track.id}</p>
         <h3 className="lt-card-title">{name}</h3>
       </div>
 
       <div className="lt-card-desc-wrap">
         <p className="lt-card-desc">{description}</p>
+      </div>
+
+      <div className="lt-card-footer">
+        <span>Explore pathway</span>
+        <span className="lt-card-arrow" aria-hidden="true">&#8599;</span>
       </div>
     </div>
   );

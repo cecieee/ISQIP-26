@@ -17,10 +17,18 @@
   --font-mech: "Mechsuit", sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 html, body {
   background-color: var(--color-background, #071110);
   color: var(--color-text, #F5F7F6);
-   overflow-x: hidden;
+  overflow-x: clip;
+}
+
+body {
+  scroll-behavior: smooth;
 }
 
 /* Modern Dark Scrollbar */

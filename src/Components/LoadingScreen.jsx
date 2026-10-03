@@ -33,11 +33,13 @@ export default function CRTLoadingScreen() {
   const [phase, setPhase] = useState(() => {
     if (typeof window === "undefined") return "lineGrow";
 
-    if (PLAY_ONCE_PER_SESSION && sessionStorage.getItem(SESSION_KEY)) {
+    const isMobile = window.innerWidth <= 768;
+
+    if (PLAY_ONCE_PER_SESSION && !isMobile && sessionStorage.getItem(SESSION_KEY)) {
       return "done";
     }
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!isMobile && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return "stable";
     }
 
@@ -61,11 +63,12 @@ export default function CRTLoadingScreen() {
 
     if (phase === "done") return;
 
+    const isMobile = window.innerWidth <= 768;
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    if (prefersReducedMotion) {
+    if (!isMobile && prefersReducedMotion) {
       const t = window.setTimeout(() => {
         setPhase("fadeOut");
       }, 400);
