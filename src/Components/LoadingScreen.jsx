@@ -9,8 +9,8 @@ const T = {
   FLASH: 300,         // line contracts to center + white flash burst
   STATIC: 900,        // analog static + scanlines
   STABILIZE: 550,     // static resolves into stable green screen
-  STABLE_HOLD: 900,   // logo sits
-  FADE_OUT: 850,      // everything dissolves, Hero revealed underneath
+  STABLE_HOLD: 1800,  // logo sits long enough to show the flicker
+  FADE_OUT: 1000,     // everything dissolves, Hero revealed underneath
 };
 
 // Play the intro on every full page load/refresh.
@@ -26,6 +26,18 @@ const PHASE_ORDER = [
   "stable",
   "fadeOut",
   "done",
+];
+
+const LETTER_FLICKER = [
+  { delay: 0.24, duration: 1.45 },
+  { delay: 0.78, duration: 1.2 },
+  { delay: 0.08, duration: 1.65 },
+  { delay: 0.56, duration: 1.32 },
+  { delay: 0.94, duration: 1.5 },
+  { delay: 0.36, duration: 1.25 },
+  { delay: 0.68, duration: 1.58 },
+  { delay: 0.16, duration: 1.38 },
+  { delay: 0.88, duration: 1.18 },
 ];
 
 export default function CRTLoadingScreen() {
@@ -72,6 +84,7 @@ export default function CRTLoadingScreen() {
     const prefersReducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
+    const timeoutIds = timeouts.current;
 
     if (!isMobile && prefersReducedMotion) {
       const t = window.setTimeout(() => {
@@ -91,7 +104,7 @@ export default function CRTLoadingScreen() {
       timeouts.current.push(t2);
 
       return () => {
-        timeouts.current.forEach((id) =>
+        timeoutIds.forEach((id) =>
           window.clearTimeout(id)
         );
       };
@@ -121,7 +134,7 @@ export default function CRTLoadingScreen() {
     timeouts.current.push(finalTimeout);
 
     return () => {
-      timeouts.current.forEach((id) =>
+      timeoutIds.forEach((id) =>
         window.clearTimeout(id)
       );
     };
@@ -215,7 +228,17 @@ export default function CRTLoadingScreen() {
         {/* Stable logo */}
         <div className="crt-intro-logo">
           <div className="crt-intro-logo-title">
-            ISQIP '26
+            {[...'ISQIP \'26'].map((character, index) => (
+              <span
+                key={`${character}-${index}`}
+                style={{
+                  '--flicker-delay': `${LETTER_FLICKER[index].delay}s`,
+                  '--flicker-duration': `${LETTER_FLICKER[index].duration}s`,
+                }}
+              >
+                {character === ' ' ? '\u00a0' : character}
+              </span>
+            ))}
           </div>
 
         </div>
@@ -522,12 +545,46 @@ const STYLES = `
       clamp(1.8rem, 5vw, 3rem);
 
     letter-spacing: 0.08em;
+    white-space: nowrap;
 
     color: #0CE644;
 
     text-shadow:
       0 0 10px rgba(12,230,68,0.7),
       0 0 24px rgba(12,230,68,0.35);
+  }
+
+  .crt-intro-logo-title > span {
+    display: inline-block;
+    animation: crt-logo-flicker var(--flicker-duration) ease-in-out infinite;
+    animation-delay: var(--flicker-delay);
+  }
+
+  @keyframes crt-logo-flicker {
+    0%, 26%, 100% {
+      opacity: 1;
+      text-shadow:
+        0 0 10px rgba(12,230,68,0.7),
+        0 0 24px rgba(12,230,68,0.35);
+    }
+    30%, 34% {
+      opacity: 0.35;
+      text-shadow:
+        0 0 5px rgba(12,230,68,0.45),
+        0 0 12px rgba(12,230,68,0.2);
+    }
+    35% {
+      opacity: 0.9;
+      text-shadow:
+        0 0 14px rgba(12,230,68,0.85),
+        0 0 30px rgba(12,230,68,0.45);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .crt-intro-logo-title {
+      font-size: clamp(1.3rem, 8vw, 2rem);
+    }
   }
 
   .crt-intro-logo-sub {
