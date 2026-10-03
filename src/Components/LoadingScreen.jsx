@@ -13,9 +13,8 @@ const T = {
   FADE_OUT: 850,      // everything dissolves, Hero revealed underneath
 };
 
-// Skip the intro on repeat visits within the same tab session.
-// Set to false if you want it to play on every full page load/refresh.
-const PLAY_ONCE_PER_SESSION = true;
+// Play the intro on every full page load/refresh.
+const PLAY_ONCE_PER_SESSION = false;
 const SESSION_KEY = "isqip-crt-intro-played";
 
 const PHASE_ORDER = [
@@ -52,6 +51,12 @@ export default function CRTLoadingScreen() {
   // Drives real per-tick noise randomization for the static.
   const [noiseSeed, setNoiseSeed] = useState(1);
   const noiseIntervalRef = useRef(null);
+
+  useEffect(() => {
+    if (phase === "done") {
+      window.dispatchEvent(new Event("isqip-loading-complete"));
+    }
+  }, [phase]);
 
   useEffect(() => {
     // Handy for testing:
@@ -213,9 +218,6 @@ export default function CRTLoadingScreen() {
             ISQIP '26
           </div>
 
-          <div className="crt-intro-logo-sub">
-            DOMAIN SPECIFIC
-          </div>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import singleTV from '../assets/singletv.webp';
 import black1   from '../assets/black1.webp';
-import CRTWarp  from './CRTWarp';
+import LazyCRTWarp from './LazyCRTWarp';
 
 /* --- Easings --- */
 const easeInCubic  = (t) => t * t * t;
@@ -178,8 +178,17 @@ export default function HeroMobile() {
   const crtRef     = useRef(null);
   const scrollPRef = useRef(0);
   const heroIdxRef = useRef(Math.round(N_TVS / 2));
+  const [loadingReady, setLoadingReady] = useState(false);
 
   useEffect(() => {
+    const onLoadingComplete = () => setLoadingReady(true);
+    window.addEventListener('isqip-loading-complete', onLoadingComplete, { once: true });
+    return () => window.removeEventListener('isqip-loading-complete', onLoadingComplete);
+  }, []);
+
+  useEffect(() => {
+    if (!loadingReady) return undefined;
+
     /* ── Reset scroll ── */
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -283,7 +292,7 @@ export default function HeroMobile() {
         crtRef.current.style.opacity = String(bgOpacity);
 
       // Content overlay fades in as monitor goes out of frame
-      const contentOp = Math.max(0, Math.min(1, (zoomP - 0.36) / 0.34));
+      const contentOp = Math.max(0, Math.min(1, (zoomP - 0.38) / 0.28));
       if (contentRef.current) {
         contentRef.current.style.opacity       = String(contentOp);
         contentRef.current.style.transform     = `scale(${0.92 + contentOp * 0.08})`;
@@ -369,11 +378,11 @@ export default function HeroMobile() {
     raf = requestAnimationFrame(loop);
 
     const onScroll = () => {
-      if (!trackRef.current) return;
-      const rect = trackRef.current.getBoundingClientRect();
-      const scrollable = rect.height - window.innerHeight;
+      const track = trackRef.current;
+      if (!track) return;
+      const scrollable = track.offsetHeight - window.innerHeight;
       scrollPRef.current = scrollable > 0
-        ? Math.min(1, Math.max(0, -rect.top) / scrollable) : 0;
+        ? Math.min(1, Math.max(0, window.scrollY - track.offsetTop) / scrollable) : 0;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
 
@@ -381,7 +390,7 @@ export default function HeroMobile() {
       cancelAnimationFrame(raf);
       window.removeEventListener('scroll', onScroll);
     };
-  }, []);
+  }, [loadingReady]);
 
   /* --- Render --- */
   return (
@@ -418,7 +427,9 @@ export default function HeroMobile() {
               transition: 'opacity 0.08s linear',
             }}
           >
-            <CRTWarp
+            <LazyCRTWarp
+              delay={700}
+              preload
               color="#0CE644"
               backgroundColor="#071110"
               speed={0.4}

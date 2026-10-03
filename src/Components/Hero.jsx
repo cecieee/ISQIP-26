@@ -2,7 +2,7 @@ import { useRef, useEffect, useState, useCallback } from 'react';
 import Matter from 'matter-js';
 import black1 from '../assets/black1.webp';
 import singleTV from '../assets/singletv.webp';
-import CRTWarp from './CRTWarp';
+import LazyCRTWarp from './LazyCRTWarp';
 
 /* ─── Injected Styles ─────────────────────────────────────────────────────── */
 const HERO_STYLES = `
@@ -171,10 +171,69 @@ export default function Hero() {
   const trackRef = useRef(null);      // the 300vh scroll track
   const pinRef = useRef(null);        // the sticky 100vh pin
   const animRef = useRef(null);
+  const tvStateRef = useRef([]);
+  const tvRefs = useRef({});
+  const contentRef = useRef(null);
+  const crtRef = useRef(null);
+  const radialRef = useRef(null);
+  const glowRefs = useRef([]);
+  const cueRef = useRef(null);
+  const scrollPRef = useRef(0);
 
-  const [scrollP, setScrollP] = useState(0);       // 0→1 across scroll track
   const [tvState, setTvState] = useState([]);       // live physics positions
   const [fallDone, setFallDone] = useState(false);  // true once monitors settled
+  const [loadingReady, setLoadingReady] = useState(false);
+
+  useEffect(() => {
+    const onLoadingComplete = () => setLoadingReady(true);
+    window.addEventListener('isqip-loading-complete', onLoadingComplete, { once: true });
+    return () => window.removeEventListener('isqip-loading-complete', onLoadingComplete);
+  }, []);
+
+  const applyScrollProgress = (p) => {
+    const pin = pinRef.current;
+    const heroTV = tvStateRef.current.find(tv => tv.hero);
+    if (!pin || !heroTV) return;
+
+    const W = pin.clientWidth || window.innerWidth;
+    const H = pin.clientHeight || window.innerHeight;
+    const isMob = W <= 768;
+    const sideOpacity = Math.max(0, 1 - p * 2.5);
+    const sideSpread = p * (isMob ? 200 : 400);
+    const ease = Math.min(1, Math.pow(p, 0.9));
+    const ix = heroTV.x + (W / 2 - heroTV.x) * ease;
+    const iy = heroTV.y + (H / 2 - heroTV.y) * ease;
+    const heroScale = 1 + Math.pow(p, 1.6) * (isMob ? 18 : 26);
+    const heroOpacity = p > 0.38 ? Math.max(0, 1 - (p - 0.38) / 0.28) : 1;
+    const contentOpacity = Math.max(0, Math.min(1, (p - 0.38) / 0.28));
+    const contentScale = 0.9 + contentOpacity * 0.1;
+
+    tvStateRef.current.forEach(tv => {
+      const element = tvRefs.current[tv.uid];
+      if (!element) return;
+
+      if (tv.hero) {
+        element.style.transform = `translate3d(${ix - tv.w / 2}px, ${iy - tv.h / 2}px, 0) scale(${heroScale}) rotate(${tv.angle * (1 - ease)}rad)`;
+        element.style.opacity = String(heroOpacity);
+      } else {
+        const spreadX = tv.side === 'left' ? -sideSpread : sideSpread;
+        element.style.transform = `translate3d(${tv.x - tv.w / 2 + spreadX}px, ${tv.y - tv.h / 2}px, 0) rotate(${tv.angle}rad)`;
+        element.style.opacity = String(sideOpacity);
+      }
+    });
+
+    if (contentRef.current) {
+      contentRef.current.style.opacity = String(contentOpacity);
+      contentRef.current.style.transform = `scale(${contentScale})`;
+      contentRef.current.style.pointerEvents = contentOpacity > 0.6 ? 'auto' : 'none';
+    }
+    if (crtRef.current) crtRef.current.style.opacity = String(contentOpacity);
+    if (radialRef.current) radialRef.current.style.opacity = String(contentOpacity);
+    glowRefs.current.forEach(element => {
+      if (element) element.style.opacity = String(sideOpacity * 0.9);
+    });
+    if (cueRef.current) cueRef.current.style.opacity = p < 0.08 ? '1' : '0';
+  };
 
   /* ── Scroll progress ────────────────────────────────────────────────────── */
   useEffect(() => {
@@ -182,12 +241,14 @@ export default function Hero() {
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
     window.scrollTo({ top: 0, behavior: 'instant' });
 
+    const track = trackRef.current;
+    const trackTop = track ? track.offsetTop : 0;
+    const scrollable = track ? track.offsetHeight - window.innerHeight : 0;
+
     const readScroll = () => {
-      if (!trackRef.current) return;
-      const rect = trackRef.current.getBoundingClientRect();
-      const scrollable = rect.height - window.innerHeight;
-      const scrolled = Math.max(0, -rect.top);
-      setScrollP(scrollable > 0 ? Math.min(1, scrolled / scrollable) : 0);
+      const scrolled = Math.max(0, window.scrollY - trackTop);
+      scrollPRef.current = scrollable > 0 ? Math.min(1, scrolled / scrollable) : 0;
+      applyScrollProgress(scrollPRef.current);
     };
 
     const onScroll = () => {
@@ -211,6 +272,8 @@ export default function Hero() {
 
   /* ── Matter.js physics – gravity fall intro ─────────────────────────────── */
   useEffect(() => {
+    if (!loadingReady) return undefined;
+
     const pin = pinRef.current;
     if (!pin) return;
 
@@ -227,6 +290,7 @@ export default function Hero() {
         { uid: 99, x: W / 2, y: H * 0.62, angle: 0, w: heroW, h: heroH, hero: true, side: 'center' },
       ];
       setTvState(staticTVs);
+      tvStateRef.current = staticTVs;
       setFallDone(true);
       return;
     }
@@ -327,6 +391,7 @@ export default function Hero() {
 
       if (now - lastUpdate >= frameInterval) {
         lastUpdate = now;
+        tvStateRef.current = snapshot;
         setTvState(snapshot);
       }
 
@@ -334,6 +399,9 @@ export default function Hero() {
       const moving = allBodies.some(b => Math.abs(b.velocity.y) > 0.3 || Math.abs(b.velocity.x) > 0.3);
       if (!moving) {
         setFallDone(true);
+        cancelAnimationFrame(raf);
+        Runner.stop(runner);
+        return;
       }
 
       raf = requestAnimationFrame(loop);
@@ -346,7 +414,7 @@ export default function Hero() {
       Engine.clear(engine);
       World.clear(engine.world, false);
     };
-  }, []);
+  }, [loadingReady]);
 
   /* ── Derived scroll values ──────────────────────────────────────────────── */
   const isMob = typeof window !== 'undefined' && window.innerWidth <= 768;
@@ -359,7 +427,7 @@ export default function Hero() {
   // We split into two sub-phases:
   //   Phase A (0 → 0.4): monitors spread + hero monitor zooms toward screen center
   //   Phase B (0.4 → 1): hero content fades in fully
-  const p = scrollP;
+  const p = scrollPRef.current;
 
   // Side monitors: spread outward and fade
   const sideOpacity = Math.max(0, 1 - p * 2.5);
@@ -375,7 +443,7 @@ export default function Hero() {
   const heroOpacity = p > 0.38 ? Math.max(0, 1 - (p - 0.38) / 0.28) : 1;
 
   // Hero content: emerges as monitor fades out
-  const contentOpacity = Math.max(0, Math.min(1, (p - 0.3) / 0.45));
+  const contentOpacity = Math.max(0, Math.min(1, (p - 0.38) / 0.28));
   const contentScale   = 0.9 + contentOpacity * 0.1;
 
   /* ── Render ─────────────────────────────────────────────────────────────── */
@@ -413,6 +481,7 @@ export default function Hero() {
 
           {/* CRTWarp background – fades in with hero content */}
           <div
+            ref={crtRef}
             style={{
               position: 'absolute', inset: 0, zIndex: 2,
               opacity: contentOpacity,
@@ -420,7 +489,10 @@ export default function Hero() {
               transition: 'opacity 0.1s linear',
             }}
           >
-            <CRTWarp
+            <LazyCRTWarp
+              active={contentOpacity > 0}
+              delay={250}
+              preload
               color="#0CE644"
               backgroundColor="#071110"
               speed={0.4}
@@ -438,13 +510,14 @@ export default function Hero() {
               rgbShift={0.01}
               mouseReact={!isMob}
               mouseStrength={0.35}
-              dpr={isMob ? 0.75 : 1.2}
-              fps={isMob ? 30 : 60}
+              dpr={isMob ? 0.75 : 0.85}
+              fps={30}
             />
           </div>
 
           {/* Radial overlay */}
           <div
+            ref={radialRef}
             style={{
               position: 'absolute', inset: 0, zIndex: 3,
               background: 'radial-gradient(ellipse at center, rgba(7,17,16,0.72) 0%, rgba(7,17,16,0.45) 45%, transparent 80%)',
@@ -453,7 +526,7 @@ export default function Hero() {
           />
 
           {/* Ambient glow left */}
-          <div style={{
+          <div ref={element => { glowRefs.current[0] = element; }} style={{
             position: 'absolute', bottom: '-5%', left: '0%',
             width: '40vw', height: '50vh', zIndex: 4, pointerEvents: 'none',
             background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)',
@@ -461,7 +534,7 @@ export default function Hero() {
             opacity: sideOpacity * 0.9,
           }} />
           {/* Ambient glow right */}
-          <div style={{
+          <div ref={element => { glowRefs.current[1] = element; }} style={{
             position: 'absolute', bottom: '-5%', right: '0%',
             width: '40vw', height: '50vh', zIndex: 4, pointerEvents: 'none',
             background: 'radial-gradient(ellipse, rgba(12,230,68,0.35) 0%, rgba(12,230,68,0.15) 35%, transparent 70%)',
@@ -475,6 +548,7 @@ export default function Hero() {
             return (
               <div
                 key={tv.uid}
+                ref={element => { tvRefs.current[tv.uid] = element; }}
                 className="tv-item"
                 style={{
                   width: `${tv.w}px`, height: `${tv.h}px`,
@@ -493,6 +567,7 @@ export default function Hero() {
           {/* Hero (center) TV – zooms toward camera on scroll */}
           {heroTV && (
             <div
+              ref={element => { tvRefs.current[heroTV.uid] = element; }}
               className="tv-item"
               style={{
                 width: `${heroTV.w}px`, height: `${heroTV.h}px`,
@@ -510,6 +585,7 @@ export default function Hero() {
 
           {/* Hero Content */}
           <div
+            ref={contentRef}
             style={{
               position: 'absolute', inset: 0, zIndex: 20,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -545,6 +621,7 @@ export default function Hero() {
 
           {/* Scroll cue */}
           <div
+            ref={cueRef}
             className="hero-scroll-cue"
             style={{ opacity: p < 0.08 && fallDone ? 1 : 0, pointerEvents: 'none' }}
           >
