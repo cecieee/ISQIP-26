@@ -307,7 +307,7 @@ const STYLES = `
 
   .wp-mobile-title {
     font-family: var(--font-mech);
-    font-size: clamp(1.8rem, 6.5vw, 2.4rem);
+    font-size: clamp(1.65rem, 6vw, 2.2rem);
     color: var(--color-text);
     text-transform: uppercase;
     letter-spacing: 0.02em;
